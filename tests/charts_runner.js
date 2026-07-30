@@ -20,6 +20,10 @@ const fs = require("fs");
 const path = require("path");
 
 const MODULES = {
+  // 엔진도 여기서 부를 수 있어야 한다 — 장이 내놓은 판독값을 엔진 원본과 **직접**
+  // 대조하려면 같은 프로세스에서 두 쪽을 다 불러야 하기 때문이다(IRR 의 기준처럼
+  // 장이 인자를 고쳐 넣는 자리는 대조 없이는 조용히 어긋난다).
+  engine: require(path.join(__dirname, "..", "site", "js", "engine.js")),
   charts: require(path.join(__dirname, "..", "site", "js", "charts.js")),
   hero: require(path.join(__dirname, "..", "site", "js", "hero.js")),
   chapter1: require(path.join(__dirname, "..", "site", "js", "chapter1.js")),

@@ -61,6 +61,11 @@
     breakeven_vacancy: "손익분기 공실률"
   };
 
+  /** 막힌 계산을 늘어놓는 차례 — 파이프라인이 부르는 순서 그대로다. */
+  var BLOCKED_ORDER = Object.keys(BLOCKED_LABEL).map(function (k) {
+    return BLOCKED_LABEL[k];
+  });
+
   var KIND_LABEL = {
     RuntimeError: "물리 게이트 — 단위를 의심하라",
     ValueError: "입력 오류",
@@ -248,9 +253,19 @@
     // 카드에는 막힌 계산의 **수**만 적는다(일곱 이름을 55장에 되풀이하면 도장이
     // 묻힌다). 그러니 이름은 판독 글줄이 본문 크기로 한 번 받아야 한다 — 손끝에
     // 닿아야만 보이는 정보로 남겨 두지 않는다.
+    // 목록은 행마다 다를 수 있다. 대장이 일부만 열리면 어떤 동은 NOI 부터,
+    // 어떤 동은 보유 모델부터 막힌다 — **가장 긴 한 행**을 골라 그것만 말하면
+    // 다른 행에서만 막힌 계산이 화면에서 조용히 사라진다. 합집합이어야 한다.
     var blocked = [];
     cards.forEach(function (c) {
-      if (c.blocked && c.blocked.length > blocked.length) blocked = c.blocked;
+      (c.blocked || []).forEach(function (name) {
+        if (blocked.indexOf(name) < 0) blocked.push(name);
+      });
+    });
+    blocked.sort(function (a, b) {
+      var ia = BLOCKED_ORDER.indexOf(a), ib = BLOCKED_ORDER.indexOf(b);
+      return (ia < 0 ? BLOCKED_ORDER.length : ia) -
+             (ib < 0 ? BLOCKED_ORDER.length : ib);
     });
     return {
       n: rows.length,
@@ -285,10 +300,21 @@
   }
 
   // ── 거래 ────────────────────────────────────────────────────────────────
-  var AMBIGUOUS_CAVEAT =
-    "모호 3,789건은 마스킹된 지번이 여러 시드에 동시에 걸려 **건물 귀속 불가**다 — " +
-    "후보 중 첫 동을 고르면 수천 행이 엉뚱한 한 동에 몰리므로 건물 단위 집계에서 " +
-    "통째로 뺐다(권역·연도 집계에는 시군구만 쓰므로 그대로 남는다).";
+  /**
+   * 귀속 불가 행의 경고문. **수는 사다리에서 온다.**
+   *
+   * 한때 이 문장에는 "3,789" 가 손으로 박혀 있었다. 사다리는
+   * `ladder_exclusive` 에서 오는데 문장만 상수면, 다음 수집에서 수가 바뀌는 날
+   * 그림과 글이 조용히 어긋난다 — 같은 사실이 두 벌이 되는 순간 한 벌이 틀린다.
+   * 강조 표기(`**`)도 뺐다. 이 문자열은 SVG·본문에 그대로 실리지 마크다운으로
+   * 해석되는 자리에 가지 않는다.
+   */
+  function ambiguousCaveat(ladder) {
+    return "모호 " + F.group(String(ladder.ambiguous)) + "건은 마스킹된 지번이 " +
+      "여러 시드에 동시에 걸려 건물 귀속 불가다 — 후보 중 첫 동을 고르면 수천 " +
+      "행이 엉뚱한 한 동에 몰리므로 건물 단위 집계에서 통째로 뺐다(권역·연도 " +
+      "집계에는 시군구만 쓰므로 그대로 남는다).";
+  }
 
   function tradesModel(trades) {
     if (!trades || !trades.matching || !trades.by_region) {
@@ -336,6 +362,22 @@
       s.points.forEach(function (p) { xs.push(p.x); });
     });
 
+    var ladder = {
+      total: ladderSrc.sum,
+      matched: ladderSrc.n_matched,
+      exact: ladderSrc.exact,
+      resolvedOnly: ladderSrc.resolved_only,
+      ambiguous: ladderSrc.ambiguous,
+      bands: [
+        { key: "exact", label: "필지 확정", value: ladderSrc.exact,
+          className: "rung-exact" },
+        { key: "resolved", label: "동 확정(후보 유일)", value: ladderSrc.resolved_only,
+          className: "rung-resolved" },
+        { key: "ambiguous", label: "귀속 불가", value: ladderSrc.ambiguous,
+          className: "rung-ambiguous" }
+      ]
+    };
+
     return {
       unit: "만원/평",
       pyeongM2: PYEONG_M2,
@@ -351,24 +393,10 @@
           ? [Math.min.apply(null, years), Math.max.apply(null, years)]
           : null
       },
-      ladder: {
-        total: ladderSrc.sum,
-        matched: ladderSrc.n_matched,
-        exact: ladderSrc.exact,
-        resolvedOnly: ladderSrc.resolved_only,
-        ambiguous: ladderSrc.ambiguous,
-        bands: [
-          { key: "exact", label: "필지 확정", value: ladderSrc.exact,
-            className: "rung-exact" },
-          { key: "resolved", label: "동 확정(후보 유일)", value: ladderSrc.resolved_only,
-            className: "rung-resolved" },
-          { key: "ambiguous", label: "귀속 불가", value: ladderSrc.ambiguous,
-            className: "rung-ambiguous" }
-        ]
-      },
+      ladder: ladder,
       rowsUsed: (trades.filters || {}).rows_used,
       canceled: (trades.filters || {}).canceled_excluded,
-      caveat: AMBIGUOUS_CAVEAT
+      caveat: ambiguousCaveat(ladder)
     };
   }
 
@@ -628,10 +656,7 @@
         "필지 확정 " + L.exact + " · 동 확정 " + F.group(String(L.resolvedOnly)) +
         " · 귀속 불가 " + F.group(String(L.ambiguous)) + ". exact 는 resolved 의 " +
         "부분집합이라 원래 수를 그대로 더하면 매칭 수를 넘는다.",
-      "모호 " + F.group(String(L.ambiguous)) + "건은 건물에 귀속할 수 없다. " +
-        "마스킹된 지번이 여러 시드에 동시에 걸려 동을 특정하지 못한 행이고, 후보 " +
-        "중 첫 동을 고르면 수천 행이 엉뚱한 한 동에 몰리므로 건물 단위 집계에서 " +
-        "통째로 뺐다.",
+      m.caveat,
       "필지까지 확정된 " + L.exact + "행이 전체의 " +
         F.fx(L.exact / L.total * 100, 1) + "% 다 — 추정가치와 실거래의 오차 분포는 " +
         "대장 승격 뒤에야 이 " + L.exact + "행과 짝을 지어 낼 수 있다."
@@ -794,7 +819,7 @@
 
   return {
     STAMP: STAMP,
-    AMBIGUOUS_CAVEAT: AMBIGUOUS_CAVEAT,
+    ambiguousCaveat: ambiguousCaveat,
     variantOf: variantOf,
     cardModel: cardModel,
     card: card,

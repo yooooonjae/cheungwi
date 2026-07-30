@@ -211,6 +211,33 @@ def test_the_ladder_says_in_words_that_the_ambiguous_rows_cannot_be_attributed()
     assert "3,789" in svg and "귀속" in svg
 
 
+def test_the_ambiguous_caveat_is_assembled_from_the_ladder_not_written_by_hand():
+    """경고문의 수는 데이터에서 온다 — 손으로 박으면 다음 수집에서 그림과 어긋난다."""
+    m = value("chapter1", "tradesModel", TRADES)
+    assert m["caveat"] == value("chapter1", "ambiguousCaveat", m["ladder"])
+    assert "3,789" in m["caveat"] and "귀속" in m["caveat"]
+    assert "**" not in m["caveat"], "마크다운은 이 자리에서 해석되지 않는다"
+    # 아무도 그리지 않는 문장은 정직성 표기가 아니다 — 판독 글줄이 실제로 싣는다
+    assert m["caveat"] in value("chapter1", "ladderLines", m)
+    other = value("chapter1", "ambiguousCaveat", dict(m["ladder"], ambiguous=1234))
+    assert "1,234" in other and "3,789" not in other
+
+
+def test_the_blocked_names_are_the_union_across_rows_not_the_longest_row():
+    """대장이 일부만 열리면 행마다 막힌 계산이 다르다 — 한 행만 말하면 나머지가 사라진다."""
+    a, b = pending_row(), pending_row()
+    a["blocked"] = ["noi", "value"]
+    b["blocked"] = ["building_adjust", "hold_model"]
+    doc = copy.deepcopy(UNDERWRITING)
+    doc["buildings"] = [a, b]
+    m = value("chapter1", "ledgerModel", doc)
+    # 합집합이고, 늘어놓는 차례는 파이프라인이 부르는 순서다
+    assert m["blocked"] == ["건물 특성 보정", "NOI", "추정가치", "보유 모델"]
+    lines = " ".join(value("chapter1", "ledgerLines", m))
+    for name in m["blocked"]:
+        assert name in lines
+
+
 def test_the_tiny_exact_rung_is_still_labelled():
     """57 은 전체의 1.3% 라 3.8px 이다 — 높이로는 못 읽으니 지시선이 받는다."""
     m = value("chapter1", "tradesModel", TRADES)
@@ -339,6 +366,53 @@ def test_the_real_regions_cannot_drown_inside_the_slider_and_say_so():
     assert m["drown"]["vacancy"] > 0.30
     assert m["drown"]["reachable"] is False
     assert any("완전" in b["text"] or "잠기" in b["text"] for b in m["banners"])
+
+
+# ---- 지분 IRR 의 두 기준 — 엔진 원본과 직접 대조한다 ---- #
+def hold_direct(m, base, cost_rate):
+    """장을 거치지 않고 엔진을 직접 부른다 — 장이 무엇을 넘겼는지 붙들기 위해."""
+    return value("engine", "hold_model", m["value"]["won"], m["loan"]["won"],
+                 m["loanRate"], m["noi"]["won"], base["noiGrowth"], m["exitCap"],
+                 base["holdYears"], cost_rate)
+
+
+def irr_note(m):
+    rows = value("chapter2", "readings", m)
+    return [r for r in rows if r["k"] == "지분 IRR"][0]["note"]
+
+
+def test_at_rest_the_irr_is_the_acquisition_irr_with_the_fee_on_the_equity():
+    """손잡이가 제자리면 그 가격은 취득가다 — 부대비용이 자기자본에 얹히는 것이 옳다."""
+    base = base_region("도심")
+    m = evaluate(base, value("chapter2", "defaultKnobs", base))
+    assert m["atRest"] is True
+    assert m["hold"]["basis"] == "acquisition"
+    assert m["hold"]["costRate"] == base["costRate"]
+    assert m["hold"]["equityWon"] == pytest.approx(
+        m["value"]["won"] * (1 + base["costRate"]) - m["loan"]["won"])
+    assert m["hold"]["irr"] == pytest.approx(
+        hold_direct(m, base, base["costRate"])["equity_irr"])
+    assert "취득 시점 IRR" in irr_note(m) and "전향 IRR" in irr_note(m)
+
+
+def test_after_the_knobs_move_the_irr_enters_at_the_market_equity_it_reports():
+    """조작 후는 취득이 아니라 보유 중이다 — 끝난 취득에 부대비용을 다시 물리지 않는다.
+
+    옛 계산은 하락한 시가에 비용률을 또 곱해 진입 유출을 판독의 「지분」보다
+    크게 잡았고, 그만큼 손해를 과장했다.
+    """
+    base = base_region("도심")
+    pulled = dict(value("chapter2", "defaultKnobs", base),
+                  vacancy=0.30, rate=0.015, exitCap=0.0075)
+    m = evaluate(base, pulled)
+    assert m["atRest"] is False
+    assert m["hold"]["basis"] == "forward" and m["hold"]["costRate"] == 0
+    # 진입 지분이 판독의 「지분」과 **같은 수**여야 한다
+    assert m["hold"]["equityWon"] == pytest.approx(m["equity"]["won"])
+    assert m["hold"]["irr"] == pytest.approx(hold_direct(m, base, 0.0)["equity_irr"])
+    overstated = hold_direct(m, base, base["costRate"])["equity_irr"]
+    assert m["hold"]["irr"] > overstated, "부대비용 재부과가 손해를 부풀렸다"
+    assert "취득 시점 IRR" in irr_note(m) and "전향 IRR" in irr_note(m)
 
 
 # ---- 오류 갈래 — RangeError 를 TypeError 보다 먼저 ---- #

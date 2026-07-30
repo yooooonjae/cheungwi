@@ -482,7 +482,11 @@
   border: 2px solid var(--ink);
   border-radius: 2px;
 }
-/* 기준 자리 표식 — "어디가 기준인가"를 트랙 아래 삼각으로 찍는다 */
+/* 기준 자리 표식 — "어디가 기준인가"를 트랙 아래 삼각으로 찍는다.
+   삼각과 「기준」 글자는 **같은 자리**(--rest)를 가리켜야 한다. 글자를 흐름에
+   두고 space-between 으로 가운데 세우면 글자는 늘 50% 에 서고 삼각만 --rest 로
+   가, 공실처럼 기준이 가운데가 아닌 손잡이에서 둘이 어긋난다. 그래서 글자도
+   흐름에서 빼 --rest 에 절대 배치한다. 남은 두 라벨(최소·최대)이 양 끝을 맡는다. */
 .knob-scale {
   grid-column: 1 / -1;
   position: relative;
@@ -512,7 +516,15 @@
   color: var(--ink-3);
   letter-spacing: .02em;
 }
-.knob-rest { color: var(--stratum-3); letter-spacing: .02em; }
+.knob-rest {
+  position: absolute;
+  top: 0;
+  left: var(--rest, 50%);
+  transform: translateX(-50%);
+  white-space: nowrap;
+  color: var(--stratum-3);
+  letter-spacing: .02em;
+}
 .rig-reset {
   min-height: 44px;
   width: 100%;

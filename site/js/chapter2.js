@@ -303,6 +303,8 @@
     var loanRate = round6(base.loanRate + k.rate);
     var marketRate = round6(base.marketRate + k.rate);
     var exitCap = round6(base.cap + k.exitCap);
+    // 손잡이가 셋 다 제자리인가. 이 한 줄이 아래에서 IRR 의 **기준**을 가른다.
+    var atRest = k.rate === 0 && k.exitCap === 0 && k.vacancy === base.vacancy0;
 
     // ① 기준 상태 — 대출은 여기서 한 번 정해지고 그 뒤로 움직이지 않는다.
     var baseNoi = stage(function () {
@@ -333,6 +335,7 @@
       marketRate: marketRate,
       exitCap: exitCap,
       columnTotal: COLUMN_TOTAL,
+      atRest: atRest,
       banners: [],
       ok: baseNoi.ok && baseValue.ok && loanRes.ok && noiRes.ok && valueRes.ok
     };
@@ -427,16 +430,32 @@
       : refiRes;
 
     // ⑤ 보유·매각. 대출이 가치를 넘으면 이 모델은 거절한다 — 그 거절도 판독이다.
+    //
+    // ── 진입 지분의 기준이 둘이다 ──
+    // `hold_model` 은 q0 을 `가격 × (1 + 비용률) − 대출` 로 잡는다. 손잡이가
+    // 제자리일 때 그 가격은 **취득가**이므로 부대비용이 자기자본에 얹히는 것이
+    // 옳다(취득 시점 IRR). 그러나 손잡이를 움직인 뒤의 가격은 취득가가 아니라
+    // **하락한 시가**다 — 거기에 비용률을 다시 곱하면 이미 끝난 취득에 부대비용을
+    // 재부과하고, 진입가마저 시가로 잡는다. 그러면 판독의 「지분」(가치−대출)과
+    // IRR 이 쓰는 유출액이 어긋나 손해가 실제보다 과장된다.
+    //
+    // 그래서 조작 후에는 비용률 0 으로 불러 **현 시가 지분에서 출발하는 전향
+    // IRR** 을 낸다. 두 기준이 다르다는 사실은 숨기지 않고 판독 주석이 한 줄로
+    // 밝힌다 — 기준을 바꾸는 일은 그 자체로 정직하게 적어야 할 가정이다.
+    var holdCostRate = atRest ? base.costRate : 0;
     var holdRes = stage(function () {
       return engine.hold_model(valueWon, loanWon, loanRate, model.noi.won,
                                base.noiGrowth, exitCap, base.holdYears,
-                               base.costRate);
+                               holdCostRate);
     });
     model.hold = holdRes.ok
       ? {
         ok: true,
         irr: holdRes.value.equity_irr,
         exitValueWon: holdRes.value.exit_value,
+        basis: atRest ? "acquisition" : "forward",
+        costRate: holdCostRate,
+        equityWon: holdRes.value.assumptions.equity_won,
         notes: holdRes.value.assumptions.notes
       }
       : holdRes;
@@ -511,6 +530,12 @@
   // 꼬리 하나로 "하한 미달"이 켜지면 기준 상태의 화면이 붉게 물든다 — 거짓 경보다.
   var EPS = 1e-9;
 
+  /** IRR 의 두 기준을 한 줄로 — 기준을 바꿨다는 사실이 화면에 남아야 한다. */
+  function irrBasisNote(m) {
+    return "기준=취득 시점 IRR(부대비용 " +
+      F.fx(m.base.costRate * 100, 0) + "% 포함) · 조작 후=현 시가 지분 기준 전향 IRR";
+  }
+
   function readings(m) {
     if (!m.ok) {
       return [{ k: "판독 불가", v: "―", u: "", alert: true,
@@ -567,7 +592,9 @@
         alert: m.hold.irr !== null && m.hold.irr < 0,
         note: m.hold.irr === null
           ? "부호 변화가 없거나 근이 탐색 범위 밖이다 — 값을 지어내지 않는다"
-          : "세전·CapEx 전·매각비용 전"
+          : (m.hold.basis === "acquisition" ? "취득 시점 IRR" : "전향 IRR") +
+            " · 진입 지분 " + eok(m.hold.equityWon) + "억원 · " +
+            irrBasisNote(m) + " · 세전·CapEx 전·매각비용 전"
       });
     } else {
       rows.push({
@@ -1066,6 +1093,7 @@
     restFraction: restFraction,
     sliderRow: sliderRow,
     evaluate: evaluate,
+    irrBasisNote: irrBasisNote,
     readings: readings,
     lines: lines,
     liveText: liveText,
