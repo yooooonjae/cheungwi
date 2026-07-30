@@ -321,6 +321,32 @@ def test_every_rent_figure_carries_the_rent_free_meta(built):
         assert row["region_figures"]["rent_free_meta"] == meta
 
 
+# ── 계열 정렬: 위치로 짝지은 세 계열의 분기가 같아야 한다 ────────────────────
+
+def test_misaligned_quarter_between_series_is_a_loud_failure(tmp_path, data_dir):
+    """공실만 한 분기 앞선 R-ONE 을 넣으면 조용히 섞이지 않고 RuntimeError 다.
+
+    임대료·공실·소득수익률은 `[-1]` 과 `zip` 으로 **위치만** 보고 짝짓는다. 한
+    계열이 새 분기를 먼저 받으면 2026Q1 임대료에 2026Q2 공실이 붙는데, 셋 다
+    정상 범위 안이라 물리 게이트도 골든도 잡지 못한다 — 정렬 단언이 유일한
+    방어선이다.
+    """
+    payload = json.loads((data_dir / "rone_office.json").read_text(encoding="utf-8"))
+    cbd = payload["regions"]["도심"]
+    shifted = _quarters(6)[1:]                    # 2025Q2…2026Q2 — 한 분기 앞선다
+    for row, yq in zip(cbd["vacancy"], shifted):
+        row["yq"] = yq
+    (data_dir / "rone_office.json").write_text(
+        json.dumps(payload, ensure_ascii=False), encoding="utf-8")
+
+    with pytest.raises(RuntimeError) as exc:
+        build_all(data_dir=data_dir, out_dir=tmp_path / "out")
+    message = str(exc.value)
+    assert "market.regions.도심" in message       # 어긋난 계열의 자리
+    assert "vacancy=2026Q2" in message            # 어긋난 분기(계열 이름과 함께)
+    assert "rent_level=2026Q1" in message
+
+
 # ── 계약 4: cap 벤치마크 ─────────────────────────────────────────────────────
 
 def test_cap_benchmark_uses_last_four_quarters_and_keeps_percent_values(built):

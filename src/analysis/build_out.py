@@ -198,6 +198,31 @@ def _last(series: list):
     return series[-1] if series else None
 
 
+def _require_same_quarter(where: str, labeled: list) -> str:
+    """한 행에 함께 실리는 계열들의 분기 라벨이 같은지 확인하고 그 분기를 돌려준다.
+
+    R-ONE 세 계열(rent_level·vacancy·yield)은 같은 분기를 같은 길이로 오름차순
+    제공한다고 **가정**하고 여기서는 위치로만 짝짓는다(`[-1]` 과 `zip`). 한 계열만
+    새 분기를 먼저 받거나 중간 한 분기를 거르면 그 가정이 깨지는데, 그때 나오는
+    행은 2026Q1 임대료에 2025Q4 공실을 붙인 값이다 — 셋 다 정상 범위 안이라
+    물리 게이트도 골든도 잡지 못하고 조용히 틀린다. 그래서 짝지을 때마다
+    등식을 확인한다.
+
+    보는 것은 길이가 아니라 **분기 라벨**이다. 계열 길이가 서로 달라도 끝나는
+    분기가 같으면 뒤에서 잘라 쓰는 이 조립은 여전히 맞고(`zip` 은 짧은 쪽에서
+    멈춘다), 어긋나는 것은 끝이 다를 때다.
+    """
+    quarters = {name: row["yq"] for name, row in labeled}
+    if len(set(quarters.values())) > 1:
+        detail = ", ".join(f"{name}={yq}" for name, yq in quarters.items())
+        raise RuntimeError(
+            f"{where}: 계열의 분기가 어긋난다 — {detail}. 세 계열을 위치로 짝지어 "
+            "한 행에 싣는 자리라, 어긋난 채로 두면 서로 다른 분기의 임대료·공실·"
+            "소득수익률이 한 분기의 관측처럼 나간다"
+        )
+    return next(iter(quarters.values()))
+
+
 def _quarter_end(yq: str) -> date:
     """'2026Q1' → 2026-03-31. 연식 계산의 기준일이다(벽시계를 쓰지 않는다)."""
     year, quarter = int(yq[:4]), int(yq[-1])
@@ -350,6 +375,13 @@ def build_market(rone: dict, rates: dict, reits: dict, seed: dict) -> dict:
         rent_free_mo = params[name]["rent_free_mo"]
         latest_rent = _last(src["rent_level"])
         latest_vac = _last(src["vacancy"])
+        latest_yld = _last(src["yield"])
+        # 최신 한 분기의 임대료·공실·소득수익률을 한 블록에 싣기 전에 셋이 같은
+        # 분기인지 못박는다(권역 3종은 예외를 그대로 올려 빌드를 멈추는 자리다).
+        _require_same_quarter(
+            f"market.regions.{name}.latest",
+            [("rent_level", latest_rent), ("vacancy", latest_vac),
+             ("yield", latest_yld)])
         nominal = latest_rent["value"] * THOUSAND_WON      # 계약 1 — 천원 → 원
         # 권역 3종의 최신 유효임대료는 예외를 그대로 올린다(빌드를 멈추는 자리).
         eff = effective_rent.effective_rent(nominal, rent_free_mo)
@@ -359,6 +391,11 @@ def build_market(rone: dict, rates: dict, reits: dict, seed: dict) -> dict:
         for rent_row, vac_row, yld_row in zip(
                 src["rent_level"][-TREND_QUARTERS:], src["vacancy"][-TREND_QUARTERS:],
                 src["yield"][-TREND_QUARTERS:]):
+            # 추이도 같은 규약이다 — `zip` 은 위치로만 짝지으므로 행마다 확인한다.
+            _require_same_quarter(
+                f"market.regions.{name}.trend[{rent_row['yq']}]",
+                [("rent_level", rent_row), ("vacancy", vac_row),
+                 ("yield", yld_row)])
             nominal_q = rent_row["value"] * THOUSAND_WON
             trend.append({
                 "yq": rent_row["yq"],
