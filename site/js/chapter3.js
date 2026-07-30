@@ -8,8 +8,9 @@
  * (`charts.strataLayout`)가 낸다.
  *
  * ── 이 그림이 말하는 네 가지 ──
- *   ① 자기자본은 첫 달에 전액 들어간다(D3). 그 뒤 쌓이는 모든 것은 빚이다 —
- *      수면 위에 남는 마른 두께가 늘 자기자본만큼이라는 사실이 그 말이다.
+ *   ① 자기자본은 첫 달에 전액 들어간다(D3). 그 뒤 들어오는 돈은 전부 빚이다.
+ *      다만 수면 위의 마른 두께가 **자기자본과 같아지는 달은 준공 달 하나뿐**이다
+ *      — 그 전에는 미자본화 이자만큼, 그 뒤에는 임대기간 순현금만큼 더 두껍다.
  *   ② 발생이자는 준공 달에 한 번에 원금으로 얹힌다(D5). 그때까지 수면 위에
  *      부풀어 있던 두께가 그 달에 꺼진다 — 아직 자본화되지 않은 이자다.
  *   ③ 준공은 퇴적이 멈추는 자리다. 지질 단면의 **부정합면**처럼, 그 위로는
@@ -276,9 +277,11 @@
         eok(m.totalCost) + "억원은 토지 " + eok(done.land) + " · 공사 " +
         eok(done.hard) + " · 간접 " + eok(done.soft) + " · 금융 " +
         eok(done.fin) + "억원으로 쌓인다.",
-      "자기자본 " + eok(m.equity) + "억원은 첫 달에 전액 들어간다(D3) — 그래서 " +
-        "수면 위에 남는 마른 두께가 늘 그만큼이고, 그 뒤 쌓이는 것은 전부 " +
-        "대출이다. 준공 시점 LTC 는 " + F.fx(m.ltc * 100) + "%다.",
+      "자기자본 " + eok(m.equity) + "억원은 첫 달에 전액 들어간다(D3) — 그 뒤 " +
+        "들어오는 돈은 전부 대출이다. 수면 위의 마른 두께가 정확히 그 자기자본이 " +
+        "되는 달은 발생이자가 원금으로 얹히는 준공 달 하나뿐이고, 그 전에는 아직 " +
+        "자본화되지 않은 이자만큼 더 두껍다. 준공 시점 LTC 는 " +
+        F.fx(m.ltc * 100) + "%다.",
       "건설기간 이자 " + eok(m.interestWon) + "억원은 달마다 발생하지만 원금에 " +
         "얹히는 것은 준공 달 한 번이다(D5 · 단리 자본화). 그 전까지 수면 위에 " +
         "부풀어 있는 두께가 아직 자본화되지 않은 이자이고, 준공 달에 그것이 " +
@@ -398,20 +401,32 @@
       inner += text(r4(g.jointX + 8), r4((g.exitY + g.costY) / 2 + 4),
                     "개발이익 " + eok(m.profit) + "억 · " +
                     F.fx(m.margin * 100) + "%", { class: "lab lab-profit" });
-      // 두 지시선은 퇴적 위의 빈 종이에서 출발해 각자의 경계로 내려간다 —
-      // 라벨을 지층 위에 얹으면 읽히지 않고, 빼면 그림이 스스로 설명하지 못한다.
-      // 짚는 달은 공사기간 안에서 고른다(기간이 짧은 사업에서도 자리가 있도록).
-      var iDry = Math.min(9, g.cols.length - 1);
+      // 두 지시선은 각자의 사실을 짚는다 — 라벨을 지층 위에 얹으면 읽히지 않고,
+      // 빼면 그림이 스스로 설명하지 못한다.
+      //
+      // 마른 두께가 **자기자본과 같아지는 달은 준공 달 하나뿐이다.** 그 전에는
+      // 아직 자본화되지 않은 발생이자만큼 더 두껍고(공사 마지막 전달까지 계속
+      // 부푼다), 그 뒤로는 임대기간 순현금이 얹혀 다시 두꺼워진다. 그래서 짚는
+      // 달을 준공(마지막 공사 달)으로 못박고, 지시선 자체가 그 달의 마른
+      // 두께(퇴적 꼭대기 ↔ 수면)를 재는 치수선이 된다.
+      var iDry = Math.max(0, Math.min(m.buildMonths - 1, g.cols.length - 1));
       var iWet = Math.min(20, g.cols.length - 1);
-      var pt = g.cols[iDry];
+      var dryX = r4(g.cols[iDry].x + g.cols[iDry].width / 2);
+      var dryTop = r4(g.yOf[iDry].cumY);
+      var dryBot = r4(g.yOf[iDry].loanY);
       var callout = r4(g.costY + 22);
       inner += tag("line", {
-        x1: r4(pt.x + pt.width / 2), x2: r4(pt.x + pt.width / 2),
-        y1: r4(callout + 4), y2: r4(g.yOf[iDry].cumY), class: "callout"
+        x1: dryX, x2: dryX, y1: dryTop, y2: dryBot, class: "callout"
       });
-      inner += text(r4(pt.x + pt.width / 2), callout,
-                    "여기까지가 자기자본 " + eok(m.equity) + "억",
-                    { class: "lab lab-dry", "text-anchor": "middle" });
+      // 치수선의 양 끝 — 어디부터 어디까지를 잰 것인지 선이 스스로 말한다.
+      [dryTop, dryBot].forEach(function (yy) {
+        inner += tag("line", {
+          x1: r4(dryX - 4), x2: r4(dryX + 4), y1: yy, y2: yy, class: "callout"
+        });
+      });
+      inner += text(dryX, r4(dryTop - 7),
+                    "준공 시점의 마른 두께 = 자기자본 " + eok(m.equity) + "억",
+                    { class: "lab lab-dry", "text-anchor": "end" });
       var wpt = g.cols[iWet];
       inner += tag("line", {
         x1: r4(wpt.x + wpt.width / 2), x2: r4(wpt.x + wpt.width / 2),

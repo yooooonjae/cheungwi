@@ -18,6 +18,7 @@
 
 import copy
 import json
+import re
 import shutil
 import subprocess
 from pathlib import Path
@@ -111,6 +112,50 @@ def test_the_water_is_the_loan_balance_and_the_dry_band_is_the_equity():
     assert m["cols"][29]["cum"] - m["cols"][29]["loan"] == pytest.approx(eq, rel=1e-9)
     # 그 전에는 아직 자본화되지 않은 발생이자만큼 더 두껍다.
     assert m["cols"][28]["cum"] - m["cols"][28]["loan"] > eq
+
+
+def test_the_dry_band_equals_the_equity_in_exactly_one_month():
+    """'마른 두께는 늘 자기자본'이 아니다 — 그 등식이 서는 달은 준공 달뿐이다.
+
+    9개월째는 268.7억(+4.8%), 28개월째는 324.2억(+26%)이다. 앞은 아직 자본화되지
+    않은 발생이자만큼, 뒤는 임대기간 순현금만큼 더 두껍다.
+    """
+    m = value("chapter3", "depositModel", PF)
+    eq = PF["model"]["assumptions"]["equity_won"]
+    same = [i for i, c in enumerate(m["cols"])
+            if abs(c["cum"] - c["loan"] - eq) < 1e6]
+    assert same == [29], "마른 두께가 자기자본과 같은 달: %s" % same
+    assert m["cols"][9]["dry"] > eq * 1.04
+    assert m["cols"][41]["dry"] > eq * 1.1
+
+
+def test_the_callout_points_at_the_completion_month_and_measures_the_dry_band():
+    """지시선은 등식이 성립하는 달을 짚고, 선 자체가 마른 두께를 잰다."""
+    g = value("chapter3", "depositGeom", PF, WIDE)
+    m = value("chapter3", "depositModel", PF)
+    svg = value("chapter3", "renderDeposit", PF, WIDE)
+    idx = m["buildMonths"] - 1
+    col = g["cols"][idx]
+    center = round(col["x"] + col["width"] / 2, 4)
+    rails = re.findall(r'<line x1="([\d.]+)" x2="([\d.]+)" y1="([\d.]+)" '
+                       r'y2="([\d.]+)" class="callout"/>', svg)
+    dim = [r for r in rails if float(r[0]) == float(r[1])]
+    assert len(dim) == 1, "치수선은 하나다: %s" % rails
+    x1, _, y1, y2 = (float(v) for v in dim[0])
+    assert x1 == pytest.approx(center, abs=1e-3), "준공 달을 짚지 않는다"
+    assert y1 == pytest.approx(g["yOf"][idx]["cumY"], abs=1e-3)
+    assert y2 == pytest.approx(g["yOf"][idx]["loanY"], abs=1e-3)
+    label = re.search(r'class="lab lab-dry"[^>]*>([^<]+)<', svg).group(1)
+    assert label == "준공 시점의 마른 두께 = 자기자본 256.3억"
+
+
+def test_the_reading_line_no_longer_claims_the_dry_band_never_changes():
+    m = value("chapter3", "depositModel", PF)
+    said = " ".join(value("chapter3", "depositLines", m))
+    assert "늘 그만큼" not in said
+    assert "준공 달 하나뿐" in said
+    # 다음 글줄의 '부풀어 있는 두께 = 미자본화 이자'와 같은 말을 해야 한다
+    assert "자본화되지 않은 이자" in said
 
 
 def test_the_bands_are_stacked_bottom_up_in_the_declared_order():
@@ -345,18 +390,44 @@ def lab_defaults():
 
 
 def test_the_lab_starts_from_the_downtown_representative_numbers():
+    """기본값은 도심 대표치다 — 다만 칸이 보이는 자릿수로 **내려서** 실린다."""
     d = lab_defaults()
     cbd = MARKET["regions"]["도심"]
     a = UNDERWRITING["assumptions"]
     noi = value("engine", "noi", cbd["effective_rent_won_m2_mo"], 50000.0,
                 a["efficiency"], cbd["vacancy"], a["opex_ratio"])["noi_won_y"]
     price = value("engine", "appraise", noi, cbd["cap"]["cap_income_based"])
-    assert d["noi"] == pytest.approx(noi / 1e8, rel=1e-9)
-    assert d["price"] == pytest.approx(price / 1e8, rel=1e-9)
+    dp = {f["key"]: f["dp"] for f in value("lab", "fields")}
+    assert d["noi"] == value("lab", "quantize", {"dp": dp["noi"]}, noi / 1e8)
+    assert d["price"] == value("lab", "quantize", {"dp": dp["price"]}, price / 1e8)
+    # 내림이므로 잘린 폭은 한 자리 안이다 — 대표치에서 멀어지지 않는다
+    assert 0 <= price / 1e8 - d["price"] < 10 ** -dp["price"]
+    assert 0 <= noi / 1e8 - d["noi"] < 10 ** -dp["noi"]
     assert d["ltv"] == pytest.approx(a["ltv_max"] * 100)
     assert d["dscr"] == pytest.approx(a["dscr_min"])
     assert d["rate"] == pytest.approx(a["loan_rate"] * 100)
     assert d["exitCap"] == pytest.approx(cbd["cap"]["cap_income_based"] * 100)
+
+
+def test_the_number_in_the_box_is_exactly_the_number_the_engine_receives():
+    """칸이 `1540.0` 을 보이면서 엔진이 1540.0668 을 받으면 옆의 환산값
+    `154,006,680,000원` 이 틀린 등식으로 읽힌다 — 보이는 수가 곧 엔진의 수다."""
+    d = lab_defaults()
+    for spec in value("lab", "fields"):
+        html = value("lab", "fieldRow", spec, d[spec["key"]])
+        shown = re.search(r'id="lab-f-%s"[^>]*?value="([^"]*)"' % spec["key"],
+                          html).group(1)
+        assert float(shown) == d[spec["key"]], "칸의 글자와 엔진의 수가 다르다"
+        frac = shown.split(".")[1] if "." in shown else ""
+        assert len(frac) <= spec["dp"], "%s 가 칸의 자릿수를 넘는다" % shown
+        # 그 자리의 환산값도 보이는 수에서 나온다
+        echo = value("lab", "engineEcho", spec, d[spec["key"]])
+        digits = int(re.sub(r"[^0-9]", "", echo))
+        if spec["scale"] == 1e8:
+            assert digits == round(float(shown) * 1e8)
+        else:
+            assert digits == round(float(shown) * spec["scale"] *
+                                   (10 ** 6 if spec["scale"] == 0.01 else 10 ** 4))
 
 
 def test_the_units_are_converted_once_and_only_once():
@@ -446,6 +517,25 @@ def test_one_failed_stage_does_not_erase_the_readings_of_the_stages_before_it():
     assert res["hold"]["ok"] is False
     keys = [r["k"] for r in value("lab", "readings", res)]
     assert "대출가능액" in keys and "차환 여유" in keys
+
+
+def test_a_row_that_cannot_be_computed_becomes_a_dash_never_a_missing_row():
+    """행이 통째로 사라지면 묻지 않은 것으로 읽힌다 — 앞 장들의 줄표 규약."""
+    ok = value("lab", "readings", value("lab", "run", lab_defaults()))
+    gated = value("lab", "readings",
+                  value("lab", "run", dict(lab_defaults(), exitCap=0.03)))
+    assert [r["k"] for r in gated if r["k"] in ("매각가", "지분 IRR")] == \
+        ["매각가", "지분 IRR"]
+    assert [r["v"] for r in gated if r["k"] == "매각가"] == ["―"]
+    assert [r["k"] for r in ok] == [r["k"] for r in gated], \
+        "판독표의 줄 수와 순서는 상태에 따라 달라지지 않는다"
+
+
+def test_the_banner_order_holds_even_when_the_implausible_flag_joins():
+    """정렬은 마지막에 한 번 — 뒤에 밀어 넣은 배너만 순서 밖에 남으면 안 된다."""
+    d = dict(lab_defaults(), exitCap=0.03, ltv=0.5)
+    kinds = [b["kind"] for b in value("lab", "run", d)["banners"]]
+    assert kinds == ["gate", "implausible"], kinds
 
 
 def test_the_live_text_says_the_reason_when_nothing_can_be_computed():

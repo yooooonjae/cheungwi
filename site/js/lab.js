@@ -51,22 +51,22 @@
    * 한 번만 일어난다(`toEngine`). 두 곳에서 나누면 반드시 한 곳이 틀린다.
    */
   var FIELDS = [
-    { key: "price", label: "가격", unit: "억원", scale: 1e8, step: 10,
+    { key: "price", label: "가격", unit: "억원", scale: 1e8, step: 10, dp: 1,
       of: "취득가이자 차환 시점의 가치다",
       hint: "1,540 은 1,540억원이다. 원 단위로 적으면 열 자리가 남는다." },
-    { key: "noi", label: "NOI", unit: "억원/년", scale: 1e8, step: 1,
+    { key: "noi", label: "NOI", unit: "억원/년", scale: 1e8, step: 1, dp: 1,
       of: "정상화 한 해의 순영업소득",
       hint: "임대수입에서 공실과 운영경비를 뺀 값. 이자·세금 전이다." },
-    { key: "ltv", label: "LTV 한도", unit: "%", scale: 0.01, step: 1,
+    { key: "ltv", label: "LTV 한도", unit: "%", scale: 0.01, step: 1, dp: 2,
       of: "대출가능액의 첫 번째 제약",
       hint: "55 는 55% 다. 0.55 를 적으면 0.55% 가 되어 대출이 100분의 1 이 된다." },
-    { key: "dscr", label: "요구 DSCR", unit: "배", scale: 1, step: 0.05,
+    { key: "dscr", label: "요구 DSCR", unit: "배", scale: 1, step: 0.05, dp: 2,
       of: "이자를 몇 배로 덮어야 하는가",
       hint: "1.3 은 1.3배다. 130 을 적으면 물리 게이트가 잡는다(0~5)." },
-    { key: "rate", label: "금리", unit: "%", scale: 0.01, step: 0.05,
+    { key: "rate", label: "금리", unit: "%", scale: 0.01, step: 0.05, dp: 2,
       of: "대출금리이자 차환 시장금리",
       hint: "4.27 은 연 4.27% 다." },
-    { key: "exitCap", label: "매각 cap", unit: "%", scale: 0.01, step: 0.05,
+    { key: "exitCap", label: "매각 cap", unit: "%", scale: 0.01, step: 0.05, dp: 4,
       of: "매각가 = 매각 시점 NOI ÷ 이 값",
       hint: "4.05 는 4.05% 다. 0.04 를 적으면 0.04% 가 되어 매각가가 100배가 된다." }
   ];
@@ -96,8 +96,25 @@
   }
 
   /**
+   * 칸이 보이는 자릿수로 **내린다.**
+   *
+   * 칸은 좁고 수는 길다. `1540.0668` 을 넣어 두면 화면에는 `1540.0` 만 보이는데
+   * 엔진은 뒷자리까지 받아 옆의 환산값이 `154,006,680,000원` 이 된다 — 읽는 사람
+   * 눈에는 틀린 등식이다. 그래서 **보이는 수가 곧 엔진의 수**가 되도록 칸의
+   * 자릿수(`dp`)로 먼저 자른다. 파생 판독은 잘린 그 수로 다시 계산되므로 화면
+   * 안에서 앞뒤가 맞는다. 올림이 아니라 내림인 것은 표시가 실측을 넘지 않게
+   * 하기 위해서다(1e-9 은 4.27 × 100 = 426.999… 같은 부동소수 흔들림 몫이다).
+   */
+  function quantize(spec, v) {
+    if (typeof v !== "number" || !isFinite(v)) return v;
+    var p = Math.pow(10, (spec && spec.dp !== undefined) ? spec.dp : 4);
+    return Math.floor(v * p + 1e-9) / p;
+  }
+
+  /**
    * 기본값은 Ⅱ장 도심 대표치다 — 실험실이 빈 종이에서 시작하면 무엇이 정상인지
    * 모른 채 숫자를 흔들게 된다. 규격 연면적 5만㎡ 는 Ⅱ장과 같은 눈금이다.
+   * 나온 수는 칸의 자릿수로 내려서 낸다(`quantize`).
    */
   function defaults(market, underwriting) {
     var reg = market && market.regions && market.regions["도심"];
@@ -107,7 +124,7 @@
                             a.efficiency, reg.vacancy, a.opex_ratio).noi_won_y;
     var cap = reg.cap.cap_income_based;
     var priceWon = engine.appraise(noiWon, cap);
-    return {
+    var raw = {
       price: priceWon / 1e8,
       noi: noiWon / 1e8,
       ltv: a.ltv_max * 100,
@@ -115,6 +132,9 @@
       rate: a.loan_rate * 100,
       exitCap: cap * 100
     };
+    var out = {};
+    FIELDS.forEach(function (f) { out[f.key] = quantize(f, raw[f.key]); });
+    return out;
   }
 
   /** 화면의 수 → 엔진의 수. 환산이 일어나는 유일한 자리다. */
@@ -264,17 +284,19 @@
           });
         }
       });
-    res.banners.sort(function (a, b) {
-      var order = { gate: 0, input: 1, other: 2, implausible: 3 };
-      return (order[a.kind] === undefined ? 9 : order[a.kind]) -
-        (order[b.kind] === undefined ? 9 : order[b.kind]);
-    });
     if (res.refi.ok && res.refi.implausible) {
       res.banners.push({
         kind: "implausible", head: KIND_HEAD.implausible,
         text: res.refi.reasons.join(" / ")
       });
     }
+    // 줄 세우기는 **마지막에** 한 번. 정렬 뒤에 하나라도 더 밀어 넣으면 그 배너만
+    // 순서 밖에 남는다(게이트가 실무 경고 아래로 내려가는 화면이 그렇게 나온다).
+    res.banners.sort(function (a, b) {
+      var order = { gate: 0, input: 1, other: 2, implausible: 3 };
+      return (order[a.kind] === undefined ? 9 : order[a.kind]) -
+        (order[b.kind] === undefined ? 9 : order[b.kind]);
+    });
     res.ok = res.loan.ok && res.hold.ok && res.refi.ok;
     return res;
   }
@@ -320,6 +342,11 @@
             "억원 · 세전·CapEx 전·매각비용 전"
       });
     } else {
+      // 못 구한 행은 사라지지 않고 줄표로 남는다 — 행이 통째로 없어지면 판독표의
+      // 줄 수가 상태마다 달라지고, 읽는 사람은 매각가를 **묻지 않은 것**으로
+      // 읽는다. 없는 값은 0 도 아니고 침묵도 아니다(앞 장들의 줄표 규약).
+      rows.push({ k: "매각가", v: "―", u: "", alert: true,
+                  note: (KIND_HEAD[res.hold.kind] || "") + " · " + res.hold.message });
       rows.push({ k: "지분 IRR", v: "―", u: "", alert: true,
                   note: (KIND_HEAD[res.hold.kind] || "") + " · " + res.hold.message });
     }
@@ -568,9 +595,11 @@
     var resetEl = doc.getElementById("lab-reset");
 
     var fixed = defaultFixed(data.underwriting);
+    // 기본값은 이미 칸의 자릿수로 내려져 있다 — 여기서 다시 다듬지 않는다.
+    // 두 곳에서 자르면 화면의 수와 엔진의 수가 다시 갈라진다.
     var base = defaults(data.market, data.underwriting);
     var inputs = {};
-    Object.keys(base).forEach(function (k) { inputs[k] = round4(base[k]); });
+    Object.keys(base).forEach(function (k) { inputs[k] = base[k]; });
     var liveTimer = null;
 
     function paintFields() {
@@ -600,8 +629,6 @@
       return res;
     }
 
-    function round4(v) { return Math.round(v * 1e4) / 1e4; }
-
     formEl.addEventListener("input", function (ev) {
       var el = ev.target;
       if (!el || el.tagName !== "INPUT") return;
@@ -619,7 +646,7 @@
 
     if (resetEl) {
       resetEl.addEventListener("click", function () {
-        Object.keys(base).forEach(function (k) { inputs[k] = round4(base[k]); });
+        Object.keys(base).forEach(function (k) { inputs[k] = base[k]; });
         paintFields();
         paint(true);
       });
@@ -673,6 +700,7 @@
     fields: function () { return FIELDS; },
     FIXED_NOTES: FIXED_NOTES,
     defaultFixed: defaultFixed,
+    quantize: quantize,
     defaults: defaults,
     toEngine: toEngine,
     kindOf: kindOf,

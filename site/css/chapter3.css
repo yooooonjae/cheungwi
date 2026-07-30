@@ -281,7 +281,9 @@
   border-bottom: 1.5px solid var(--ink-3);
 }
 .exp-num {
-  width: 7.5ch;
+  /* 스피너가 상자 안쪽을 먹는다 — 7.5ch 는 여섯 자리에서 이미 뒷자리를 잘랐고,
+     잘린 자리는 옆의 환산값과 어긋나 보였다. 등폭 글꼴이라 ch 가 곧 자릿수다. */
+  width: 10ch;
   min-height: 44px;          /* 터치 타깃 — 보이는 밑줄은 이 상자 안에 있다 */
   padding: 2px 0;
   background: none;
