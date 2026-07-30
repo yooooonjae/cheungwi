@@ -1,4 +1,6 @@
 import json
+import pytest
+from src.collect import rone_office
 from src.collect.common import ROOT
 from src.collect.rone_office import parse_rows, REGION_CLS_ID
 
@@ -49,3 +51,17 @@ def test_parse_rows_stitch_prefers_later_table():
     out = parse_rows([_vac(510003, "서울>도심", 5.0, "202402"),
                       _vac(510003, "서울>도심", 5.5, "202402")])
     assert out["regions"]["도심"]["vacancy"] == [{"yq": "2024Q2", "value": 5.5}]
+
+
+def test_fetch_table_refuses_truncated_pagination(tmp_path, monkeypatch):
+    # 2페이지째가 조용히 비면 절단본이 캐시에 영구 박제된다 — 실패시키고 캐시를 남기지 않는다
+    def fake_get_page(statbl_id, page):
+        if page == 1:
+            return 2000, [dict(_vac(510003, "서울>도심", 5.0)[1]) for _ in range(1000)]
+        return 0, []  # RESULT-only(INFO-200) 응답
+
+    monkeypatch.setattr(rone_office, "RAW_DIR", tmp_path)
+    monkeypatch.setattr(rone_office, "_get_page", fake_get_page)
+    with pytest.raises(RuntimeError, match="절단"):
+        rone_office._fetch_table("TT_TRUNCATED")
+    assert not (tmp_path / "TT_TRUNCATED.json").exists()

@@ -167,7 +167,12 @@ def _get_page(statbl_id: str, page: int) -> tuple:
 
 
 def _fetch_table(statbl_id: str) -> list:
-    """한 표의 전체 분기 행(전 페이지). STATBL_ID 단위 캐시 — 오류 응답은 캐시하지 않는다."""
+    """한 표의 전체 분기 행(전 페이지). STATBL_ID 단위 캐시 — 오류 응답은 캐시하지 않는다.
+
+    중간 페이지가 조용히 비면(RESULT-only 응답) 절단본이 캐시에 영구 박제되고 "캐시가 있으면
+    호출하지 않는다" 규칙 탓에 이후 실행이 계속 그 절단본을 읽는다. 그래서 받은 행수가
+    list_total_count 와 다르면 캐시를 쓰지 않고 실패시킨다.
+    """
     cache = RAW_DIR / f"{statbl_id}.json"
     if cache.exists():
         return json.loads(cache.read_text())
@@ -179,6 +184,12 @@ def _fetch_table(statbl_id: str) -> list:
             break
         rows.extend(more)
         page += 1
+    if len(rows) != total:
+        raise RuntimeError(
+            f"{statbl_id}: 페이지네이션 절단 — list_total_count {total}인데 {len(rows)}행만 받았다"
+            f"(마지막으로 응답한 페이지 {page - 1}, pSize {PSIZE}, 마지막 행 "
+            f"{rows[-1].get('CLS_FULLNM') if rows else '-'}@"
+            f"{rows[-1].get('WRTTIME_IDTFR_ID') if rows else '-'}). 캐시를 기록하지 않는다.")
     cache.write_text(json.dumps(rows, ensure_ascii=False))
     return rows
 
@@ -202,10 +213,11 @@ def _coverage(parsed: dict) -> dict:
 
 
 def _validate(parsed: dict):
-    """저장 전 물리 게이트: 3대 권역 지수 20분기 이상, 공실률 0~50%, 수익률 -10~20%, 임대료 양수."""
+    """저장 전 물리 게이트: 3대 권역 4계열 20분기 이상, 공실률 0~50%, 수익률 -10~20%, 임대료 양수."""
     for name in REGION_CLS_ID:
-        n = len(parsed["regions"].get(name, {}).get("rent_index", []))
-        assert n >= 20, f"{name}: 임대가격지수 분기 수 부족 {n}"
+        for series in SERIES:
+            n = len(parsed["regions"].get(name, {}).get(series, []))
+            assert n >= 20, f"{name}/{series}: 분기 수 부족 {n}"
     for bucket in ("regions", "sub_regions"):
         for key, entry in parsed[bucket].items():
             for series in SERIES:
