@@ -279,9 +279,14 @@ def test_the_chapters_have_the_mounts_their_scripts_write_into(sandbox):
 
 
 def test_chapter_scripts_load_after_the_shapes_they_borrow(sandbox):
-    """장은 charts·engine 에 더해 hero(판형 부속·서식)까지 읽는다."""
+    """장은 charts·engine 에 더해 hero(판형 부속·서식)까지 읽는다.
+
+    실험실은 한 걸음 더 나아가 chapter3 의 `fitFigures` 를 빌려 쓰므로 반드시 그
+    뒤에 온다 — 순서가 뒤집히면 실험실의 도면만 계수를 못 받아 라벨이 작아진다.
+    """
     assert sandbox.JS_FILES == ["engine.js", "charts.js", "hero.js",
-                                "chapter1.js", "chapter2.js"]
+                                "chapter1.js", "chapter2.js", "chapter3.js",
+                                "lab.js"]
     html = (sandbox.build_dist() / "index.html").read_text(encoding="utf-8")
     order = [html.index('src="js/%s"' % f) for f in sandbox.JS_FILES]
     assert order == sorted(order)
@@ -310,6 +315,48 @@ def test_chapter_figures_have_exactly_one_lettering_height_per_plate(sandbox):
     # 낱개 라벨 클래스가 제 크기를 따로 선언하면 위의 "하나"가 깨진다
     stray = re.findall(r"\.lab[\w-]*[^{}]*\{[^{}]*font-size:([^;}]+)", css)
     assert not stray, "장 도면의 라벨이 제 크기를 따로 선언했다: %s" % stray
+
+
+# ------------------------------------------------------------------ #
+# Ⅲ장·실험실 — 마운트·활자 규약·낭독
+# ------------------------------------------------------------------ #
+def test_the_time_chapter_and_the_lab_have_the_mounts_their_scripts_write_into(sandbox):
+    html = (sandbox.build_dist() / "index.html").read_text(encoding="utf-8")
+    for mount in ('id="ch3-deposit"', 'id="ch3-legend"', 'id="ch3-deposit-reading"',
+                  'id="ch3-stress"', 'id="ch3-stress-reading"', 'id="ch3-ladder"',
+                  'id="ch3-ladder-reading"', 'id="ch3-land"', 'id="ch3-land-reading"',
+                  'id="ch3-land-verdict"', 'id="ch3-spec"',
+                  'id="lab-fields"', 'id="lab-plate"', 'id="lab-readings"',
+                  'id="lab-banners"', 'id="lab-reading"', 'id="lab-fixed"',
+                  'id="lab-reset"'):
+        assert mount in html, "%s 가 없으면 그 자리는 조용히 빈다" % mount
+    assert 'id="lab-live"' in html and 'role="status"' in html
+    assert 'href="#lab"' in html, "실험실은 앱바에서 닿을 수 있어야 한다"
+    assert "가상 사업지" in html, "정직성 표기는 스크립트가 아니라 지면에도 있다"
+
+
+def test_chapter3_css_ships_and_keeps_both_themes(sandbox):
+    css = (sandbox.build_dist() / "css" / "chapter3.css").read_text(encoding="utf-8")
+    assert "prefers-color-scheme" in css
+    assert '[data-theme="dark"]' in css and '[data-theme="light"]' in css
+    for token in ("--stratum-3", "--senior", "--alert", "--pos", "--waterline"):
+        assert token in css, "%s 를 쓰지 않는다면 색이 어디선가 하드코딩됐다" % token
+    assert not re.findall(r"#[0-9a-fA-F]{6}\b", css), \
+        "Ⅲ장이 새로 만드는 색은 없다 — 팔레트의 단일 출처는 tokens.css 다"
+
+
+def test_the_time_plates_declare_no_lettering_height_of_their_own(sandbox):
+    """활자 높이는 chapters.css 의 두 줄뿐이다 — 여기서 다시 적으면 규약이 깨진다.
+
+    한 줄이라도 여기에 크기를 선언하면 `--fig-k` 의 하한 계산이 두 곳으로 갈리고,
+    계수는 1 인 채로 그 라벨만 좁은 화면에서 8px 로 찍힌다.
+    """
+    css = (sandbox.build_dist() / "css" / "chapter3.css").read_text(encoding="utf-8")
+    stray = re.findall(r"\.(?:lab|ch-fig)[\w.-]*[^{}]*text?[^{}]*"
+                       r"\{[^{}]*font-size:([^;}]+)", css)
+    assert not stray, "Ⅲ장 도면이 제 활자 높이를 따로 선언했다: %s" % stray
+    plates = re.findall(r"\.ch-fig[\w.-]* text\{[^{}]*font-size:([^;}]+)", css)
+    assert not plates
 
 
 # ------------------------------------------------------------------ #

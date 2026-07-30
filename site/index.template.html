@@ -24,6 +24,7 @@
     <a href="#ch1">Ⅰ 공간</a>
     <a href="#ch2">Ⅱ 자본</a>
     <a href="#ch3">Ⅲ 시간</a>
+    <a href="#lab">실험실</a>
     <a href="#method">방법론</a>
   </div>
   <button class="theme-toggle" type="button" aria-label="밝은 화면과 어두운 화면을 전환한다">☀</button>
@@ -161,7 +162,90 @@
   <span class="chapter-mark">제삼장</span>
   <h2 class="chapter-title" id="ch3-h">시간의 층위</h2>
   <p class="chapter-lede">토지와 공사와 이자가 달마다 퇴적되는 동안, 사업은 서기도 하고 서지 못하기도 한다.</p>
-  <div class="chapter-slot">개발 PF 현금흐름 단면과 스트레스 표, 실험실이 이 자리에 온다.</div>
+  <p class="ch-note">여기서 다루는 것은 <b>가상 사업지</b>다. 실제 인허가 건이 아니라 강남권 중형 오피스의 전형적인 규모·기간 가정에 시장 실측 앵커(임대료·공실·cap·금리)를 물린 것이다. 어떤 파라미터가 실측이고 어떤 것이 가정인지는 그림 밑 판독 글줄과 표제란이 갈라 둔다. 분양 수입이 없는 <b>임대형 개발 모델</b>이라 준공 전 수입이 한 푼도 없다고 본다.</p>
+
+  <div class="ch-head">
+    <h3 id="ch3-dep-h">마흔두 달의 단면</h3>
+    <p class="stamp">데이터 기준월 {{DATA_CUTOFF}}</p>
+  </div>
+  <p class="ch-note">서장에서 지층은 <b>한 시점의 자본 스택</b>이었다. 여기서는 같은 기둥이 마흔두 개 늘어서서 시간이 된다 — 달마다 토지·공사·간접비·금융비용이 퇴적되고, 그 위로 부채의 수면이 차오른다. 준공은 퇴적이 멈추는 자리이고, 지질 단면의 <b>부정합면</b>처럼 그 위로는 다른 종류의 시간이 온다.</p>
+  <figure class="dep-wrap" aria-labelledby="ch3-dep-h">
+    <div class="dep-host" id="ch3-deposit">
+      <p class="plate-wait">단면은 브라우저에서 그린다. 자바스크립트가 꺼져 있으면 이 자리는 비고, 수치는 아래 표에만 남는다.</p>
+    </div>
+    <figcaption>
+      <div id="ch3-legend"></div>
+      <ul class="ch-reading is-two" id="ch3-deposit-reading"></ul>
+    </figcaption>
+  </figure>
+
+  <div class="ch-head">
+    <h3 id="ch3-stress-h">열다섯 번 흔든다</h3>
+    <p class="stamp">단일 시나리오는 인용하지 않는다</p>
+  </div>
+  <p class="ch-note">매각가는 <b>NOI ÷ exit cap</b>이라 cap 0.5%p가 매각가를 10% 안팎으로 움직인다. 그래서 기준 시나리오 하나만 인용하는 것은 이 모델에서 금지다. LLCR도 마찬가지다 — 매각대금을 포함한 값과 잔여 NOI만 본 값은 뜻이 다르므로 <b>두 값을 함께</b> 읽어야 한다. 표의 기준 행이 둘을 나란히 싣는다.</p>
+  <div class="table-wrap" id="ch3-stress"></div>
+  <ul class="ch-reading" id="ch3-stress-reading"></ul>
+
+  <div class="ch-head">
+    <h3 id="ch3-ladder-h">제도가 사다리를 올릴 때</h3>
+    <p class="stamp">자기자본 5 → 20%</p>
+  </div>
+  <p class="ch-note">스트레스 열다섯 행 가운데 넉 줄은 충격이 아니라 <b>제도</b>다. 요구 자기자본을 5%에서 20%까지 올리며 같은 사업을 다시 세운 것이고, 그 넉 줄이 이 장에서 가장 조용하고 가장 정치적인 표다.</p>
+  <div class="ladder-two">
+    <div class="ladder-host" id="ch3-ladder"></div>
+    <div>
+      <h4 class="ch-figcap"><b>같은 사업의 두 얼굴</b></h4>
+      <ul class="ch-reading" id="ch3-ladder-reading"></ul>
+    </div>
+  </div>
+
+  <div class="ch-head">
+    <h3 id="ch3-land-h">프라임 필지에서는 서지 않는다</h3>
+    <p class="stamp">VWorld 개별공시지가 · 시드 21필지</p>
+  </div>
+  <p class="ch-note">이 사업이 서려면 토지를 얼마에 사야 하는가. 그 손익분기 단가를 시드 55동의 대표 필지 공시지가와 한 축에 올렸다 — 비교가 아니라 <b>거리</b>를 보이기 위해서다. 시드는 3대 권역의 프라임 대로변 표본이라 그 공시지가를 신규 개발부지의 매입 원가로 그대로 쓸 수 없다.</p>
+  <div class="land-two">
+    <div class="land-host" id="ch3-land"></div>
+    <ul class="ch-reading" id="ch3-land-reading"></ul>
+  </div>
+  <p class="land-verdict" id="ch3-land-verdict"></p>
+
+  <dl class="titleblock" id="ch3-spec"></dl>
+</section>
+
+<!-- ============ 실험실 ============ -->
+<section class="chapter" id="lab" aria-labelledby="lab-h">
+  <span class="chapter-mark">실험실</span>
+  <h2 class="chapter-title" id="lab-h">엔진만 남긴다</h2>
+  <p class="chapter-lede">여섯 개의 수를 적으면 대출·보유·차환이 이 페이지 안에서 그대로 계산된다.</p>
+  <p class="ch-note">앞의 세 장은 이 데이터로 무엇을 말할 수 있는지를 보였다. 여기서는 데이터를 치우고 엔진만 남긴다 — <b>max_loan → hold_model → refi_test</b> 체인이 브라우저에서 돌아간다. 서버도 없고 요청도 없다. 이 실험실의 주제는 <b>단위</b>다: 4.5%를 <span class="num">4.5</span>로 넣으면 감정가가 100분의 1이 되고 <span class="num">0.045</span>로 넣으면 10배가 되는데, 둘 다 정상 금액처럼 생겨서 대출과 IRR까지 조용히 흘러간다. 그래서 칸마다 적은 수가 엔진에 어떤 수로 들어가는지를 그 자리에 보이고, 물리 게이트에 걸리면 <b>단위를 의심하라</b>를 가장 먼저 말한다.</p>
+
+  <div class="exp">
+    <div class="exp-panel">
+      <h4>입력</h4>
+      <div id="lab-fields">
+        <p class="plate-wait">실험실은 브라우저에서 돈다. 자바스크립트가 꺼져 있으면 이 자리는 빈다.</p>
+      </div>
+      <button type="button" class="exp-reset" id="lab-reset">도심 대표치로 되돌린다</button>
+    </div>
+    <div class="exp-main">
+      <div class="exp-board">
+        <figure class="exp-plate">
+          <div id="lab-plate"></div>
+        </figure>
+        <div class="exp-out-box">
+          <h4>판독값</h4>
+          <div id="lab-readings"></div>
+        </div>
+      </div>
+      <div id="lab-banners"></div>
+      <ul class="ch-reading" id="lab-reading"></ul>
+    </div>
+  </div>
+
+  <p class="rig-live" id="lab-live" role="status" aria-live="polite"></p>
+  <dl class="exp-fixed" id="lab-fixed"></dl>
 </section>
 
 <!-- ============ 방법론 ============ -->

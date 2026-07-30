@@ -28,6 +28,8 @@ const MODULES = {
   hero: require(path.join(__dirname, "..", "site", "js", "hero.js")),
   chapter1: require(path.join(__dirname, "..", "site", "js", "chapter1.js")),
   chapter2: require(path.join(__dirname, "..", "site", "js", "chapter2.js")),
+  chapter3: require(path.join(__dirname, "..", "site", "js", "chapter3.js")),
+  lab: require(path.join(__dirname, "..", "site", "js", "lab.js")),
 };
 
 function kindOf(err) {
