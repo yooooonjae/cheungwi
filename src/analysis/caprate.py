@@ -11,7 +11,8 @@ cap rate 는 "이 건물의 1년 소득이 가격의 몇 %인가"이고, 소득�
 프리미엄을 준 것이거나 우리 NOI 추정이 낮은 것이다 — 어느 쪽인지 이 모듈은
 모른다. **두 값을 평균해 하나로 뭉개지 말고 괴리를 그대로 공개하라.**
 
-전부 순수 함수다 — I/O 도 전역 상태도 없다. 표준 라이브러리(`math`)만 쓴다.
+전부 순수 함수다 — I/O 도 전역 상태도 없다. 서드파티는 쓰지 않고, 임포트는
+표준 라이브러리 `math` 와 `fin_core.require_finite` 뿐이다.
 
 규약이 셋 있다.
 
@@ -31,9 +32,10 @@ cap rate 는 "이 건물의 1년 소득이 가격의 몇 %인가"이고, 소득�
    `implied` 의 산출 양쪽에 걸고, 소비 쪽인 `value.appraise` 는 같은 상수를
    임포트해 인자에 건다 — 한 곳만 막으면 다른 경로로 새어 나간다.
 
-NaN·무한대는 도메인 검사가 아니라 별도 가드로 막는다. 크기 비교가 전부
-False 라 게이트를 조용히 통과하는데, NaN cap 으로 나눈 감정가는 NaN 이고
-그것은 정상 float 처럼 생겨서 하류(대출·IRR)까지 그대로 흘러간다.
+NaN·무한대는 도메인 검사가 아니라 별도 가드(`fin_core.require_finite`)로
+막는다. 크기 비교가 전부 False 라 게이트를 조용히 통과하는데, NaN cap 으로
+나눈 감정가는 NaN 이고 그것은 정상 float 처럼 생겨서 하류(대출·IRR)까지
+그대로 흘러간다.
 
 오류 유형은 둘을 구분한다. 값이 물리적으로 말이 안 되면(가격 0 이하, 음수
 소득수익률, NaN·inf, 4분기 미만) `ValueError` 로 "입력이 틀렸다"고 하고,
@@ -42,6 +44,8 @@ False 라 게이트를 조용히 통과하는데, NaN cap 으로 나눈 감정�
 """
 
 import math
+
+from src.analysis.fin_core import require_finite
 
 # 물리 게이트 경계(소수 연율, 양끝 포함). 서울 오피스 cap 의 실측 범위를
 # 넉넉히 감쌌다. `value` 가 이 상수를 임포트해 쓴다(단일 출처).
@@ -52,20 +56,6 @@ CAP_MAX = 0.12
 QUARTERS_PER_YEAR = 4
 
 _PERCENT = 100.0
-
-
-def _require_finite(x: float, what: str) -> None:
-    """NaN·무한대를 입력 오류로 잡는다. 자기 자신과 다른 값은 NaN 뿐이다.
-
-    NaN 은 크기 비교가 전부 False 라 게이트(`CAP_MIN <= cap <= CAP_MAX`)를
-    통과하지 못하고 걸리기는 하지만, 그때 나오는 오류 유형이 "단위를
-    의심하라"(RuntimeError)가 되어 원인을 잘못 짚는다. inf 는 가격처럼 상한
-    검사가 없는 인자에서 그대로 지나가 cap 을 0 이나 inf 로 만든다.
-    """
-    if x != x:
-        raise ValueError(f"{what} 값이 NaN 이다 — 검사를 조용히 통과하므로 막는다")
-    if math.isinf(x):
-        raise ValueError(f"{what} 값이 무한대다 — 검사를 조용히 통과하므로 막는다")
 
 
 def _gate_cap(cap: float, what: str) -> float:
@@ -124,7 +114,7 @@ def benchmark(income_yield_quarterly_pct: list[float]) -> dict:
     # 양수이고 합이 게이트 안(예: 0.5+0.6+0.5+0.6 = 2.2%)이면 cap 0.022 로
     # 조용히 통과한다. 소득수익률은 정의상 음수가 없어 오탐 비용이 0 이다.
     for i, q in enumerate(income_yield_quarterly_pct):
-        _require_finite(q, f"{i}번째 분기 소득수익률")
+        require_finite(q, f"{i}번째 분기 소득수익률")
         if q < 0:
             raise ValueError(
                 f"{i}번째 분기 소득수익률이 음수다: {q} — 소득수익률은 정의상 "
@@ -174,10 +164,10 @@ def implied(noi_won_y: float, price_won: float) -> float:
     4.5%). 이 값은 **거래 한 건**이 함의한 cap 이라 표본이 1 이다.
     `benchmark` 와 나란히 놓고 괴리를 보라.
     """
-    _require_finite(noi_won_y, "NOI")
+    require_finite(noi_won_y, "NOI")
     if noi_won_y < 0:
         raise ValueError(f"NOI 는 음수일 수 없다: {noi_won_y}")
-    _require_finite(price_won, "거래가격")
+    require_finite(price_won, "거래가격")
     if price_won <= 0:
         raise ValueError(f"거래가격은 양수여야 한다: {price_won}")
 

@@ -16,8 +16,9 @@
     필요 NOI = 요구 DSCR × 대출 × 금리
     공실률   = 1 − 필요 NOI ÷ (임대료 × 임대면적 × 12 × (1 − opex))
 
-전부 순수 함수다 — I/O 도 전역 상태도 없다. 표준 라이브러리(`math`)와 게이트
-상수 넷(`acquisition` 의 DSCR, `effective_rent` 의 임대료)만 임포트한다.
+전부 순수 함수다 — I/O 도 전역 상태도 없다. 임포트는 게이트 상수 넷
+(`acquisition` 의 DSCR, `effective_rent` 의 임대료)과 `fin_core.require_finite`
+뿐이다.
 
 규약이 넷 있다.
 
@@ -93,10 +94,9 @@ GFA −1 을 함께 넣으면 GFA 쪽 `ValueError` 가 먼저다). 이 순서의
 `dscr_min == 0` 만 그 뒤에서 `ValueError` 로 잡는다.
 """
 
-import math
-
 from src.analysis.acquisition import DSCR_GATE_MAX, DSCR_GATE_MIN
 from src.analysis.effective_rent import RENT_MAX_WON_M2_MO, RENT_MIN_WON_M2_MO
+from src.analysis.fin_core import require_finite
 
 # 소수 이율 1 = 10,000 베이시스포인트. headroom 의 단위 변환에만 쓴다.
 BP_PER_UNIT = 10_000.0
@@ -110,20 +110,6 @@ IMPLAUSIBLE_LTV_UNDER = 0.01       # 대출이 가치의 1% 도 안 된다
 # `noi()` 가 같은 값을 사적으로 들고 있다 — 두 모듈이 어긋나면
 # `test_breakeven_vacancy_round_trips_through_noi` 의 왕복이 깨진다.
 _MONTHS_PER_YEAR = 12
-
-
-def _require_finite(x: float, what: str) -> None:
-    """NaN·무한대를 입력 오류로 잡는다. 자기 자신과 다른 값은 NaN 뿐이다.
-
-    NaN 은 크기 비교가 전부 False 라 도메인 검사(`0 < x <= 1` 따위)를 조용히
-    통과하고, 게이트에는 "범위 밖"으로 걸려 오류 유형까지 뒤바꾼다. inf 는
-    NOI·가치·대출처럼 상한이 없는 인자에서 그대로 지나가 최대금리·공실률을
-    inf/NaN 으로 만든다. 둘 다 정상 float 처럼 생겨서 하류가 잡지 못한다.
-    """
-    if x != x:
-        raise ValueError(f"{what} 값이 NaN 이다 — 검사를 조용히 통과하므로 막는다")
-    if math.isinf(x):
-        raise ValueError(f"{what} 값이 무한대다 — 검사를 조용히 통과하므로 막는다")
 
 
 def _gate_dscr(dscr_min: float) -> None:
@@ -210,12 +196,12 @@ def refi_test(
     `pass` 도 바꾸지 않는다 — 물리 게이트가 아니라 공시이기 때문이다. 정상
     입력에서는 꺼져 있고 사유는 빈 리스트다.
     """
-    _require_finite(noi_won_y, "NOI")
-    _require_finite(loan_won, "대출")
-    _require_finite(value_won, "가치")
-    _require_finite(dscr_min, "요구 DSCR")
-    _require_finite(ltv_max, "LTV 한도")
-    _require_finite(market_rate, "시장금리")
+    require_finite(noi_won_y, "NOI")
+    require_finite(loan_won, "대출")
+    require_finite(value_won, "가치")
+    require_finite(dscr_min, "요구 DSCR")
+    require_finite(ltv_max, "LTV 한도")
+    require_finite(market_rate, "시장금리")
 
     if noi_won_y < 0:
         raise ValueError(f"NOI 는 음수일 수 없다: {noi_won_y}")
@@ -385,13 +371,13 @@ def breakeven_vacancy(
     opex·대출 조건 가정은 부르는 쪽이 이미 들고 있는 값이므로, 이 숫자를
     인용할 때 그 가정들을 함께 실어야 한다.
     """
-    _require_finite(eff_rent, "유효임대료")
-    _require_finite(gfa, "연면적")
-    _require_finite(efficiency, "전용률")
-    _require_finite(opex_ratio, "운영경비율")
-    _require_finite(loan_won, "대출")
-    _require_finite(loan_rate, "대출금리")
-    _require_finite(dscr_min, "요구 DSCR")
+    require_finite(eff_rent, "유효임대료")
+    require_finite(gfa, "연면적")
+    require_finite(efficiency, "전용률")
+    require_finite(opex_ratio, "운영경비율")
+    require_finite(loan_won, "대출")
+    require_finite(loan_rate, "대출금리")
+    require_finite(dscr_min, "요구 DSCR")
 
     if eff_rent <= 0:
         raise ValueError(f"유효임대료는 양수여야 한다: {eff_rent}")

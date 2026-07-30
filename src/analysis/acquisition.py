@@ -10,8 +10,8 @@
 골든 검증을 마쳤다). 이 모듈이 책임지는 것은 **현금흐름 배열이 규약대로
 조립되는가**다.
 
-전부 순수 함수다 — I/O 도 전역 상태도 없다. 임포트는 `math`(표준 라이브러리),
-`fin_core.irr_annual`, `caprate` 의 cap 게이트 상수 둘뿐이다.
+전부 순수 함수다 — I/O 도 전역 상태도 없다. 임포트는 `fin_core` 의
+`irr_annual`·`require_finite` 와 `caprate` 의 cap 게이트 상수 둘뿐이다.
 
 규약이 넷 있다.
 
@@ -71,10 +71,8 @@ DSCR 을 도메인 검사로 먼저 잡으면 유형이 어긋나기 때문이�
 `ValueError` 로 잡는다.
 """
 
-import math
-
 from src.analysis.caprate import CAP_MAX, CAP_MIN
-from src.analysis.fin_core import irr_annual
+from src.analysis.fin_core import irr_annual, require_finite
 
 # 물리 게이트(계획 Global Constraints): DSCR 0~5 밖은 RuntimeError.
 # 차환(refi)도 같은 게이트를 써야 하므로 상수는 여기 한 곳에만 둔다.
@@ -86,20 +84,6 @@ DSCR_GATE_MAX = 5.0
 BINDING_PRIORITY = ("ltv", "dscr", "debt_yield")
 
 _QUARTERS_PER_YEAR = 4
-
-
-def _require_finite(x: float, what: str) -> None:
-    """NaN·무한대를 입력 오류로 잡는다. 자기 자신과 다른 값은 NaN 뿐이다.
-
-    NaN 은 크기 비교가 전부 False 라 도메인 검사(`0 < x <= 1` 따위)를 조용히
-    통과하고, 게이트에는 "범위 밖"으로 걸려 오류 유형까지 뒤바꾼다. inf 는
-    NOI·가격처럼 상한이 없는 인자에서 그대로 지나가 대출가능액·IRR 을
-    inf/NaN 으로 만든다. 둘 다 정상 float 처럼 생겨서 하류가 잡지 못한다.
-    """
-    if x != x:
-        raise ValueError(f"{what} 값이 NaN 이다 — 검사를 조용히 통과하므로 막는다")
-    if math.isinf(x):
-        raise ValueError(f"{what} 값이 무한대다 — 검사를 조용히 통과하므로 막는다")
 
 
 def _gate_dscr(dscr_min: float) -> None:
@@ -183,12 +167,12 @@ def max_loan(
             "봐서 대출가능액이 과대(위험한 방향)로 나온다 — 계산하지 않는다"
         )
 
-    _require_finite(noi_won_y, "NOI")
-    _require_finite(price_won, "가격")
-    _require_finite(ltv_max, "LTV 한도")
-    _require_finite(dscr_min, "요구 DSCR")
-    _require_finite(debt_yield_min, "DY 하한")
-    _require_finite(loan_rate, "대출금리")
+    require_finite(noi_won_y, "NOI")
+    require_finite(price_won, "가격")
+    require_finite(ltv_max, "LTV 한도")
+    require_finite(dscr_min, "요구 DSCR")
+    require_finite(debt_yield_min, "DY 하한")
+    require_finite(loan_rate, "대출금리")
 
     if noi_won_y < 0:
         raise ValueError(f"NOI 는 음수일 수 없다: {noi_won_y}")
@@ -310,13 +294,13 @@ def hold_model(
     총액과 같아 유출이 0) 근이 분기이율 [−0.5, 1.0] 밖이면 `fin_core` 가
     값을 지어내지 않고 `None` 을 준다. 부르는 쪽이 `None` 을 처리해야 한다.
     """
-    _require_finite(price_won, "가격")
-    _require_finite(loan_won, "대출")
-    _require_finite(loan_rate, "대출금리")
-    _require_finite(noi_won_y, "NOI")
-    _require_finite(noi_growth_y, "NOI 성장률")
-    _require_finite(exit_cap, "매각 cap")
-    _require_finite(cost_rate, "취득부대비용률")
+    require_finite(price_won, "가격")
+    require_finite(loan_won, "대출")
+    require_finite(loan_rate, "대출금리")
+    require_finite(noi_won_y, "NOI")
+    require_finite(noi_growth_y, "NOI 성장률")
+    require_finite(exit_cap, "매각 cap")
+    require_finite(cost_rate, "취득부대비용률")
 
     if price_won <= 0:
         raise ValueError(f"가격은 양수여야 한다: {price_won}")

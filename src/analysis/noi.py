@@ -11,7 +11,7 @@
     NOI = EGI × (1 − opex_ratio)              (순영업소득)
 
 전부 순수 함수다 — I/O 도 전역 상태도 없다. 서드파티는 쓰지 않고, 임포트는
-`effective_rent` 의 게이트 상수 둘뿐이다(아래 규약 1).
+`effective_rent` 의 게이트 상수 둘(아래 규약 1)과 `fin_core.require_finite` 뿐이다.
 
 규약이 셋 있다.
 
@@ -36,9 +36,10 @@
    수준이 EGI 의 15% 라 기본값으로 둔다. 관리비 수입과 지출을 각각 총액으로
    세우는 정석 대신 상계 후 비율 하나로 뭉갠 단순화다.
 
-NaN·무한대는 도메인 검사가 아니라 별도 가드로 막는다. 크기 비교가 전부
-False 라 도메인 검사를 조용히 통과하는데, 그렇게 나온 NaN·inf 는 정상 float
-처럼 생겨서 하류(cap rate·가치·대출)까지 그대로 흘러가기 때문이다.
+NaN·무한대는 도메인 검사가 아니라 별도 가드(`fin_core.require_finite`)로
+막는다. 크기 비교가 전부 False 라 도메인 검사를 조용히 통과하는데, 그렇게 나온
+NaN·inf 는 정상 float 처럼 생겨서 하류(cap rate·가치·대출)까지 그대로 흘러가기
+때문이다.
 
 오류 유형은 둘을 구분한다. 값이 물리적으로 말이 안 되면(전용률 0, 공실률
 음수, 임대료 0 이하, NaN·inf) `ValueError` 로 "입력이 틀렸다"고 하고, 값 자체는
@@ -48,6 +49,7 @@ False 라 도메인 검사를 조용히 통과하는데, 그렇게 나온 NaN·i
 """
 
 from src.analysis.effective_rent import RENT_MAX_WON_M2_MO, RENT_MIN_WON_M2_MO
+from src.analysis.fin_core import require_finite
 
 # 조정 가능한 가정의 기본값(골든 상수가 아니다). 시그니처는 다섯 인자를 모두
 # 요구하므로 여기서 기본값을 주지 않는다 — 부르는 쪽이 이 상수를 넘긴다.
@@ -55,21 +57,6 @@ DEFAULT_EFFICIENCY = 0.5    # GFA 대비 임대면적 — 서울 오피스 NLA �
 DEFAULT_OPEX_RATIO = 0.15   # 관리비 상계 후 미회수 운영경비 / EGI
 
 _MONTHS_PER_YEAR = 12
-_INF = float("inf")
-
-
-def _require_finite(x: float, what: str) -> None:
-    """NaN·무한대를 입력 오류로 잡는다. 자기 자신과 다른 값은 NaN 뿐이다.
-
-    NaN 은 크기 비교가 전부 False 라 도메인 검사(`0 < x <= 1` 따위)를 조용히
-    통과한다. inf 는 통과하지는 않지만 GFA·임대료처럼 상한이 없는 인자에서는
-    검사 자체가 없어 그대로 지나간다. 둘 다 곱셈을 거치면 NOI 가 NaN/inf 가
-    되는데, 그 값은 정상 float 처럼 생겨서 하류가 잡지 못한다.
-    """
-    if x != x:
-        raise ValueError(f"{what} 값이 NaN 이다 — 검사를 조용히 통과하므로 막는다")
-    if x == _INF or x == -_INF:
-        raise ValueError(f"{what} 값이 무한대다 — 검사를 조용히 통과하므로 막는다")
 
 
 def _gate_rent(rent_won_m2_mo: float) -> None:
@@ -117,20 +104,20 @@ def noi(
     실어 보낸다. NOI 숫자만 떼어 인용하면 안 된다 — 세 가정이 바뀌면 값도
     바뀐다.
     """
-    _require_finite(eff_rent_won_m2_mo, "유효임대료")
+    require_finite(eff_rent_won_m2_mo, "유효임대료")
     if eff_rent_won_m2_mo <= 0:
         raise ValueError(f"유효임대료는 양수여야 한다: {eff_rent_won_m2_mo}")
     _gate_rent(eff_rent_won_m2_mo)
-    _require_finite(gfa_m2, "연면적")
+    require_finite(gfa_m2, "연면적")
     if gfa_m2 <= 0:
         raise ValueError(f"연면적은 양수여야 한다: {gfa_m2}")
-    _require_finite(efficiency, "전용률")
+    require_finite(efficiency, "전용률")
     if not 0 < efficiency <= 1:
         raise ValueError(f"전용률은 (0, 1] 이어야 한다: {efficiency}")
-    _require_finite(vacancy, "공실률")
+    require_finite(vacancy, "공실률")
     if not 0 <= vacancy <= 1:
         raise ValueError(f"공실률은 [0, 1] 이어야 한다: {vacancy}")
-    _require_finite(opex_ratio, "운영경비율")
+    require_finite(opex_ratio, "운영경비율")
     if not 0 <= opex_ratio < 1:
         raise ValueError(f"운영경비율은 [0, 1) 이어야 한다: {opex_ratio}")
 

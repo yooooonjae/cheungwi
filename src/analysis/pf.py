@@ -13,8 +13,8 @@
 골든 검증을 마쳤다). 이 모듈이 책임지는 것은 **월별 스케줄이 규약대로
 조립되고, 그것이 분기 흐름으로 정확히 접히는가**다.
 
-전부 순수 함수다 — I/O 도 전역 상태도 없다. 임포트는 `math`(표준 라이브러리),
-`fin_core.irr_annual`, `caprate` 의 cap 게이트 상수 둘뿐이다.
+전부 순수 함수다 — I/O 도 전역 상태도 없다. 임포트는 `fin_core` 의
+`irr_annual`·`require_finite` 와 `caprate` 의 cap 게이트 상수 둘뿐이다.
 
 ## 규약 넷
 
@@ -164,10 +164,8 @@ x = 0.073533953206652267660378469816… 을 `Decimal` 60자리 뉴턴법으로 �
 보이지 않는 행은 "그 시나리오는 괜찮았다"로 읽힌다.
 """
 
-import math
-
 from src.analysis.caprate import CAP_MAX, CAP_MIN
-from src.analysis.fin_core import irr_annual
+from src.analysis.fin_core import irr_annual, require_finite
 
 # 물리 게이트(계획 Global Constraints 의 자릿수 방어). 대출/총사업비는
 # 정의상 0~1 이다 — 밖이면 금액 단위를 의심해야 한다.
@@ -221,20 +219,6 @@ _DECISIONS = (
     "D9 margin 은 개발이익 ÷ 총사업비다(매각가 대비가 아니다 — 같은 이익이 매각가 "
     "대비로는 더 작아 보인다).",
 )
-
-
-def _require_finite(x: float, what: str) -> None:
-    """NaN·무한대를 입력 오류로 잡는다. 자기 자신과 다른 값은 NaN 뿐이다.
-
-    NaN 은 크기 비교가 전부 False 라 도메인 검사(`0 <= x <= 1` 따위)를 조용히
-    통과하고, 게이트에는 "범위 밖"으로 걸려 오류 유형까지 뒤바꾼다. inf 는
-    비용·NOI 처럼 상한이 없는 인자에서 그대로 지나가 총사업비·IRR 을 inf/NaN
-    으로 만든다. 둘 다 정상 float 처럼 생겨서 하류가 잡지 못한다.
-    """
-    if x != x:
-        raise ValueError(f"{what} 값이 NaN 이다 — 검사를 조용히 통과하므로 막는다")
-    if math.isinf(x):
-        raise ValueError(f"{what} 값이 무한대다 — 검사를 조용히 통과하므로 막는다")
 
 
 def _require_months(x, what: str, minimum: int) -> int:
@@ -333,7 +317,7 @@ def _read_inputs(inputs) -> dict:
         if isinstance(raw, bool) or not isinstance(raw, (int, float)):
             raise ValueError(f"{what} 는 수치여야 한다: {raw!r}")
         value = float(raw)
-        _require_finite(value, what)
+        require_finite(value, what)
         p[key] = value
 
     if p["land_won"] < 0:

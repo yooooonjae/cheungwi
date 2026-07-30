@@ -5,7 +5,9 @@
 렌트프리 개월 수만큼 적다. 이 모듈은 그 차감(`effective_rent`)과, 같은
 권역이라도 건물마다 다른 값이 붙는 세 특성 보정(`building_adjust`)을 한다.
 
-전부 순수 함수다 — I/O 도 전역 상태도 없다. 표준 라이브러리만 쓴다.
+전부 순수 함수다 — I/O 도 전역 상태도 없다. 서드파티는 쓰지 않고, 임포트는
+`fin_core.require_finite` 하나뿐이다(`fin_core` 는 아무것도 임포트하지 않아
+순환이 생기지 않는다).
 
 규약이 셋 있다.
 
@@ -24,10 +26,19 @@
 임대료의 실측 범위를 넉넉히 감싼 값이라, 여기를 벗어났다면 임대료가 틀린
 것이 아니라 단위나 자릿수가 틀린 것이다.
 
-NaN 은 게이트가 아니라 입력 검증(`ValueError`)에서 막는다. 구간표는 크기
-비교로만 칸을 고르는데 NaN 은 모든 비교가 False 라 조용히 통과하고, 그렇게
-나온 계수는 정상 float 이라 게이트에도 걸리지 않기 때문이다.
+NaN·±inf 는 게이트가 아니라 입력 검증(`fin_core.require_finite` →
+`ValueError`)에서 막는다. 구간표는 크기 비교로만 칸을 고르는데, NaN 은 모든
+비교가 False 라 조용히 마지막 칸으로 떨어지고 +inf 도 같은 자리로 간다 —
+연면적 +inf 가 최고 프리미엄(1.08), 연식 +inf 가 최대 감가(0.88)다. 그렇게
+나온 계수는 정상 float 이라 물리 게이트에도 걸리지 않는다. −inf 는 원래도
+음수 도메인 검사에 걸렸지만 같은 가드로 함께 잡아 유형을 하나로 둔다.
+
+명목임대료(`effective_rent`)도 같은 가드를 쓴다. 예전에는 ±inf 가 게이트까지
+흘러가 `RuntimeError`("단위를 의심하라")로 나왔는데, 무한대는 단위를 고쳐서 될
+값이 아니라 입력이 틀린 것이다.
 """
+
+from src.analysis.fin_core import require_finite
 
 # 물리 게이트 경계(원/㎡·월, 양끝 포함). 서울 오피스 실측 범위를 넉넉히 감쌌다.
 RENT_MIN_WON_M2_MO = 10_000.0
@@ -58,21 +69,10 @@ _REGION_RENT_FREE_MO = {
 }
 
 
-def _reject_nan(x: float, what: str) -> None:
-    """NaN 을 입력 오류로 잡는다. 자기 자신과 다른 값은 NaN 뿐이다.
-
-    NaN 은 크기 비교가 전부 False 라 구간표(`_pick`)를 조용히 통과한다.
-    막지 않으면 연면적 NaN 이 최고 프리미엄(1.08), 연식 NaN 이 최대
-    감가(0.88)로 떨어지고, 결과가 정상 float 이라 물리 게이트도 잡지 못한다.
-    """
-    if x != x:
-        raise ValueError(f"{what} 값이 NaN 이다 — 구간표를 조용히 통과하므로 막는다")
-
-
 def _pick(table: tuple[tuple[float, float], ...], x: float) -> float:
     """구간표에서 계수를 고른다. 경계는 [하한, 상한) 반열림.
 
-    `x` 는 NaN 이 아니어야 한다(부르는 쪽이 `_reject_nan` 으로 막는다).
+    `x` 는 유한해야 한다(부르는 쪽이 `require_finite` 로 막는다).
     """
     for upper, factor in table:
         if x < upper:
@@ -103,7 +103,12 @@ def effective_rent(nominal_won_m2_mo: float, rent_free_months_per_year: float) -
     현금흐름 쪽에서 따로 다룬다.
 
     결과는 물리 게이트를 통과해야 한다(10,000~60,000원/㎡·월).
+
+    명목임대료가 NaN·±inf 면 게이트에 닿기 전에 `ValueError` 다. 게이트까지
+    흘러가면 유형이 `RuntimeError`("단위를 의심하라")가 되는데, 무한대는 단위를
+    고쳐서 될 값이 아니라 입력이 틀린 것이다.
     """
+    require_finite(nominal_won_m2_mo, "명목임대료")
     if not 0 <= rent_free_months_per_year <= 12:
         raise ValueError(
             f"렌트프리는 연 0~12개월이어야 한다: {rent_free_months_per_year}"
@@ -174,14 +179,14 @@ def building_adjust(
     "assumptions": [...], "caveats": [...]}`. 보정 결과도 물리 게이트를
     통과해야 한다.
     """
-    _reject_nan(age_years, "연식")
+    require_finite(age_years, "연식")
     if age_years < 0:
         raise ValueError(f"연식은 음수일 수 없다: {age_years}")
-    _reject_nan(gfa_m2, "연면적")
+    require_finite(gfa_m2, "연면적")
     if gfa_m2 <= 0:
         raise ValueError(f"연면적은 양수여야 한다: {gfa_m2}")
     if dist_subway_m is not None:
-        _reject_nan(dist_subway_m, "역까지 거리")
+        require_finite(dist_subway_m, "역까지 거리")
         if dist_subway_m < 0:
             raise ValueError(f"역까지 거리는 음수일 수 없다: {dist_subway_m}")
 

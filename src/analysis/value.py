@@ -8,8 +8,8 @@
     appraise   : 가치 = NOI ÷ cap                (소득접근, 직접환원법)
     error_dist : err = (추정 − 실거래) / 실거래  의 사분위·평균절대오차
 
-전부 순수 함수다 — I/O 도 전역 상태도 없다. 표준 라이브러리(`math`·
-`statistics`)와 `caprate` 의 게이트 상수 둘만 쓴다(아래 규약 2).
+전부 순수 함수다 — I/O 도 전역 상태도 없다. 표준 라이브러리 `statistics` 와
+`caprate` 의 게이트 상수 둘(아래 규약 2), `fin_core.require_finite` 만 쓴다.
 
 규약이 셋 있다.
 
@@ -31,9 +31,9 @@
    실거래이고 과대추정이 양수다. 뒤집으면 부호가 반대가 되고 분모가 바뀌어
    중앙값의 뜻이 달라진다.
 
-NaN·무한대는 도메인 검사가 아니라 별도 가드로 막는다. 크기 비교가 전부
-False 라 cap 게이트를 원인이 아닌 오류 유형으로 통과·차단하고, NaN 가치는
-정상 float 처럼 생겨서 하류까지 그대로 흘러간다.
+NaN·무한대는 도메인 검사가 아니라 별도 가드(`fin_core.require_finite`)로
+막는다. 크기 비교가 전부 False 라 cap 게이트를 원인이 아닌 오류 유형으로
+통과·차단하고, NaN 가치는 정상 float 처럼 생겨서 하류까지 그대로 흘러간다.
 
 오류 유형은 둘을 구분한다. 값이 물리적으로 말이 안 되면(음수 NOI, 실거래가
 0 이하, NaN·inf, 표본 3건 미만) `ValueError` 로 "입력이 틀렸다"고 하고, 값
@@ -41,10 +41,10 @@ False 라 cap 게이트를 원인이 아닌 오류 유형으로 통과·차단�
 한다.
 """
 
-import math
 import statistics
 
 from src.analysis.caprate import CAP_MAX, CAP_MIN
+from src.analysis.fin_core import require_finite
 
 # 사분위수에 필요한 최소 표본. `statistics.quantiles` 자체는 2점으로도 돌지만
 # 그때 나오는 p25·p75 는 사분위수가 아니라 두 점 사이의 내삽일 뿐이다.
@@ -52,20 +52,6 @@ MIN_PAIRS_FOR_QUANTILES = 3
 
 _QUARTILES = 4
 _QUANTILE_METHOD = "inclusive"
-
-
-def _require_finite(x: float, what: str) -> None:
-    """NaN·무한대를 입력 오류로 잡는다. 자기 자신과 다른 값은 NaN 뿐이다.
-
-    NaN 은 크기 비교가 전부 False 라 cap 게이트에 "범위 밖"으로 걸리는데,
-    그러면 오류 유형이 `RuntimeError`(단위 의심)가 되어 원인을 잘못 짚는다.
-    inf 는 NOI 처럼 상한 검사가 없는 인자에서 그대로 지나가 가치를 inf 로
-    만든다. 둘 다 정상 float 처럼 생겨 하류가 잡지 못한다.
-    """
-    if x != x:
-        raise ValueError(f"{what} 값이 NaN 이다 — 검사를 조용히 통과하므로 막는다")
-    if math.isinf(x):
-        raise ValueError(f"{what} 값이 무한대다 — 검사를 조용히 통과하므로 막는다")
 
 
 def _gate_cap(cap: float) -> None:
@@ -102,10 +88,10 @@ def appraise(noi_won_y: float, cap: float) -> float:
 
     게이트: cap 은 0.02~0.12(양끝 포함) 안이어야 한다. 밖이면 `RuntimeError`.
     """
-    _require_finite(noi_won_y, "NOI")
+    require_finite(noi_won_y, "NOI")
     if noi_won_y < 0:
         raise ValueError(f"NOI 는 음수일 수 없다: {noi_won_y}")
-    _require_finite(cap, "cap")
+    require_finite(cap, "cap")
     _gate_cap(cap)
 
     return noi_won_y / cap
@@ -147,10 +133,10 @@ def error_dist(pairs: list[tuple[float, float]]) -> dict:
         if len(pair) != 2:
             raise ValueError(f"{i}번째 쌍이 (추정, 실거래) 두 값이 아니다: {pair}")
         estimated, actual = pair
-        _require_finite(estimated, f"{i}번째 추정가")
+        require_finite(estimated, f"{i}번째 추정가")
         if estimated < 0:
             raise ValueError(f"{i}번째 추정가는 음수일 수 없다: {estimated}")
-        _require_finite(actual, f"{i}번째 실거래가")
+        require_finite(actual, f"{i}번째 실거래가")
         if actual <= 0:
             raise ValueError(f"{i}번째 실거래가는 양수여야 한다: {actual}")
         errs.append((estimated - actual) / actual)
