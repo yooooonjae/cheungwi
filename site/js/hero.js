@@ -53,6 +53,18 @@
   var FLOORS = 20;
   var CELLS_PER_FLOOR = 6;
 
+  /**
+   * 표제란의 축척 한 줄. 격자에서 그대로 나온다.
+   *
+   * "가치 100 = 20층 · 창 1칸 = 0.83%p"를 지면에 박아 두면, 격자를 20×6 에서
+   * 옮기는 날 그림은 새 눈금으로 그려지고 표제란만 옛 눈금을 말한다 — 도면에서
+   * 축척이 틀린 것은 그림이 틀린 것과 같다.
+   */
+  function scaleNote() {
+    return "가치 100 = " + FLOORS + "층 · 창 1칸 = " +
+      fx(100 / (FLOORS * CELLS_PER_FLOOR), 2) + "%p";
+  }
+
   var BINDING_LABEL = {
     ltv: "LTV 한도",
     dscr: "요구 DSCR",
@@ -688,6 +700,11 @@
     var gaugeEl = doc.getElementById("gauge");
     if (!plate || !tabsEl) return null;
 
+    // 축척은 데이터가 아니라 격자에서 나온다 — 권역 자료를 못 읽어도 참이라
+    // 실패 갈래보다 먼저 적는다.
+    var scaleEl = doc.getElementById("hero-scale");
+    if (scaleEl) scaleEl.textContent = scaleNote();
+
     var market = data.market, uw = data.underwriting, manifest = data.manifest || {};
     var names = Object.keys((market && market.regions) || {});
     if (!names.length) {
@@ -821,6 +838,7 @@
   return {
     FLOORS: FLOORS,
     CELLS_PER_FLOOR: CELLS_PER_FLOOR,
+    scaleNote: scaleNote,
     pickDarkCells: pickDarkCells,
     regionModel: regionModel,
     render: render,

@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <script>/* 테마 선택 복원 — 첫 페인트 전에 끝나야 화면이 번쩍이지 않는다 */try{var t=localStorage.getItem("cheungwi-theme");if(t==="dark"||t==="light")document.documentElement.dataset.theme=t}catch(e){}</script>
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="description" content="서울 3대 권역 프라임 오피스 55동을 공공 원천에서 수집해, 유효임대료에서 NOI·자산가치·Equity IRR·차환 가능성까지 한 줄기로 잇는 개인 연구.">
+<meta name="description" content="서울 3대 권역 프라임 오피스 {{SEED_N}}동을 공공 원천에서 수집해, 유효임대료에서 NOI·자산가치·Equity IRR·차환 가능성까지 한 줄기로 잇는 개인 연구.">
 {{ROBOTS}}
 <meta property="og:type" content="website">
 <meta property="og:site_name" content="층위(層位)">
 <meta property="og:url" content="https://cheungwi.pages.dev/">
 <meta property="og:title" content="층위(層位) — 서울 오피스의 공간·자본·시간">
-<meta property="og:description" content="임대의 층이 쌓이고, 부채의 물이 차오른다 — 서울 프라임 오피스 55동의 언더라이팅.">
+<meta property="og:description" content="임대의 층이 쌓이고, 부채의 물이 차오른다 — 서울 프라임 오피스 {{SEED_N}}동의 언더라이팅.">
 <!-- 카드 원본은 src/build/og_card.html 이고 `make og` 가 site/static/og.png 로 굽는다.
      빌드가 static/ 을 web/ 루트로 평면 복사하므로 이 절대 URL 이 그 파일을 가리킨다. -->
 <meta property="og:image" content="https://cheungwi.pages.dev/og.png">
@@ -64,7 +64,7 @@
 
     <dl class="titleblock">
       <div><dt>도면</dt><dd>서울 3대 권역 대표 단면 · 모식도</dd></div>
-      <div><dt>축척</dt><dd>가치 100 = 20층 · 창 1칸 = 0.83%p</dd></div>
+      <div><dt>축척</dt><dd id="hero-scale">가치 100 = 타워 전체 높이 · 창 1칸 = 공실률 눈금</dd></div>
       <div><dt>기준</dt><dd>{{DATA_CUTOFF}}</dd></div>
       <div><dt>계보</dt><dd>수지 → 순환 → 시차 → 층위</dd></div>
     </dl>
@@ -198,7 +198,7 @@
     <h3 id="ch3-ladder-h">제도가 사다리를 올릴 때</h3>
     <p class="stamp">자기자본 5 → 20%</p>
   </div>
-  <p class="ch-note">스트레스 열다섯 행 가운데 넉 줄은 충격이 아니라 <b>제도</b>다. 요구 자기자본을 5%에서 20%까지 올리며 같은 사업을 다시 세운 것이고, 그 넉 줄이 이 장에서 가장 조용하고 가장 정치적인 표다.</p>
+  <p class="ch-note">스트레스 {{STRESS_N}}행 가운데 넉 줄은 충격이 아니라 <b>제도</b>다. 요구 자기자본을 5%에서 20%까지 올리며 같은 사업을 다시 세운 것이고, 그 넉 줄이 이 장에서 가장 조용하고 가장 정치적인 표다.</p>
   <div class="ladder-two">
     <div class="ladder-host" id="ch3-ladder"></div>
     <div>
@@ -209,9 +209,9 @@
 
   <div class="ch-head">
     <h3 id="ch3-land-h">프라임 필지에서는 서지 않는다</h3>
-    <p class="stamp">VWorld 개별공시지가 · 시드 21필지</p>
+    <p class="stamp">VWorld 개별공시지가 · 시드 {{LAND_PARCEL_N}}필지</p>
   </div>
-  <p class="ch-note">이 사업이 서려면 토지를 얼마에 사야 하는가. 그 손익분기 단가를 시드 55동의 대표 필지 공시지가와 한 축에 올렸다 — 비교가 아니라 <b>거리</b>를 보이기 위해서다. 시드는 3대 권역의 프라임 대로변 표본이라 그 공시지가를 신규 개발부지의 매입 원가로 그대로 쓸 수 없다.</p>
+  <p class="ch-note">이 사업이 서려면 토지를 얼마에 사야 하는가. 그 손익분기 단가를 시드 {{SEED_N}}동의 대표 필지 공시지가와 한 축에 올렸다 — 비교가 아니라 <b>거리</b>를 보이기 위해서다. 시드는 3대 권역의 프라임 대로변 표본이라 그 공시지가를 신규 개발부지의 매입 원가로 그대로 쓸 수 없다.</p>
   <div class="land-two">
     <div class="land-host" id="ch3-land"></div>
     <ul class="ch-reading" id="ch3-land-reading"></ul>
@@ -309,7 +309,7 @@
         <p class="field-of">게이트 위반·계산 정지·implausible·제외된 상권</p>
       </div>
       <div class="field-body">
-        <p class="ch-note">네 목록은 파이프라인이 <b>스스로 실패를 적어 두는 자리</b>다. 오늘 셋이 비어 있는데, 빈 목록에는 제도 도면의 관습대로 사선을 긋는다 — 미기입이 아니라 의도된 공백이라는 표기이고, 여기서는 <b>0건은 검증의 결과가 아니다</b>라는 뜻이다.</p>
+        <p class="ch-note">아래 목록은 파이프라인이 <b>스스로 실패를 적어 두는 자리</b>다. <span id="method-checks-tally">빈 목록</span>에는 제도 도면의 관습대로 사선을 긋는다 — 미기입이 아니라 의도된 공백이라는 표기이고, 여기서는 <b>0건은 검증의 결과가 아니다</b>라는 뜻이다.</p>
         <div id="method-checks"></div>
       </div>
     </section>

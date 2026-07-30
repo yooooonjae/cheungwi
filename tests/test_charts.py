@@ -289,6 +289,14 @@ def test_dark_windows_are_deterministic():
     assert len(value("hero", "pickDarkCells", 120, 120)) == 120
 
 
+def test_the_titleblock_scale_is_read_off_the_grid_not_written_by_hand():
+    """표제란의 축척은 격자에서 나온다 — 20×6 을 옮기면 그 줄도 함께 움직인다."""
+    t = value("hero", "regionModel", market(), underwriting(), "도심")["tower"]
+    note = value("hero", "scaleNote")
+    assert "가치 100 = %d층" % t["floors"] in note
+    assert "창 1칸 = %.2f%%p" % (100 / t["cells"]) in note
+
+
 def test_dark_windows_do_not_clump_into_one_floor():
     """8칸이 한 층에 몰리면 공실이 아니라 폐쇄된 층으로 읽힌다."""
     cells = value("hero", "pickDarkCells", 120, 8)

@@ -448,7 +448,8 @@ def build_market(rone: dict, rates: dict, reits: dict, seed: dict) -> dict:
                 "reason": (
                     f"소득수익률 계열이 {len(yields)}분기뿐이라 연환산에 필요한 "
                     f"{caprate.QUARTERS_PER_YEAR}분기를 못 채운다. 짧은 계열로 합을 "
-                    "내면 4분의 3 짜리 cap 이 나오는데 그 값도 게이트 안(2~12%)이라 "
+                    f"내면 4분의 3 짜리 cap 이 나오는데 그 값도 게이트 안"
+                    f"({caprate.CAP_MIN * 100:g}~{caprate.CAP_MAX * 100:g}%)이라 "
                     "조용히 통과한다 — benchmark 를 부르기 전에 거른다. 이런 계열은 "
                     "관측 자체가 옛것이라 임대료·공실도 함께 뺀다(행째 제외)."
                 ),
@@ -980,8 +981,9 @@ def build_trades_analysis(trades: dict, seed: dict) -> dict:
                 "label": (
                     "building_id 가 채워진 행 전체다. **이 중 exact "
                     f"{len(exact_all)}행은 마스킹이 없어 필지까지 확정된 행이고**, "
-                    f"나머지 {len(resolved_only)}행(n_resolved_only)이 '시드 55동 "
-                    "목록 안에서 후보가 유일'할 뿐인 행이다 — 그쪽은 마스킹된 지번이라 "
+                    f"나머지 {len(resolved_only)}행(n_resolved_only)이 "
+                    f"'시드 {len(seed['buildings'])}동 목록 안에서 후보가 유일'할 뿐인 "
+                    "행이다 — 그쪽은 마스킹된 지번이라 "
                     "같은 법정동의 비-시드 건물과 구분되지 않으므로 '확정'으로 읽으면 "
                     "안 된다. parcel_confirmed 는 n_resolved_only 부분에 대한 라벨이다."
                 ),
@@ -1011,11 +1013,14 @@ def build_trades_analysis(trades: dict, seed: dict) -> dict:
             ),
         },
         "value_error_dist": None,
+        # 해제를 뺀 exact 는 위 두 칸(exact.n_live · exact_cases)이 이미 세어 둔 수다.
+        # 여기에 다시 손으로 적으면 한 산출물 안에서 세 수가 갈린다 — 실제로 이 문장만
+        # 해제를 안 뺀 수(57)를 말하고 있었다.
         "value_error_dist_reason": (
             "추정가치 대비 오차 분포는 건물별 추정가치가 있어야 낼 수 있는데, 건축물대장이 "
-            "열리지 않아 연면적을 몰라 55동 전부 pending_ledger 다(underwriting.json 참조). "
-            "대장 승격 뒤 exact 57행(해제 제외)과 짝을 지어 value.error_dist 로 낸다. "
-            "지금 값을 지어내지 않는다."
+            f"열리지 않아 연면적을 몰라 {len(seed['buildings'])}동 전부 pending_ledger 다"
+            f"(underwriting.json 참조). 대장 승격 뒤 exact {len(exact_live)}행(해제 제외)과 "
+            "짝을 지어 value.error_dist 로 낸다. 지금 값을 지어내지 않는다."
         ),
         "caveats": [
             "거래면적(building_ar_m2)은 집합건물 거래의 계약·분양면적이라 건물 연면적이 "
@@ -1211,9 +1216,10 @@ def build_pf_case(market: dict, buildings: dict, seed: dict) -> dict:
                            f"+ PF 가산 {PF_LOAN_SPREAD:.2%}(가산은 가정)",
                  "value": loan_rate},
                 {"parameter": "land_price_won_m2", "kind": "가정",
-                 "source": "강남권 이면부 중형 개발부지 토지 단가 가정. 시드 55동은 "
-                           "프라임 대로변 표본이라 그 개별공시지가를 신규 개발부지의 "
-                           "매입 원가로 쓸 수 없다 — land_price_context 참조.",
+                 "source": f"강남권 이면부 중형 개발부지 토지 단가 가정. 시드 "
+                           f"{len(seed['buildings'])}동은 프라임 대로변 표본이라 그 "
+                           "개별공시지가를 신규 개발부지의 매입 원가로 쓸 수 없다 — "
+                           "land_price_context 참조.",
                  "value": PF_LAND_PRICE_WON_M2},
                 {"parameter": "hard_cost_won_m2", "kind": "가정",
                  "source": f"중형 오피스 도급 공사비 단가 가정(약 "
@@ -1222,8 +1228,8 @@ def build_pf_case(market: dict, buildings: dict, seed: dict) -> dict:
                  "value": PF_HARD_COST_WON_M2},
                 {"parameter": "plot_m2 · far · basement_ratio", "kind": "가정",
                  "source": "일반상업지역 용적률 상한 수준의 중형 개발 규모 가정. "
-                           "건축물대장이 열리지 않아 시드 55동의 실측 규모 분포를 "
-                           "쓸 수 없다.",
+                           f"건축물대장이 열리지 않아 시드 {len(seed['buildings'])}동의 "
+                           "실측 규모 분포를 쓸 수 없다.",
                  "value": [PF_PLOT_M2, PF_FAR, PF_BASEMENT_RATIO]},
                 {"parameter": "months_build · lease_up_months", "kind": "가정",
                  "source": "중형 오피스 공사 30개월·임대안정화 12개월 가정.",

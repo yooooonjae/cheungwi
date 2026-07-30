@@ -116,16 +116,39 @@ def _require_sources() -> None:
             % (len(missing), " · ".join(str(p) for p in missing)))
 
 
+def _seed_rows(man: dict) -> int:
+    """원장이 센 시드 동수. 없으면 짓지 않고 멈춘다.
+
+    지면이 "55동"을 제 문장에 박아 두면 시드가 늘어난 날 설명만 옛 목록을 가리키고,
+    그 어긋남은 아무도 실행해서 알아채지 못한다. 그래서 원장 행 수가 단일 출처다.
+    """
+    for src in man.get("sources") or []:
+        if src.get("key") == "seed_buildings" and src.get("rows"):
+            return int(src["rows"])
+    raise RuntimeError(
+        "원장에 시드 원천(seed_buildings)이 없다 — 지면의 동수를 지어낼 수 없다")
+
+
 def _substitute(tpl: str) -> str:
     """템플릿 플레이스홀더를 빌드 시점 값으로 바꾼다.
 
     데이터·스크립트 모두 defer 라 문서 순서대로 실행된다. 데이터 태그를 앞에 두면
     뒤따르는 스크립트가 window.__DATA_* 를 이미 있는 것으로 읽을 수 있다.
+
+    산문 안의 수도 여기서 온다. 메타 설명·표제란처럼 스크립트가 닿지 않는 자리는
+    지면이 제 상수를 들고 있을 수밖에 없는데, 그 상수는 데이터가 움직이는 날
+    조용히 거짓이 된다 — 빌드가 산출물에서 세어 넣고, 자리가 남으면 게이트가
+    빌드를 멈춘다.
     """
     man = json.loads(DATA_MAP["DATA_MANIFEST"][1].read_text(encoding="utf-8"))
+    pf = json.loads(DATA_MAP["DATA_PF"][1].read_text(encoding="utf-8"))
     cutoff = (man.get("data_cutoff") or "―").replace("-", ".")
     built = datetime.date.today().isoformat()
     subs = {
+        "{{SEED_N}}": str(_seed_rows(man)),
+        "{{LAND_PARCEL_N}}": str(pf["land_price_context"]
+                                 ["seed_land_price_won_m2"]["n"]),
+        "{{STRESS_N}}": str(pf["stress"]["n"]),
         "{{ROBOTS}}": _robots_tag(),
         "{{CSS_LINKS}}": "\n".join(
             '<link rel="stylesheet" href="css/%s">' % f for f in CSS_FILES),

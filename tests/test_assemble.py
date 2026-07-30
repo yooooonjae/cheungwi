@@ -118,6 +118,58 @@ def test_unreplaced_placeholder_fails(sandbox, tmp_path, monkeypatch):
 
 
 # ------------------------------------------------------------------ #
+# (b') 산문 속의 수 — 지면이 제 상수를 들고 있지 않다
+# ------------------------------------------------------------------ #
+def _artifact_counts():
+    man = json.loads((ROOT / "data" / "DATA_MANIFEST.json").read_text(encoding="utf-8"))
+    pf = json.loads((ROOT / "out" / "pf_case.json").read_text(encoding="utf-8"))
+    seed = [s for s in man["sources"] if s["key"] == "seed_buildings"][0]["rows"]
+    return seed, pf["land_price_context"]["seed_land_price_won_m2"]["n"], pf["stress"]["n"]
+
+
+def test_the_prose_numbers_are_counted_from_the_artifacts(sandbox):
+    """메타 설명·표제란처럼 스크립트가 닿지 않는 자리도 제 수를 지어내지 않는다."""
+    html = (sandbox.build_dist() / "index.html").read_text(encoding="utf-8")
+    seed_n, parcels, stress_n = _artifact_counts()
+    assert "프라임 오피스 %d동" % seed_n in html
+    assert "부채의 물이 차오른다 — 서울 프라임 오피스 %d동" % seed_n in html
+    assert "시드 %d동의 대표 필지" % seed_n in html
+    assert "시드 %d필지" % parcels in html
+    assert "스트레스 %d행" % stress_n in html
+
+
+def test_a_grown_seed_moves_every_sentence_that_counts_it(sandbox, tmp_path, monkeypatch):
+    """시드가 늘어난 날 문장만 옛 목록을 가리키면, 틀린 것은 데이터가 아니라 설명이다."""
+    man = json.loads((ROOT / "data" / "DATA_MANIFEST.json").read_text(encoding="utf-8"))
+    seed_n = _artifact_counts()[0]
+    for src in man["sources"]:
+        if src["key"] == "seed_buildings":
+            src["rows"] = 41
+    path = tmp_path / "DATA_MANIFEST.json"
+    path.write_text(json.dumps(man, ensure_ascii=False), encoding="utf-8")
+    moved = dict(sandbox.DATA_MAP)
+    moved["DATA_MANIFEST"] = ("manifest", path)
+    monkeypatch.setattr(sandbox, "DATA_MAP", moved)
+
+    html = (sandbox.build_dist() / "index.html").read_text(encoding="utf-8")
+    assert "프라임 오피스 41동" in html and "시드 41동" in html
+    assert "%d동" % seed_n not in html, "지면 어딘가가 아직 옛 동수를 들고 있다"
+
+
+def test_a_ledger_without_the_seed_source_stops_the_build(sandbox, tmp_path, monkeypatch):
+    """세지 못하면 짓지 않는다 — 빈칸이나 지어낸 수가 배포로 나가지 않게."""
+    man = json.loads((ROOT / "data" / "DATA_MANIFEST.json").read_text(encoding="utf-8"))
+    man["sources"] = [s for s in man["sources"] if s["key"] != "seed_buildings"]
+    path = tmp_path / "DATA_MANIFEST.json"
+    path.write_text(json.dumps(man, ensure_ascii=False), encoding="utf-8")
+    moved = dict(sandbox.DATA_MAP)
+    moved["DATA_MANIFEST"] = ("manifest", path)
+    monkeypatch.setattr(sandbox, "DATA_MAP", moved)
+    with pytest.raises(RuntimeError, match="시드 원천"):
+        sandbox.build_dist()
+
+
+# ------------------------------------------------------------------ #
 # (c) 한국어 조사 분리 게이트
 # ------------------------------------------------------------------ #
 def test_josa_separation_fails(sandbox, tmp_path, monkeypatch):
@@ -225,7 +277,8 @@ def test_minified_css_keeps_theme_switches(sandbox):
 # ------------------------------------------------------------------ #
 def test_prologue_has_the_mounts_the_hero_writes_into(sandbox):
     html = (sandbox.build_dist() / "index.html").read_text(encoding="utf-8")
-    for mount in ('id="hero-tabs"', 'id="hero-plate"', 'id="hero-reading"', 'id="gauge"'):
+    for mount in ('id="hero-tabs"', 'id="hero-plate"', 'id="hero-reading"',
+                  'id="hero-scale"', 'id="gauge"'):
         assert mount in html, "%s 가 없으면 hero.js 는 조용히 아무것도 그리지 않는다" % mount
     assert 'role="tablist"' in html and 'role="tabpanel"' in html
     assert "임대의 층이 쌓이고, 부채의 물이 차오른다." in html
@@ -418,6 +471,7 @@ def test_the_method_page_has_the_mounts_its_script_writes_into(sandbox):
     for mount in ('id="method-manifest"', 'id="method-manifest-lines"',
                   'id="method-estimate"', 'id="method-ladder"',
                   'id="method-matching-reading"', 'id="method-checks"',
+                  'id="method-checks-tally"',
                   'id="method-ledger"', 'id="method-parked"', 'id="method-spec"'):
         assert mount in html, "%s 가 없으면 방법론은 조용히 빈다" % mount
     assert "잘 맞는 척하지 않는다" in html

@@ -375,8 +375,11 @@
       of: "분기 계열이 짧아 연환산 cap 을 낼 수 없어 행째 뺀 상권",
       pick: function (d) { return (d.market || {}).sub_regions_cap_skipped; },
       note: function () {
+        // 게이트 경계는 엔진에서 인용한다 — 지면에 글자로 박아 두면 엔진이 경계를
+        // 옮기는 날 이 문단만 옛 범위를 말한다.
         return "짧은 계열로 합을 내면 4분의 3 짜리 cap 이 나오는데 그 값도 게이트 " +
-          "안(2~12%)이라 조용히 통과한다. 그래서 benchmark 를 부르기 전에 거른다 — " +
+          "안(" + F.fx(eng.CAP_MIN * 100, 0) + "~" + F.fx(eng.CAP_MAX * 100, 0) +
+          "%)이라 조용히 통과한다. 그래서 benchmark 를 부르기 전에 거른다 — " +
           "이 목록은 '없는 값'이 아니라 '내지 않기로 한 값'의 기록이다.";
       }
     }
@@ -415,6 +418,28 @@
         missing: !Array.isArray(list)
       };
     });
+  }
+
+  /**
+   * 몇 개가 비어 있는가 — 그 수는 오늘 데이터의 사실이라 지면에 박을 수 없다.
+   *
+   * "오늘 셋이 비어 있는데"를 문장에 적어 두면 게이트 하나가 켜진 날 지면만
+   * 옛 사실을 말한다. 세어서 적고, 뒤에 오는 정적 문장에 그대로 이어지도록
+   * "그 빈 목록"으로 끝낸다(스크립트가 꺼져 있으면 그 자리는 "빈 목록"이다).
+   */
+  function checkTally(model) {
+    var rows = model || [];
+    var missing = rows.filter(function (c) { return c.missing; }).length;
+    var blank = rows.filter(function (c) { return c.empty && !c.missing; }).length;
+    // 채워지지 않은 자리는 "빈 목록"이 아니다 — 0건이 아니라 파이프라인이 그 자리를
+    // 지나갔다는 뜻이라, 세는 칸을 따로 둔다.
+    var gone = missing
+      ? "따로 " + missing + "개는 파이프라인이 채우지 않은 자리다. " : "";
+    if (blank === 0) {
+      return "오늘은 목록 " + rows.length + "개에 빈 것이 하나도 없다. " + gone + "빈 목록";
+    }
+    return "오늘은 목록 " + rows.length + "개 가운데 " + blank +
+      "개가 비어 있는데, " + gone + "그 빈 목록";
   }
 
   function checkHtml(model) {
@@ -599,7 +624,9 @@
     put("method-manifest-lines", ul(manifestLines(data.manifest)));
     put("method-estimate", estimationHtml(data.market, "도심"));
     put("method-matching-reading", ul(matchingLines(data.trades, data.manifest)));
-    put("method-checks", checkHtml(checkModel(data)));
+    var checks = checkModel(data);
+    put("method-checks-tally", esc(checkTally(checks)));
+    put("method-checks", checkHtml(checks));
     put("method-ledger", ledgerHtml(ledgerModel(data.underwriting)));
     put("method-parked", parkedHtml());
     put("method-spec", specHtml(data));
@@ -616,7 +643,7 @@
         raf(function () { pending = false; fitLadder(); });
       });
     }
-    return { checks: checkModel(data), ledger: ledgerModel(data.underwriting) };
+    return { checks: checks, ledger: ledgerModel(data.underwriting) };
   }
 
   function boot() {
@@ -657,6 +684,7 @@
     matchingPlate: matchingPlate,
     matchingLines: matchingLines,
     checkModel: checkModel,
+    checkTally: checkTally,
     checkHtml: checkHtml,
     ledgerModel: ledgerModel,
     ledgerHtml: ledgerHtml,

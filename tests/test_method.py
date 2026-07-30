@@ -30,6 +30,8 @@ from pathlib import Path
 
 import pytest
 
+from src.analysis import caprate
+
 ROOT = Path(__file__).resolve().parents[1]
 RUNNER = str(Path(__file__).resolve().parent / "charts_runner.js")
 NODE = shutil.which("node")
@@ -304,6 +306,58 @@ def test_an_empty_list_is_never_a_clean_bill_of_health():
     for c in empty:
         assert c["empty"] is True
         assert note in c["emptyNote"]
+
+
+def test_the_page_counts_the_blank_lists_instead_of_declaring_them():
+    """"오늘 셋이 비어 있는데"는 지면의 상수가 아니라 세어 낸 수다.
+
+    게이트 하나가 켜지는 날 그 문장만 옛 사실을 말하면, 틀린 것은 데이터가 아니라
+    설명이다 — 그리고 설명이 틀린 것은 아무도 실행해서 알아채지 못한다.
+    """
+    checks = value("method", "checkModel", DATA)
+    blank = len([c for c in checks if c["empty"] and not c["missing"]])
+    tally = value("method", "checkTally", checks)
+    assert "목록 %d개 가운데 %d개가 비어 있는데" % (len(checks), blank) in tally
+    assert tally.endswith("그 빈 목록"), "뒤따르는 정적 문장에 그대로 이어져야 한다"
+
+    # 위반이 하나 뜨면 문장이 스스로 줄어든다
+    hurt = copy.deepcopy(DATA)
+    hurt["market"]["gate_violations"] = [{"name": "합성 위반", "reason": "게이트 밖"}]
+    moved = value("method", "checkTally", value("method", "checkModel", hurt))
+    assert "%d개가 비어 있는데" % (blank - 1) in moved
+
+
+def test_the_tally_never_counts_an_unfilled_slot_as_a_blank_list():
+    """목록이 아예 없는 것은 0건이 아니다 — 사선 그은 빈칸과 같은 칸에서 세지 않는다."""
+    gone = copy.deepcopy(DATA)
+    del gone["underwriting"]["errors"]
+    checks = value("method", "checkModel", gone)
+    tally = value("method", "checkTally", checks)
+    assert "파이프라인이 채우지 않은 자리다" in tally
+    blank = len([c for c in checks if c["empty"] and not c["missing"]])
+    assert "%d개가 비어 있는데" % blank in tally
+
+
+def test_the_cap_gate_range_is_quoted_from_the_engine():
+    """게이트 경계를 글자로 박아 두면 엔진이 경계를 옮기는 날 이 문단만 옛 범위를 말한다."""
+    checks = {c["key"]: c for c in value("method", "checkModel", DATA)}
+    note = checks["sub_regions_cap_skipped"]["note"]
+    span = "게이트 안(%g~%g%%)" % (caprate.CAP_MIN * 100, caprate.CAP_MAX * 100)
+    assert span in note
+
+    moved = node_eval(
+        "const eng = require({eng});"
+        "eng.CAP_MIN = 0.03; eng.CAP_MAX = 0.11;"
+        "const m = require({met});"
+        "const data = {{market: JSON.parse(fs.readFileSync({mkt}, 'utf8'))}};"
+        "const c = m.checkModel(data)"
+        ".filter((x) => x.key === 'sub_regions_cap_skipped')[0];"
+        "out(c.note);".format(
+            eng=json.dumps(str(ROOT / "site" / "js" / "engine.js")),
+            met=json.dumps(str(ROOT / "site" / "js" / "method.js")),
+            mkt=json.dumps(str(ROOT / "out" / "market.json"))))
+    assert "게이트 안(3~11%)" in moved
+    assert span not in moved
 
 
 def test_each_check_quotes_the_engines_own_note_not_a_paraphrase():

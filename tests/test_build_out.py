@@ -501,6 +501,32 @@ def test_exact_cases_are_listed_individually(built):
     assert ta["value_error_dist_reason"]
 
 
+def test_the_pending_reason_counts_the_live_exact_rows_not_all_of_them():
+    """사유 문장의 두 수도 세어서 넣는다 — 산출이 제 안에서 다른 말을 하면 안 된다.
+
+    이 문장은 "exact 57행(해제 제외)"이라 적고 있었는데 해제를 뺀 exact 는 55행이다.
+    같은 파일의 `matching.exact.n_live` 와 `exact_cases` 는 그 55를 세고 있었으니,
+    한 산출물 안에서 같은 수가 두 갈래로 갈려 있었던 셈이다.
+    """
+    exact = {"building_id": "b-tower", "masked": False, "candidates": ["b-tower"],
+             "kind": "jibun_only", "area_ratio": None}
+    rows = ([_trade("2025-01-01", "11680", "역삼동", 5_000_000, match=exact)] * 3
+            + [_trade("2025-02-01", "11680", "역삼동", 6_000_000,
+                      canceled=True, match=exact)] * 2)
+    seed = {"buildings": [{"id": "b%d" % i} for i in range(4)], "meta": {
+        "rone_region": {"CBD": "도심", "GBD": "강남", "YBD": "여의도마포"},
+        "region_def": {"CBD": ["11140"], "GBD": ["11680"], "YBD": ["11560"]}}}
+
+    ta = build_out.build_trades_analysis(
+        {"trades": rows, "meta": {"collected_at": "2026-07-30"}}, seed)
+    reason = ta["value_error_dist_reason"]
+    assert ta["matching"]["exact"]["n"] == 5 and ta["matching"]["exact"]["n_live"] == 3
+    assert "exact 3행(해제 제외)" in reason and "exact 5행" not in reason
+    assert len(ta["exact_cases"]) == 3, "짝지을 행의 수가 문장과 같아야 한다"
+    assert "4동 전부 pending_ledger" in reason
+    assert "55" not in reason, "시드 동수도 문장의 상수가 아니다"
+
+
 def test_pyeong_conversion_is_four_hundred_over_one_twenty_one(built):
     """G-BLD-004 — 1평 = 400/121 ㎡. 3.3 으로 반올림하면 0.17% 어긋난다."""
     _, out_dir = built

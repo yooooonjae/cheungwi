@@ -1501,7 +1501,7 @@
   "build_year_conflicts_note": "붙은 거래의 건축년도가 갈리는 시드다 — 마스킹 지번이 같은 법정동의 다른 건물을 끌어왔거나 그 자리를 헐고 다시 지은 것이다. 어느 쪽이든 build_year 로 갈라 보기 전에는 그 시드 매칭을 쓸 수 없다."
  },
  "value_error_dist": null,
- "value_error_dist_reason": "추정가치 대비 오차 분포는 건물별 추정가치가 있어야 낼 수 있는데, 건축물대장이 열리지 않아 연면적을 몰라 55동 전부 pending_ledger 다(underwriting.json 참조). 대장 승격 뒤 exact 57행(해제 제외)과 짝을 지어 value.error_dist 로 낸다. 지금 값을 지어내지 않는다.",
+ "value_error_dist_reason": "추정가치 대비 오차 분포는 건물별 추정가치가 있어야 낼 수 있는데, 건축물대장이 열리지 않아 연면적을 몰라 55동 전부 pending_ledger 다(underwriting.json 참조). 대장 승격 뒤 exact 55행(해제 제외)과 짝을 지어 value.error_dist 로 낸다. 지금 값을 지어내지 않는다.",
  "caveats": [
   "거래면적(building_ar_m2)은 집합건물 거래의 계약·분양면적이라 건물 연면적이 아니다. 평당가는 그 면적 기준이므로 연면적 기준 단가와 직접 비교하면 안 된다.",
   "공유지분 거래(share_deal)와 층·향·전용률 차이를 나누지 않고 한 칸에 넣었다 — 중위값이 그 편차를 뭉갠다.",
