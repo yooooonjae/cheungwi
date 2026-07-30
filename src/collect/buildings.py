@@ -102,10 +102,66 @@ class LedgerNoData(RuntimeError):
     """조회 결과 없음(봉투 03). 건별 사유다 — 그 건만 failed에 남기고 계속한다."""
 
 
-# data.go.kr 게이트웨이 오류 봉투의 returnReasonCode 분류
-ENVELOPE_DENIED = {"20", "30", "31", "32"}   # 권한 없음·기한 만료·미등록 IP
-ENVELOPE_QUOTA = {"22"}                      # 일일 트래픽 초과
-ENVELOPE_NODATA = {"03"}                     # 데이터 없음
+class LedgerTransient(RuntimeError):
+    """일시적 서버 사고(봉투 04·05·21). 재시도 후에도 안 되면 그 건만 격리하고 계속한다."""
+
+
+# data.go.kr 게이트웨이 오류 봉투의 returnReasonCode 분류(2자리 정규형)
+ENVELOPE_DENIED = {"20", "30", "31", "32", "33"}  # 권한 없음·미등록 키·기한 만료·미등록 IP
+ENVELOPE_QUOTA = {"22"}                           # 일일 트래픽 초과
+ENVELOPE_NODATA = {"03"}                          # 데이터 없음
+ENVELOPE_TRANSIENT = {"01", "02", "04", "05", "21"}  # 앱·DB 오류·HTTP 오류·타임아웃·일시중지
+
+# 메시지 → 성격. **코드보다 이쪽을 먼저 본다**(아래 classify_envelope 참조).
+ENVELOPE_MSG_RULES = (
+    ("nodata", ("NODATA",)),
+    ("quota", ("LIMITED_NUMBER_OF_SERVICE_REQUESTS",)),
+    ("denied", ("SERVICE_ACCESS_DENIED", "SERVICE_KEY_IS_NOT_REGISTERED",
+                "DEADLINE_HAS_EXPIRED", "UNREGISTERED_IP", "UNSIGNED_CALL")),
+    ("transient", ("HTTP_ERROR", "SERVICETIMEOUT", "TEMPORARILY_DISABLE",
+                   "DB_ERROR", "APPLICATION_ERROR")),
+)
+
+
+def _norm_reason_code(code: str):
+    """사유코드의 자릿수 변형을 2자리 정규형으로. 읽기가 갈리면 None(모름).
+
+    이 게이트웨이는 같은 뜻을 2자리로도 3자리로도 보낸다("00"과 "000"이 함께 쓰인다).
+    그런데 3자리 "030"은 앞 0을 떼면 "30"(권한 없음), 뒤 0을 떼면 "03"(데이터 없음)이라
+    **뜻이 정반대로 갈린다.** 한쪽으로 단정하면 건별로 끝났어야 할 '데이터 없음'이 전역
+    차단으로 승격돼 남은 전 동을 생략해 버린다. 그래서 갈리면 모른다고 답한다.
+    """
+    c = (code or "").strip()
+    if not c.isdigit():
+        return None
+    if len(c) <= 2:
+        return c.zfill(2)
+    readings = {c.lstrip("0").zfill(2)}
+    if c.endswith("0"):
+        readings.add(c[:-1].lstrip("0").zfill(2))
+    return readings.pop() if len(readings) == 1 else None
+
+
+def classify_envelope(code: str, msg: str) -> str:
+    """(사유코드, 메시지) → "nodata"|"quota"|"denied"|"transient"|"unknown".
+
+    **메시지를 코드보다 먼저 본다.** 게이트웨이는 returnAuthMsg를 늘 정형 문자열로
+    보내지만(NODATA_ERROR 등) 사유코드는 자릿수가 흔들려 "030"처럼 뜻이 갈리는 값이 온다.
+    """
+    upper = (msg or "").upper()
+    for kind, needles in ENVELOPE_MSG_RULES:
+        if any(n in upper for n in needles):
+            return kind
+    norm = _norm_reason_code(code)
+    if norm in ENVELOPE_NODATA:
+        return "nodata"
+    if norm in ENVELOPE_QUOTA:
+        return "quota"
+    if norm in ENVELOPE_DENIED:
+        return "denied"
+    if norm in ENVELOPE_TRANSIENT:
+        return "transient"
+    return "unknown"
 
 
 def envelope_error(xml_text: str):
@@ -130,16 +186,18 @@ def envelope_error(xml_text: str):
 
 
 def _raise_for_envelope(code: str, msg: str, where: str):
-    """오류 봉투를 성격별 예외로 올린다. 재시도해도 소용없는 것들이라 즉시 던진다."""
+    """오류 봉투를 성격별 예외로 올린다."""
     detail = f"{where}: 사유코드 {code or '?'} {msg or '(메시지 없음)'}"
-    if code in ENVELOPE_QUOTA or "LIMITED_NUMBER_OF_SERVICE_REQUESTS" in msg:
+    kind = classify_envelope(code, msg)
+    if kind == "quota":
         raise LedgerQuotaExceeded(f"대장 API 일일 쿼터 소진 — {detail}")
-    if code in ENVELOPE_DENIED or "SERVICE_ACCESS_DENIED" in msg or "DEADLINE" in msg \
-            or "UNREGISTERED" in msg:
+    if kind == "denied":
         raise LedgerAccessDenied(f"대장 API 접근 권한 없음 — {detail}")
-    if code in ENVELOPE_NODATA or "NODATA" in msg:
+    if kind == "nodata":
         raise LedgerNoData(f"대장 조회 결과 없음 — {detail}")
-    raise RuntimeError(f"대장 API 오류 봉투 — {detail}")
+    if kind == "transient":
+        raise LedgerTransient(f"대장 API 일시 오류 — {detail}")
+    raise RuntimeError(f"대장 API 오류 봉투(성격 미상) — {detail}")
 
 
 # ── 순수 함수 ────────────────────────────────────────────────────────────────
@@ -344,6 +402,7 @@ def _fetch_page(sgg: str, bjdong: str, bun: str, ji: str, page: int, key: str) -
               "numOfRows": str(PER_PAGE), "pageNo": str(page), "serviceKey": key}
     where = f"{sgg}/{bjdong}/{bun}-{ji} p{page}"
     status, text = -1, ""
+    last_transient = None
     for attempt in range(EMPTY_RETRIES + 1):
         status, text = call_with_backoff(
             lambda: api_get(BASE, params, timeout=TIMEOUT, retries=1, headers=HDR), tries=3)
@@ -355,20 +414,26 @@ def _fetch_page(sgg: str, bjdong: str, bun: str, ji: str, page: int, key: str) -
                 f"유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. {where}")
         if status == 200 and text:
             env = envelope_error(text)
-            if env:                       # 재시도해도 같은 답이 온다 — 성격별로 즉시 분기
-                _raise_for_envelope(env[0], env[1], where)
-            if "<resultCode>" in text:
+            if env:
+                # 일시 오류만 재시도한다. 권한·쿼터·데이터없음은 다시 물어도 같은 답이다.
+                if classify_envelope(env[0], env[1]) != "transient":
+                    _raise_for_envelope(env[0], env[1], where)
+                last_transient = env
+            elif "<resultCode>" in text:
                 break
         time.sleep(2.0 * (attempt + 1))
     if not (status == 200 and text and "<resultCode>" in text):
-        raise RuntimeError(f"대장 빈/이상 응답 {sgg}/{bjdong}/{bun}-{ji} p{page}: "
-                           f"status={status} len={len(text or '')} body={text[:200]!r}")
+        # 여기까지 왔으면 재시도를 다 쓴 일시적 사고다. 전역 사망시키지 않고 이 건만 격리한다.
+        detail = (f"{where}: status={status} len={len(text or '')} "
+                  f"body={text[:160]!r}" if not last_transient
+                  else f"{where}: 사유코드 {last_transient[0]} {last_transient[1]}")
+        raise LedgerTransient(f"대장 응답을 {EMPTY_RETRIES + 1}회 시도했으나 못 받았다 — {detail}")
     root = ET.fromstring(text)
     rc = (root.findtext("./header/resultCode") or "").strip()
     if rc not in ("00", "000"):
-        # 정상 봉투 안의 오류코드도 같은 분류를 쓴다(선행 0 제거: "03"·"030" 모두 NODATA)
-        _raise_for_envelope(rc.lstrip("0").zfill(2),
-                            (root.findtext("./header/resultMsg") or "").strip(), where)
+        # 정상 봉투 안의 오류코드도 같은 분류를 쓴다. 자릿수 정규화는 classify_envelope이
+        # 하되 resultMsg를 먼저 보므로, 뜻이 갈리는 "030" 같은 코드에 끌려가지 않는다.
+        _raise_for_envelope(rc, (root.findtext("./header/resultMsg") or "").strip(), where)
     cache.write_text(text, encoding="utf-8")
     return text
 
@@ -569,6 +634,11 @@ def collect() -> dict:
                 row["flags"].append(f"대장 미조회: {ledger_blocked}")
             except LedgerNoData as e:
                 reason = f"대장 데이터 없음: {e}"
+                failed.append({"id": seed["id"], "reason": reason})
+                row["flags"].append(reason)
+            except LedgerTransient as e:
+                # 서버 일시 사고 — 이 건만 비우고 계속한다. 다음 실행이 이 동만 다시 받는다.
+                reason = f"대장 일시 오류(다음 실행에서 재시도): {e}"
                 failed.append({"id": seed["id"], "reason": reason})
                 row["flags"].append(reason)
             else:
