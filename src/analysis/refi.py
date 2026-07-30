@@ -40,6 +40,27 @@
    부호로 그대로 보여준다(0 으로 자르지 않는다). 자르면 "겨우 통과"와 "크게
    미달"이 같은 0 으로 뭉개진다. 음수 headroom 은 `pass is False` 와 짝이다.
 
+**등호 해석이 `acquisition` 과 반대인 지점이 하나 있다.** `max_loan` 의 DSCR
+제약은 등호를 통과로 읽는다 — DSCR 이 정확히 요구치인 대출을 결속 조건으로
+승인한다. 그렇게 승인된 대출을 같은 금리로 이 함수에 넣으면 `max_rate` 가
+시장금리와 정확히 같아져 `headroom_bp == 0` 이 되고 `pass` 는 **False** 다.
+한 엔진 안에서 같은 부등식을 반대로 읽는 셈이라, 일부러 남겨 둔 경계다:
+취득 시점의 "지금 최대 얼마까지 빌릴 수 있나"와 만기의 "앞으로도 다시 빌릴 수
+있나"는 묻는 것이 다르다. 뒤쪽은 금리가 1bp 만 올라도 깨지는 대출을 "차환
+가능"이라 부르지 않는다 — 판정이 보수적인 방향으로 어긋난다. 같은 함수 안의
+LTV 관문이 등호를 통과로 두는 것과도 어긋나 보이지만, 그쪽은 **여력**이 아니라
+**약정 준수**를 묻기 때문에 한도에 정확히 붙은 대출이 위반은 아니다. 이 경계는
+`test_refi_test_rejects_the_dscr_bound_loan_that_acquisition_approved` 가
+`max_loan` → `refi_test` 로 실제 값을 흘려 고정한다.
+
+**낙관 쪽 침묵은 게이트가 아니라 신호로 공시한다.** 대출 금액의 단위 오입력
+(억↔원)은 계획이 정한 물리 게이트 셋(cap·임대료·DSCR) 어디에도 걸리지 않고,
+하필 `pass` 를 True 로 만드는 방향이다. 새 게이트를 만들어 막는 대신
+`implausible` 플래그를 둔다 — `max_rate` 가 1.0(이자만으로 연 100% 초과를
+견딘다)을 넘거나 차환 LTV 가 1% 를 밑도는, 실무에서 나올 수 없는 조합에서만
+켜진다. **판정(`pass`)은 건드리지 않는다**(값을 지어내지 않는다). 정상 건에서는
+꺼져 있어 신호가 잡음에 묻히지 않는 것이 이 방식의 요점이다.
+
 **대출이 가치를 넘어도 막지 않는다.** `acquisition.hold_model` 은 대출 > 가격을
 `ValueError` 로 막지만(취득 시점에 LTV 100% 초과 구조는 이 모델에 없다),
 차환 시점에는 자산가치가 대출 밑으로 빠지는 일이 실제로 일어난다. 그 판정이
@@ -79,6 +100,12 @@ from src.analysis.effective_rent import RENT_MAX_WON_M2_MO, RENT_MIN_WON_M2_MO
 
 # 소수 이율 1 = 10,000 베이시스포인트. headroom 의 단위 변환에만 쓴다.
 BP_PER_UNIT = 10_000.0
+
+# 실무에서 나올 수 없는 조합의 경계 — 게이트가 아니라 **신호**다(예외를 던지지도
+# 판정을 바꾸지도 않는다). 대출 금액의 단위 오입력(억↔원)이 물리 게이트 셋에
+# 걸리지 않고 pass 를 True 로 만드는 구멍을 여기서 드러낸다.
+IMPLAUSIBLE_MAX_RATE_OVER = 1.0    # 이자만으로 연 100% 초과를 견딘다
+IMPLAUSIBLE_LTV_UNDER = 0.01       # 대출이 가치의 1% 도 안 된다
 
 # `noi()` 가 같은 값을 사적으로 들고 있다 — 두 모듈이 어긋나면
 # `test_breakeven_vacancy_round_trips_through_noi` 의 왕복이 깨진다.
@@ -158,6 +185,10 @@ def refi_test(
     깨졌는지는 `assumptions` 의 `rate_pass`·`ltv_pass` 로 갈라 실어 보낸다 —
     `pass` 만 인용하면 "금리가 올라서"인지 "가치가 빠져서"인지가 사라진다.
 
+    등호 처리는 `acquisition.max_loan` 과 반대다. 그쪽이 DSCR 결속으로 승인한
+    대출(DSCR 이 정확히 요구치)을 같은 금리로 여기 넣으면 `headroom_bp` 가 0 이
+    되어 부결된다. 일부러 남긴 경계이고 사유는 모듈 docstring 에 있다.
+
     도메인: NOI ≥ 0 · 대출 > 0 · 가치 > 0 · LTV 한도 ∈ (0, 1] ·
     시장금리 ∈ [0, 1]. 밖이면 `ValueError`. NOI 0(전관 공실)은 최대금리 0 을
     돌려주고 판정은 False 다. 대출 0 은 막는다 — 갚을 대출이 없으면 차환
@@ -169,9 +200,15 @@ def refi_test(
     게이트: 요구 DSCR 은 0~5(양끝 포함) 안이어야 한다. 밖이면 `RuntimeError`.
     0 은 게이트 안이지만 최대금리가 무한대가 되므로 `ValueError` 다.
 
-    반환: `{"pass", "max_rate", "max_loan_by_ltv", "headroom_bp",
-    "assumptions": {...}}`. 판정 하나만 떼어 인용하면 안 된다 — 가치 추정과
-    대출 조건 가정이 바뀌면 판정도 바뀐다.
+    반환: `{"pass", "max_rate", "max_loan_by_ltv", "headroom_bp", "implausible",
+    "implausible_reasons", "assumptions": {...}}`. 판정 하나만 떼어 인용하면 안
+    된다 — 가치 추정과 대출 조건 가정이 바뀌면 판정도 바뀐다.
+
+    **`implausible` 이 True 면 판정보다 입력을 먼저 보라.** 최대금리가 1.0 을
+    넘거나 차환 LTV 가 1% 를 밑도는, 실무에 없는 조합에서만 켜지는 신호다
+    (`implausible_reasons` 에 사유 문구가 들어간다). 켜져도 예외를 던지지 않고
+    `pass` 도 바꾸지 않는다 — 물리 게이트가 아니라 공시이기 때문이다. 정상
+    입력에서는 꺼져 있고 사유는 빈 리스트다.
     """
     _require_finite(noi_won_y, "NOI")
     _require_finite(loan_won, "대출")
@@ -212,11 +249,30 @@ def refi_test(
     rate_pass = max_rate > market_rate
     ltv_pass = loan_won <= max_loan_by_ltv
 
+    ltv_at_refi = loan_won / value_won
+    # 게이트가 아니라 신호다 — 판정(pass)을 바꾸지 않고 조건이 설 때만 켠다.
+    implausible_reasons = []
+    if max_rate > IMPLAUSIBLE_MAX_RATE_OVER:
+        implausible_reasons.append(
+            f"견딜 수 있는 최대금리가 {max_rate:,.2f}(= 연 "
+            f"{max_rate * 100:,.0f}%)로 {IMPLAUSIBLE_MAX_RATE_OVER * 100:.0f}% 를 "
+            f"넘는다 — 대출 {loan_won:,.0f}원이 NOI 에 비해 너무 작다. 금액 단위"
+            "(억↔원)를 의심하라"
+        )
+    if ltv_at_refi < IMPLAUSIBLE_LTV_UNDER:
+        implausible_reasons.append(
+            f"차환 LTV 가 {ltv_at_refi:.6f}(= {ltv_at_refi * 100:.4f}%)로 "
+            f"{IMPLAUSIBLE_LTV_UNDER * 100:.0f}% 를 밑돈다 — 대출 "
+            f"{loan_won:,.0f}원과 가치 {value_won:,.0f}원의 자릿수가 맞지 않는다"
+        )
+
     return {
         "pass": rate_pass and ltv_pass,
         "max_rate": max_rate,
         "max_loan_by_ltv": max_loan_by_ltv,
         "headroom_bp": headroom_bp,
+        "implausible": bool(implausible_reasons),
+        "implausible_reasons": implausible_reasons,
         "assumptions": {
             "noi_won_y": noi_won_y,
             "loan_won": loan_won,
@@ -226,7 +282,7 @@ def refi_test(
             "market_rate": market_rate,
             "rate_pass": rate_pass,
             "ltv_pass": ltv_pass,
-            "ltv_at_refi": loan_won / value_won,
+            "ltv_at_refi": ltv_at_refi,
             "interest_at_market_rate_won_y": loan_won * market_rate,
             "dscr_at_market_rate": (
                 noi_won_y / (loan_won * market_rate) if market_rate > 0 else None
@@ -243,9 +299,18 @@ def refi_test(
                 f"headroom {headroom_bp:,.2f}bp 는 부호를 그대로 둔다 — 음수면 "
                 "시장금리가 견딜 수 있는 금리를 그만큼 넘었다는 뜻이고 pass 는 "
                 "False 다.",
-                f"차환 시점 LTV = 대출 ÷ 가치 = {loan_won / value_won:.4f}. "
+                f"차환 시점 LTV = 대출 ÷ 가치 = {ltv_at_refi:.4f}. "
                 "1 을 넘는 값도 막지 않는다 — 자산가치가 대출 밑으로 빠진 상황을 "
                 "판정하는 것이 이 함수의 목적이다.",
+                (
+                    "**implausible 신호가 켜졌다** — 판정보다 입력을 먼저 보라: "
+                    + " / ".join(implausible_reasons)
+                    if implausible_reasons
+                    else "implausible 신호는 꺼져 있다 — 최대금리와 차환 LTV 가 "
+                    "실무 범위 안이다(신호는 max_rate > "
+                    f"{IMPLAUSIBLE_MAX_RATE_OVER} 또는 차환 LTV < "
+                    f"{IMPLAUSIBLE_LTV_UNDER} 에서만 켜진다)."
+                ),
             ],
             "caveats": [
                 "가치(value_won)가 감정가라면 그 자체가 추정치다 — cap 가정 하나가 "
@@ -261,9 +326,10 @@ def refi_test(
                 "선순위 한 트랜치만 본다. 메자닌·후순위를 얹거나 자기자본을 더 "
                 "넣어 대출을 줄이는(부분 상환) 대안은 이 판정에 없다 — pass 가 "
                 "False 라도 구조를 바꾸면 차환이 될 수 있다.",
-                "대출 금액의 단위 오입력(억↔원)은 게이트가 없는 축이라 막지 "
-                "못한다. 1,485억을 1,485 로 넣으면 max_rate 가 터무니없이 커져 "
-                "pass 가 True 로 나온다 — ltv_at_refi 를 함께 볼 것.",
+                "대출 금액의 단위 오입력(억↔원)은 물리 게이트가 없는 축이라 "
+                "막지 못한다. 1,485억을 1,485 로 넣으면 max_rate 가 터무니없이 "
+                "커지고 pass 가 True 로 나온다 — 그 조합에서 implausible 신호가 "
+                "켜지지만 예외를 던지지는 않으므로, 부르는 쪽이 신호를 읽어야 한다.",
             ],
         },
     }

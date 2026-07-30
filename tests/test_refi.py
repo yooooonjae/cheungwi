@@ -39,6 +39,35 @@ max_rate 손계산: 분모 = 1.3 × 1,485억 = 1,930.5억. 121.125/1930.5 를 �
 | NOI 62.5억·대출 1,000억·DSCR 1.25·시장금리 5%     | max 0.05  | 시장 0.05 | 금리 실패 |
 | 대출 1,500억·가치 3,000억·LTV 50%                 | 1,500억   | 1,500억   | LTV 통과 |
 
+## acquisition 과의 등호 경계(같은 부등식을 반대로 읽는 자리)
+
+`max_loan` 의 DSCR 제약은 등호를 **통과**로 읽어 "DSCR 이 정확히 요구치인 대출"을
+결속 조건으로 승인한다. 그 대출을 같은 금리로 차환하면 여기서는 부결된다.
+
+| 단계                     | 산식                              | 값                    |
+|--------------------------|-----------------------------------|-----------------------|
+| `max_loan` by_dscr       | (62.5억 ÷ 1.25) ÷ 0.05            | 1,000억 (binding=dscr)|
+| 그 대출의 DSCR           | 62.5억 ÷ (1,000억 × 0.05)         | 1.25 (= 요구치, 승인) |
+| `refi_test` max_rate     | 62.5억 ÷ (1.25 × 1,000억)         | 0.05 (= 시장금리)     |
+| headroom / pass          | (0.05 − 0.05) × 10⁴               | 0.0bp / **False**     |
+
+취득의 "지금 최대 얼마"와 만기의 "앞으로도 다시 빌릴 수 있나"는 묻는 것이 달라서
+남긴 경계다 — 뒤쪽은 1bp 만 올라도 깨지는 대출을 차환 가능이라 부르지 않는다.
+시장금리를 4.99% 로 낮추면 같은 대출이 통과하는 것으로 경계 위치까지 못박는다.
+
+## implausible — 낙관 쪽 침묵의 공시
+
+물리 게이트 셋(cap·임대료·DSCR) 어디에도 걸리지 않으면서 `pass` 를 True 로 만드는
+축이 하나 있다: 대출 금액의 단위 오입력(억↔원). 게이트를 새로 만드는 대신
+실무에 없는 조합에서만 켜지는 신호를 둔다(예외도 던지지 않고 판정도 바꾸지 않는다).
+
+| 입력                                     | max_rate | 차환 LTV | implausible |
+|------------------------------------------|----------|----------|-------------|
+| 대출 1,485**원**(억↔원 오입력)           | 6.27e6   | 5.5e−9   | True (사유 2) |
+| 대출 10억·가치 20억                      | 9.32     | 0.5      | True (사유 1) |
+| NOI 1억·대출 10억·가치 1조               | 0.0769   | 0.001    | True (사유 1) |
+| 골든·부결·전관공실 등 정상 입력 5종      | 0.0~0.063| 0.55~1.33| **False**    |
+
 ## 손익분기 공실률(breakeven_vacancy)
 
 | ID        | 입력                                       | 산식                    | 기대값        |
@@ -99,6 +128,8 @@ def test_refi_test_return_shape():
     r = refi_test(12_112_500_000, 148_500_000_000, 270_000_000_000, 1.3, 0.60, 0.05)
     assert {"pass", "max_rate", "max_loan_by_ltv", "headroom_bp"} <= set(r)
     assert isinstance(r["pass"], bool)
+    assert isinstance(r["implausible"], bool)
+    assert isinstance(r["implausible_reasons"], list)
     assert r["assumptions"]["caveats"]      # 가정 없는 판정은 출고 금지
     assert r["assumptions"]["notes"]
 
@@ -160,6 +191,30 @@ def test_refi_test_rate_equality_is_a_failure_but_ltv_equality_is_a_pass():
     assert eq_ltv["pass"] is True
 
 
+def test_refi_test_rejects_the_dscr_bound_loan_that_acquisition_approved():
+    # **모듈 간 등호 경계** — max_loan 은 DSCR 등호를 통과로 읽어 "DSCR 이 정확히
+    # 1.25 인 대출"을 결속 조건으로 승인한다. 그 대출을 같은 금리로 차환하면
+    # max_rate 가 시장금리와 정확히 만나 headroom 0 → pass False 다. 한 엔진 안에서
+    # 같은 부등식을 반대로 읽는 자리라 실제 값을 흘려 못박는다(보수적 방향).
+    #
+    # NOI 62.5억·DSCR 1.25·금리 5% → by_dscr = (62.5/1.25)/0.05 = 1,000억
+    # (1.25·0.05 조합은 float 에서 정확히 1,000억이 나온다).
+    approved = acquisition.max_loan(6_250_000_000, 500_000_000_000, 0.99, 1.25, 0.01, 0.05)
+    assert approved["binding"] == "dscr"
+    assert approved["loan_won"] == 100_000_000_000.0
+    assert abs(approved["assumptions"]["dscr_at_max_loan"] - 1.25) < 1e-12   # 등호 승인
+
+    r = refi_test(6_250_000_000, approved["loan_won"], 300_000_000_000, 1.25, 0.60, 0.05)
+    assert r["max_rate"] == 0.05
+    assert r["headroom_bp"] == 0.0
+    assert r["assumptions"]["ltv_pass"] is True      # LTV 는 여유가 있다
+    assert r["assumptions"]["rate_pass"] is False    # 금리 여력이 정확히 0
+    assert r["pass"] is False                        # acquisition 승인 대출도 부결
+    # 경계가 정확히 거기다 — 시장금리가 1bp 만 낮으면 통과한다.
+    assert refi_test(6_250_000_000, approved["loan_won"], 300_000_000_000,
+                     1.25, 0.60, 0.0499)["pass"] is True
+
+
 def test_refi_test_headroom_sign_matches_the_rate_leg_everywhere():
     # headroom 부호와 금리 관문은 같은 부등식이다 — 어긋나면 보고서가
     # "여유 있는데 실패"처럼 읽힌다.
@@ -205,6 +260,52 @@ def test_refi_test_allows_loan_above_value_because_that_is_the_finding():
     r = refi_test(12_112_500_000, 200_000_000_000, 150_000_000_000, 1.3, 0.60, 0.05)
     assert r["pass"] is False
     assert r["assumptions"]["ltv_at_refi"] > 1.0
+
+
+# ── refi_test: 낙관 쪽 침묵의 공시(implausible 신호) ────────────────────
+
+def test_refi_test_flags_the_unit_error_that_no_gate_catches():
+    # 1,485억을 1,485(원)으로 넣은 오입력. 물리 게이트 셋(cap·임대료·DSCR)에
+    # 걸리지 않고 하필 pass 를 True 로 만드는 방향이다 — 신호가 그 구멍을 덮는다.
+    r = refi_test(12_112_500_000, 1_485, 270_000_000_000, 1.3, 0.60, 0.05)
+    assert r["pass"] is True                 # 판정은 낙관 쪽으로 샌다(그래서 신호가 있다)
+    assert r["implausible"] is True
+    assert len(r["implausible_reasons"]) == 2        # 최대금리·차환 LTV 둘 다
+    assert any("단위" in s for s in r["implausible_reasons"])
+    assert r["max_rate"] > refi.IMPLAUSIBLE_MAX_RATE_OVER
+    assert r["assumptions"]["ltv_at_refi"] < refi.IMPLAUSIBLE_LTV_UNDER
+    # 신호일 뿐 게이트가 아니다 — 예외를 던지지 않고 판정도 바꾸지 않는다.
+    assert r["pass"] == (r["assumptions"]["rate_pass"] and r["assumptions"]["ltv_pass"])
+
+
+def test_refi_test_implausible_is_off_for_ordinary_inputs():
+    # 정상 건에서 꺼져 있어야 신호가 잡음에 묻히지 않는다.
+    for args in (
+        (12_112_500_000, 148_500_000_000, 270_000_000_000, 1.3, 0.60, 0.05),   # 골든
+        (12_112_500_000, 148_500_000_000, 200_000_000_000, 1.3, 0.60, 0.05),   # LTV 부결
+        (12_112_500_000, 148_500_000_000, 270_000_000_000, 1.3, 0.60, 0.08),   # 금리 부결
+        (12_112_500_000, 200_000_000_000, 150_000_000_000, 1.3, 0.60, 0.05),   # 담보 역전
+        (0.0, 148_500_000_000, 270_000_000_000, 1.3, 0.60, 0.05),              # 전관 공실
+    ):
+        r = refi_test(*args)
+        assert r["implausible"] is False, args
+        assert r["implausible_reasons"] == []
+
+
+def test_refi_test_implausible_reasons_fire_independently():
+    # 최대금리만 이상한 경우(대출·가치가 서로 맞는데 NOI 대비 대출이 작다)
+    only_rate = refi_test(12_112_500_000, 1_000_000_000, 2_000_000_000, 1.3, 0.60, 0.05)
+    assert only_rate["implausible"] is True
+    assert len(only_rate["implausible_reasons"]) == 1
+    assert only_rate["max_rate"] > refi.IMPLAUSIBLE_MAX_RATE_OVER
+    assert only_rate["assumptions"]["ltv_at_refi"] >= refi.IMPLAUSIBLE_LTV_UNDER
+    # 차환 LTV 만 이상한 경우(최대금리는 실무 범위)
+    only_ltv = refi_test(100_000_000, 1_000_000_000, 1_000_000_000_000, 1.3, 0.60, 0.05)
+    assert only_ltv["implausible"] is True
+    assert len(only_ltv["implausible_reasons"]) == 1
+    assert only_ltv["max_rate"] <= refi.IMPLAUSIBLE_MAX_RATE_OVER
+    assert only_ltv["assumptions"]["ltv_at_refi"] < refi.IMPLAUSIBLE_LTV_UNDER
+    assert (refi.IMPLAUSIBLE_MAX_RATE_OVER, refi.IMPLAUSIBLE_LTV_UNDER) == (1.0, 0.01)
 
 
 # ── refi_test: 도메인·게이트 ────────────────────────────────────────────
@@ -414,7 +515,10 @@ def test_refi_test_is_a_pure_function():
     assert a == b
     assert a is not b
     a["assumptions"]["notes"].append("오염")
-    assert len(refi_test(*args)["assumptions"]["notes"]) == len(b["assumptions"]["notes"])
+    a["implausible_reasons"].append("오염")
+    fresh = refi_test(*args)
+    assert len(fresh["assumptions"]["notes"]) == len(b["assumptions"]["notes"])
+    assert fresh["implausible_reasons"] == []
 
 
 def test_pipeline_max_loan_feeds_refi_test():
