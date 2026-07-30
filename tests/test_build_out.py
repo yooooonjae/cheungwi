@@ -35,6 +35,7 @@ from pathlib import Path
 
 import pytest
 
+from src.analysis import build_out
 from src.analysis.build_out import build_all
 from src.analysis.effective_rent import region_params
 
@@ -63,19 +64,26 @@ def _series(yqs: list, values: list) -> list:
 
 
 def _rone(tmp: Path) -> None:
-    """R-ONE 축약형. 권역 3종은 5분기, 하위 상권 하나는 2분기(4분기 미만 필터 미끼)."""
+    """R-ONE 축약형.
+
+    권역 3종은 5분기다. 하위 상권 셋으로 세 경로를 모두 태운다 — 정상(광화문)·
+    4분기 미만(신사, 계약 4)·cap 게이트 위반(도산대로, 소득수익률 0.1%×4 → cap
+    0.004 로 하한 0.02 미달).
+    """
     yqs = _quarters(5)
     # 소득수익률 첫 분기 9.9% 는 '뒤 4개만 합한다'를 고정하는 미끼다(G-BLD-002).
-    ylds = [
-        {"yq": yq, "income": inc, "capital": 0.5, "total": inc + 0.5}
-        for yq, inc in zip(yqs, [9.9, 1.0, 1.0, 1.0, 1.0])
-    ]
-    region = lambda rent, vac: {                                   # noqa: E731
-        "rent_index": _series(yqs, [100.0] * 5),
-        "vacancy": _series(yqs, [vac] * 5),
-        "rent_level": _series(yqs, [rent] * 5),
-        "yield": [dict(y) for y in ylds],
-    }
+    incomes = [9.9, 1.0, 1.0, 1.0, 1.0]
+
+    def region(rent, vac, income_pct=None):
+        series = income_pct or incomes
+        return {
+            "rent_index": _series(yqs, [100.0] * 5),
+            "vacancy": _series(yqs, [vac] * 5),
+            "rent_level": _series(yqs, [rent] * 5),
+            "yield": [{"yq": yq, "income": inc, "capital": 0.5, "total": inc + 0.5}
+                      for yq, inc in zip(yqs, series)],
+        }
+
     payload = {
         "regions": {
             "도심": region(30.0, 6.0),
@@ -85,12 +93,16 @@ def _rone(tmp: Path) -> None:
         },
         "sub_regions": {
             "서울>도심>광화문": region(35.0, 5.0),
+            # 게이트 미끼 — 분기 0.1% 넷의 합 0.4% → cap 0.004 는 하한 0.02 밖이다.
+            # 실측에서도 서울>강남>도산대로는 2024Q2~2025Q1 창에서 1.4756% 였다.
+            "서울>강남>도산대로": region(24.0, 5.0, [0.1] * 5),
             # 2분기짜리 계열 — benchmark 는 4분기 미만이면 ValueError 다(계약 4).
             "서울>강남>신사": {
                 "rent_index": _series(yqs[:2], [100.0, 100.0]),
                 "vacancy": _series(yqs[:2], [5.0, 5.0]),
                 "rent_level": _series(yqs[:2], [19.0, 19.0]),
-                "yield": [dict(y) for y in ylds[:2]],
+                "yield": [{"yq": yq, "income": 1.0, "capital": 0.5, "total": 1.5}
+                          for yq in yqs[:2]],
             },
         },
         "meta": {
@@ -328,8 +340,41 @@ def test_short_sub_region_series_is_filtered_with_a_stated_reason(built):
     skipped = {s["name"]: s for s in market["sub_regions_cap_skipped"]}
     assert "서울>강남>신사" in skipped
     assert skipped["서울>강남>신사"]["quarters"] == 2
+    assert skipped["서울>강남>신사"]["kind"] == "short_series"
+    assert skipped["서울>강남>신사"]["row_dropped"] is True
     assert "4분기" in skipped["서울>강남>신사"]["reason"]
     assert "서울>도심>광화문" in market["sub_regions"]
+
+
+def test_sub_region_cap_gate_nulls_that_point_and_keeps_the_build(built):
+    """하위 상권 cap 이 게이트에 걸려도 빌드는 계속된다 — 그 지점만 null 이다.
+
+    권역 3종과 달리 하위 상권은 참고 계열이고, GBD 상권 여럿이 게이트 하한 2% 에서
+    0.5%p 안쪽이라(도산대로 2.3992·교대역 2.3638·신사역 2.4851) R-ONE 한 분기
+    갱신에 `make analyze` 전체가 죽을 자리다. 실측으로도 도산대로는 직전 창
+    (2024Q2~2025Q1)에서 cap 1.4756% 로 하한을 밑돌았다.
+    """
+    _, out_dir = built
+    market = _read(out_dir, "market.json")
+
+    row = market["sub_regions"]["서울>강남>도산대로"]      # 행은 살아 있다
+    assert row["cap"] is None
+    assert row["cap_skipped_reason"]
+    # cap 만 못 쓰는 것이므로 임대료·공실은 그대로 실린다.
+    assert row["nominal_rent_won_m2_mo"] == 24_000.0
+    assert row["effective_rent_won_m2_mo"] == 24_000.0 * 10.5 / 12
+    assert row["vacancy_pct"] == 5.0
+
+    skipped = {s["name"]: s for s in market["sub_regions_cap_skipped"]}
+    assert skipped["서울>강남>도산대로"]["kind"] == "gate"
+    assert skipped["서울>강남>도산대로"]["row_dropped"] is False
+
+    # 게이트 위반은 최상위에도 모인다(조용한 통과 금지).
+    where = {v["where"]: v for v in market["gate_violations"]}
+    assert "market.sub_regions.서울>강남>도산대로.cap" in where
+    assert where["market.sub_regions.서울>강남>도산대로.cap"]["kind"] == "RuntimeError"
+    # 권역 3종은 멀쩡히 나왔다 — 하위 상권 하나가 빌드를 끌고 내려가지 않는다.
+    assert market["regions"]["강남"]["cap"]["cap_income_based"] == 0.04
 
 
 def test_spread_is_cap_minus_treasury10y(built):
@@ -362,6 +407,59 @@ def test_matching_ladder_labels_resolved_as_seed_unique_not_confirmed(built):
     assert m["ambiguous"]["n"] == 1
     assert m["ambiguous"]["excluded_from_aggregation"] is True
     assert m["ambiguous"]["reason"]
+
+
+def test_matching_ladder_is_not_three_exclusive_buckets(built):
+    """exact ⊆ resolved 다 — 세 수를 더하면 exact 를 두 번 센다.
+
+    합성 표본은 exact 1 · resolved 2(exact 포함) · ambiguous 1 이라 단순 합은
+    1+2+1 = 4 인데 매칭된 행은 3 이다. 배타적 사다리(1 + 1 + 1)를 따로 낸다.
+    """
+    _, out_dir = built
+    m = _read(out_dir, "trades_analysis.json")["matching"]
+    assert m["n_matched"] == 3
+    assert m["exact"]["n"] + m["resolved"]["n"] + m["ambiguous"]["n"] == 4  # ≠ 3
+    assert m["exact"]["subset_of_resolved"] is True
+    assert m["resolved"]["includes_exact"] is True
+    assert m["resolved"]["n_resolved_only"] == 1
+
+    ladder = m["ladder_exclusive"]
+    assert ladder == {"exact": 1, "resolved_only": 1, "ambiguous": 1,
+                      "sum": 3, "n_matched": 3}
+    assert ladder["sum"] == ladder["n_matched"] == m["n_matched"]
+    assert "더하면 안 된다" in m["nesting"]
+    # 해제 제외 수를 세 칸 모두에 병기한다(exact 만 갖고 있으면 비대칭이다).
+    for bucket in ("exact", "resolved", "ambiguous"):
+        assert m[bucket]["n"] == m[bucket]["n_live"] + m[bucket]["n_canceled_excluded"]
+
+
+def test_ladder_closes_for_any_mix_of_match_states():
+    """사다리 항등식은 표본과 무관하다 — 배타 세 칸의 합이 늘 matched 와 같다.
+
+    (실데이터에서는 57 + 677 + 3,789 = 4,523 이다. 실산출을 읽는 대신 계약대로
+    합성 입력으로 고정한다.)
+    """
+    exact = {"building_id": "b-tower", "masked": False, "candidates": ["b-tower"],
+             "kind": "jibun_only", "area_ratio": None}
+    resolved = {"building_id": "b-tower", "masked": True, "candidates": ["b-tower"],
+                "kind": "jibun_only", "area_ratio": None}
+    ambiguous = {"building_id": None, "masked": True, "kind": "jibun_only",
+                 "area_ratio": None, "candidates": ["a-tower", "b-tower"]}
+    rows = ([_trade("2025-01-01", "11680", "역삼동", 5_000_000, match=exact)] * 3
+            + [_trade("2025-02-01", "11680", "역삼동", 6_000_000, match=resolved)] * 5
+            + [_trade("2025-03-01", "11680", "역삼동", 7_000_000, match=ambiguous)] * 7
+            + [_trade("2025-04-01", "11680", "역삼동", 8_000_000)] * 2)   # 매칭 없음
+    seed = {"buildings": [], "meta": {
+        "rone_region": {"CBD": "도심", "GBD": "강남", "YBD": "여의도마포"},
+        "region_def": {"CBD": ["11140"], "GBD": ["11680"], "YBD": ["11560"]}}}
+
+    m = build_out.build_trades_analysis(
+        {"trades": rows, "meta": {"collected_at": "2026-07-30"}}, seed)["matching"]
+    assert m["n_matched"] == 15                       # 매칭 없는 2행은 빠진다
+    assert m["exact"]["n"] == 3 and m["resolved"]["n"] == 8
+    assert m["resolved"]["n_resolved_only"] == 5      # 8 − 3(exact 가 포함돼 있다)
+    assert m["ambiguous"]["n"] == 7
+    assert m["ladder_exclusive"]["sum"] == m["n_matched"] == 15
 
 
 def test_exact_cases_are_listed_individually(built):
@@ -522,6 +620,80 @@ def test_refi_implausible_signal_is_surfaced_not_swallowed(built):
     assert refi["implausible_reasons"] == []
     # 켜진 건은 산출물 최상위에 모아 둔다(조용한 통과 금지).
     assert uw["implausible_refi"] == []
+    # 빈 리스트가 '검증됨'으로 읽히지 않도록 침묵의 근거를 함께 싣는다.
+    assert "구조적으로 켜지지 않는다" in uw["implausible_refi_note"]
+
+
+# ── 실패·신호 수집 경로(정상 조립에서는 도달하지 않는 자리) ──────────────────
+
+def test_not_implemented_is_caught_before_runtime_error(tmp_path, data_dir, monkeypatch):
+    """`NotImplementedError` 는 `RuntimeError` 의 하위형이라 **먼저** 잡아야 한다.
+
+    순서가 뒤집히면 "계산할 수 없다"는 신호가 "단위를 의심하라"로 오분류되어,
+    입력을 고치면 되는 문제처럼 보인다. 이 테스트는 kind 문자열로 그 순서를 읽는다.
+    """
+    def boom(*_args, **_kwargs):
+        raise NotImplementedError("원리금균등(io=False)은 계산하지 않는다")
+
+    monkeypatch.setattr(build_out, "_underwrite_one", boom)
+    payloads = build_all(data_dir=data_dir, out_dir=tmp_path / "out")
+
+    errors = payloads["underwriting"]["errors"]
+    assert [e["kind"] for e in errors] == ["NotImplementedError"]   # RuntimeError 아님
+    assert "io=False" in errors[0]["reason"]
+
+
+def test_building_failure_is_isolated_and_the_build_continues(tmp_path, data_dir,
+                                                             monkeypatch):
+    """한 동이 물리 게이트로 죽어도 나머지 동과 나머지 산출물은 그대로 나온다."""
+    def boom(*_args, **_kwargs):
+        raise RuntimeError("cap 0.900000(= 90.0000%)이 물리 범위[0.02, 0.12] 밖이다")
+
+    monkeypatch.setattr(build_out, "_underwrite_one", boom)
+    out_dir = tmp_path / "out"
+    payloads = build_all(data_dir=data_dir, out_dir=out_dir)
+
+    assert {p.name for p in out_dir.iterdir()} == FILES      # 빌드는 계속됐다
+    uw = payloads["underwriting"]
+    rows = {r["id"]: r for r in uw["buildings"]}
+    failed = rows["b-tower"]
+    assert failed["pending_ledger"] is False
+    assert "underwriting" not in failed                     # 반쪽 결과를 남기지 않는다
+    assert failed["underwriting_error"]["kind"] == "RuntimeError"
+    assert "물리 범위" in failed["underwriting_error"]["reason"]
+    # 실패는 행에 격리되고 최상위에도 이름과 사유로 남는다.
+    assert [e["id"] for e in uw["errors"]] == ["b-tower"]
+    assert uw["errors_note"]
+    # 대장이 없어 애초에 계산하지 않는 동은 영향을 받지 않는다.
+    assert rows["a-tower"]["pending_ledger"] is True
+    assert uw["summary"]["pending_ledger"] == 1
+
+
+def test_implausible_refi_flows_to_the_top_level_when_it_fires(tmp_path, data_dir,
+                                                               monkeypatch):
+    """신호가 켜진 결과는 사유 문구와 함께 최상위로 흐른다.
+
+    이 조립에서는 대출을 `max_loan` 의 삼중 제약으로만 만들어 신호가 구조적으로
+    켜지지 않는다(DY 하한 0.08 ÷ DSCR 1.3 = 6.15% 가 max_rate 의 바닥이라 문턱
+    1.0 에 닿지 못한다). 표시 경로가 살아 있는지는 그래서 주입으로 확인한다.
+    """
+    real = build_out.refi.refi_test
+
+    def loud(*args, **kwargs):
+        result = dict(real(*args, **kwargs))
+        result["implausible"] = True
+        result["implausible_reasons"] = ["견딜 수 있는 최대금리가 12.00(= 연 1,200%)"]
+        return result
+
+    monkeypatch.setattr(build_out.refi, "refi_test", loud)
+    payloads = build_all(data_dir=data_dir, out_dir=tmp_path / "out")
+
+    flagged = payloads["underwriting"]["implausible_refi"]
+    assert [f["id"] for f in flagged] == ["b-tower"]
+    assert flagged[0]["reasons"] == ["견딜 수 있는 최대금리가 12.00(= 연 1,200%)"]
+    # 판정을 바꾸지 않는 신호이므로 행의 refi 결과는 그대로 남아 있어야 한다.
+    row = {r["id"]: r for r in payloads["underwriting"]["buildings"]}["b-tower"]
+    assert row["underwriting"]["refi"]["implausible"] is True
 
 
 def test_all_pending_when_no_ledger_anywhere(tmp_path, data_dir):

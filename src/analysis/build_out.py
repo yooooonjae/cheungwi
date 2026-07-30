@@ -31,6 +31,10 @@
 6. **필지까지 확정된 것은 `match_exact` 57행뿐이다.** `building_id` 가 채워진
    734행(`match_resolved`)은 "시드 55동 목록 안에서 후보가 유일"이라는 뜻이지
    같은 법정동의 비-시드 건물과 구분된 것이 아니다. 라벨을 갈라 싣는다.
+   **두 수는 배타적이 아니다** — exact ⊆ resolved 라 그대로 더하면 exact 를 두 번
+   센다(57 + 734 + 3,789 = 4,580 ≠ 4,523). 배타적 사다리는 exact 57 +
+   resolved_only 677 + ambiguous 3,789 = 4,523 이고, 그 세 칸을
+   `matching.ladder_exclusive` 로 따로 낸다.
 7. **리츠 `revenue` 는 `holding` 으로 가른다.** indirect·mixed 의 별도 영업수익은
    임대료가 아니라 배당·이자다. 앵커 후보는 direct 뿐이다.
 
@@ -52,13 +56,18 @@
 물리 게이트(cap 0.02~0.12 · 유효임대료 10,000~60,000원/㎡·월 · DSCR 0~5 ·
 LTC 0~1)를 만났을 때 이 모듈이 하는 일은 둘 중 하나다.
 
-- **권역 3종의 최신 유효임대료**와 **PF 대표 사업지**는 예외를 그대로 올린다.
+- **권역 3종의 최신 유효임대료·cap** 과 **PF 대표 사업지**는 예외를 그대로 올린다.
   그 값이 없으면 산출물이 성립하지 않고, 조용한 `null` 은 대시보드에서
   "자료 없음"으로 읽혀 사고가 묻힌다.
-- **하위 상권·건물 단위·권역 추이**의 개별 지점은 그 지점만 `null` 로 두고
-  `gate_violations`(market)·`errors`(underwriting)에 사유 문구를 싣고 stderr 로
-  경고를 찍는다. 한 지점 때문에 나머지 스물두 상권을 잃지 않으면서도, 빠진
-  자리가 산출물 안에서 이름과 사유를 갖게 하려는 것이다.
+- **하위 상권·서울 참고 계열·건물 단위·권역 추이**의 개별 지점은 그 지점만
+  `null` 로 두고 `gate_violations`(market)·`errors`(underwriting)에 사유 문구를
+  싣고 stderr 로 경고를 찍는다. 한 지점 때문에 나머지 스물두 상권을 잃지
+  않으면서도, 빠진 자리가 산출물 안에서 이름과 사유를 갖게 하려는 것이다.
+
+  하위 상권 cap 이 특히 그렇다 — GBD 상권 여럿(도산대로 2.3992% · 교대역
+  2.3638% · 신사역 2.4851%)이 게이트 하한 2% 에서 0.5%p 안쪽이고, 도산대로는
+  직전 창(2024Q2~2025Q1)에서 1.4756% 로 실제로 하한을 밑돌았다. 여기서 예외를
+  올리면 R-ONE 한 분기 갱신에 `make analyze` 전체가 죽는다.
 
 `refi_test` 의 `implausible` 은 게이트가 아니라 **신호**다(예외를 던지지도
 판정을 바꾸지도 않는다). 켜진 건은 산출물 최상위 `implausible_refi` 에 사유
@@ -135,6 +144,22 @@ PF_REGION = "강남"
 
 _BREAKEVEN_LAND_MAX_WON_M2 = 200_000_000.0   # 손익분기 토지단가 이분 탐색 상한
 _BREAKEVEN_ITERATIONS = 80
+
+# `refi_test` 의 implausible 신호가 **이 조립에서는 켜질 수 없는 이유**. 신호가 늘
+# 꺼져 있는 것을 "정상"으로 읽으면, 나중에 대출을 밖에서 주입하는 경로가 생겼을 때
+# 그 침묵이 검증된 것인 줄 알게 된다 — 침묵의 근거를 산출물에 적어 둔다.
+IMPLAUSIBLE_UNREACHABLE_NOTE = (
+    f"이 조립에서 implausible 신호는 구조적으로 켜지지 않는다. 대출을 "
+    f"max_loan 의 삼중 제약으로만 만들기 때문이다 — 결속 조건에 따라 max_rate 가 "
+    f"cap÷(DSCR {DSCR_MIN}×LTV {LTV_MAX}) · 대출금리 · DY하한÷DSCR "
+    f"({DEBT_YIELD_MIN}/{DSCR_MIN} = {DEBT_YIELD_MIN / DSCR_MIN:.6f}) 중 하나가 "
+    f"되는데, cap 게이트 상한 0.12 에서도 최댓값이 "
+    f"{0.12 / (DSCR_MIN * LTV_MAX):.4f} 라 신호 문턱 1.0 에 닿지 못한다. 차환 LTV "
+    f"쪽도 cap÷(DSCR×금리) ≥ 0.02/{DSCR_MIN} = {0.02 / DSCR_MIN:.4f} 라 문턱 0.01 을 "
+    "밑돌지 않는다. 그래도 표시 경로를 두는 것은 대출 금액이 밖에서 들어오는 순간"
+    "(대장 승격 뒤 실거래가 기준 대출 등) 신호가 켜질 수 있고, 그때 조용히 "
+    "지나가면 안 되기 때문이다 — 이 값이 늘 빈 리스트인 것을 '검증됨'으로 읽지 말 것."
+)
 
 
 # ── 입출력 ───────────────────────────────────────────────────────────────────
@@ -372,31 +397,61 @@ def build_market(rone: dict, rates: dict, reits: dict, seed: dict) -> dict:
     for full_name, src in rone.get("sub_regions", {}).items():
         parent = full_name.split(">")[1] if full_name.count(">") >= 1 else None
         yields = src.get("yield") or []
+        latest_rent = _last(src.get("rent_level") or [])
+        latest_quarter = None if latest_rent is None else latest_rent["yq"]
         if len(yields) < caprate.QUARTERS_PER_YEAR:
-            latest_rent = _last(src.get("rent_level") or [])
+            # 계열 전체가 너무 짧다 — cap 만이 아니라 행 자체가 최신 시장을 말하지
+            # 못한다(신사는 마지막 관측이 2016Q4 다). 행째로 뺀다.
             skipped.append({
                 "name": full_name,
+                "kind": "short_series",
                 "quarters": len(yields),
-                "latest_quarter": None if latest_rent is None else latest_rent["yq"],
+                "latest_quarter": latest_quarter,
+                "row_dropped": True,
                 "reason": (
                     f"소득수익률 계열이 {len(yields)}분기뿐이라 연환산에 필요한 "
                     f"{caprate.QUARTERS_PER_YEAR}분기를 못 채운다. 짧은 계열로 합을 "
                     "내면 4분의 3 짜리 cap 이 나오는데 그 값도 게이트 안(2~12%)이라 "
-                    "조용히 통과한다 — benchmark 를 부르기 전에 거른다."
+                    "조용히 통과한다 — benchmark 를 부르기 전에 거른다. 이런 계열은 "
+                    "관측 자체가 옛것이라 임대료·공실도 함께 뺀다(행째 제외)."
                 ),
             })
             continue
         rent_free_mo = params[parent]["rent_free_mo"] if parent in params else None
-        latest_rent = _last(src.get("rent_level") or [])
         latest_vac = _last(src.get("vacancy") or [])
         nominal = None if latest_rent is None else latest_rent["value"] * THOUSAND_WON
         eff = None
         if nominal is not None and rent_free_mo is not None:
             eff = _effective_rent_or_violation(
                 nominal, rent_free_mo, f"market.sub_regions.{full_name}", violations)
+        # 하위 상권의 cap 은 게이트에 걸려도 **빌드를 멈추지 않는다**. 권역 3종과
+        # 달리 이쪽은 참고 계열이고, GBD 상권 여럿이 하한(2%)에서 0.5%p 안쪽이라
+        # R-ONE 한 분기 갱신으로 통째로 죽을 자리다(실측: 서울>강남>도산대로의
+        # 2024Q2~2025Q1 창 cap 은 1.4756% 로 하한 미달이었다). cap 한 값만 못 쓰는
+        # 것이므로 그 지점만 null 로 두고 사유를 두 곳(gate_violations·
+        # sub_regions_cap_skipped)에 남긴 뒤 임대료·공실은 그대로 싣는다.
+        cap, cap_reason = None, None
+        try:
+            cap = _cap_block([q["income"] for q in yields])
+        except (RuntimeError, ValueError) as exc:
+            cap_reason = str(exc)
+            skipped.append({
+                "name": full_name,
+                "kind": "gate",
+                "quarters": len(yields),
+                "latest_quarter": latest_quarter,
+                "row_dropped": False,
+                "reason": (
+                    f"cap 벤치마크가 물리 게이트에 걸려 cap 만 비웠다(임대료·공실은 "
+                    f"그대로다) — {cap_reason}"
+                ),
+            })
+            violations.append({"where": f"market.sub_regions.{full_name}.cap",
+                               "kind": type(exc).__name__, "reason": cap_reason})
+            _warn(f"market.sub_regions.{full_name}.cap: {exc}")
         sub_regions[full_name] = {
             "parent_region": parent,
-            "latest_quarter": None if latest_rent is None else latest_rent["yq"],
+            "latest_quarter": latest_quarter,
             "rent_level_raw_thousand_won_m2_mo": (
                 None if latest_rent is None else latest_rent["value"]),
             "nominal_rent_won_m2_mo": nominal,
@@ -404,7 +459,8 @@ def build_market(rone: dict, rates: dict, reits: dict, seed: dict) -> dict:
             "rent_free_meta": rent_free_meta,
             "effective_rent_won_m2_mo": eff,
             "vacancy_pct": None if latest_vac is None else latest_vac["value"],
-            "cap": _cap_block([q["income"] for q in yields]),
+            "cap": cap,
+            "cap_skipped_reason": cap_reason,
         }
 
     seoul_src = rone["regions"].get(SEOUL_KEY)
@@ -412,11 +468,22 @@ def build_market(rone: dict, rates: dict, reits: dict, seed: dict) -> dict:
     if seoul_src:
         latest_rent = _last(seoul_src["rent_level"])
         latest_vac = _last(seoul_src["vacancy"])
+        # 서울 계열도 참고용이라 하위 상권과 같은 규칙을 쓴다 — cap 하나 때문에
+        # 빌드를 멈추지 않는다(권역 3종만 멈춘다).
+        seoul_cap, seoul_cap_reason = None, None
+        try:
+            seoul_cap = _cap_block([q["income"] for q in seoul_src["yield"]])
+        except (RuntimeError, ValueError) as exc:
+            seoul_cap_reason = str(exc)
+            violations.append({"where": "market.seoul_reference.cap",
+                               "kind": type(exc).__name__, "reason": seoul_cap_reason})
+            _warn(f"market.seoul_reference.cap: {exc}")
         seoul = {
             "latest_quarter": latest_rent["yq"],
             "nominal_rent_won_m2_mo": latest_rent["value"] * THOUSAND_WON,
             "vacancy_pct": latest_vac["value"],
-            "cap": _cap_block([q["income"] for q in seoul_src["yield"]]),
+            "cap": seoul_cap,
+            "cap_skipped_reason": seoul_cap_reason,
             "note": (
                 "서울 전체 계열은 렌트프리 관행 가정이 권역 3종에만 있어 유효임대료를 "
                 "만들지 않았다. 명목·공실·cap 만 참고로 싣는다."
@@ -607,6 +674,11 @@ def build_underwriting(buildings: dict, seed: dict, market: dict) -> dict:
         except ValueError as exc:               # 입력이 물리적으로 말이 안 된다
             _record_failure(row, errors, "ValueError", exc)
         else:
+            # `implausible` 은 예외를 던지지도 판정을 바꾸지도 않는 신호라, 읽는
+            # 쪽이 없으면 아무 일도 일어나지 않는다. **이 조립에서는 구조적으로
+            # 켜지지 않는다**(사유는 IMPLAUSIBLE_UNREACHABLE_NOTE) — 그래도 경로를
+            # 두는 것은 대출 금액이 밖에서 들어오는 순간(대장 승격 뒤 실거래가
+            # 기준 대출 등) 켜질 수 있고, 그때 조용히 지나가면 안 되기 때문이다.
             signal = row["underwriting"]["refi"]
             if signal["implausible"]:
                 implausible.append({
@@ -675,7 +747,15 @@ def build_underwriting(buildings: dict, seed: dict, market: dict) -> dict:
         },
         "buildings": rows,
         "errors": errors,
+        "errors_note": (
+            "건물 한 동의 실패는 그 행에 격리하고(underwriting_error) 나머지 동은 계속 "
+            "계산한다 — 한 동 때문에 쉰네 동을 잃지 않으면서, 빠진 자리가 이름과 사유를 "
+            "갖게 하려는 것이다. kind 는 잡은 예외 유형 그대로다: NotImplementedError"
+            "(계산 불가) · RuntimeError(물리 게이트 — 단위 의심) · ValueError(입력 오류). "
+            "NotImplementedError 는 RuntimeError 의 하위형이라 반드시 먼저 잡는다."
+        ),
         "implausible_refi": implausible,
+        "implausible_refi_note": IMPLAUSIBLE_UNREACHABLE_NOTE,
         "caveats": [
             "**건축물대장이 열리기 전이라 대부분(또는 전부)의 동이 pending_ledger 다.** "
             "빈 자리를 권역 평균으로 메우지 않았다 — 추정과 부재를 같은 색으로 칠하면 "
@@ -742,6 +822,11 @@ def build_trades_analysis(trades: dict, seed: dict) -> dict:
     resolved = [r for r in all_rows if (r.get("match") or {}).get("building_id")]
     ambiguous = [r for r in all_rows
                  if r.get("match") and not r["match"].get("building_id")]
+    matched = [r for r in all_rows if r.get("match")]
+    # **세 수는 배타적이지 않다.** exact ⊆ resolved 다(마스킹이 없고 후보가 하나면
+    # 수집기가 그 동을 building_id 로 확정한다). 세 수를 그대로 더하면 exact 를 두 번
+    # 세어 matched 를 넘는다 — 배타 합을 쓰려면 resolved_only 를 써야 한다.
+    resolved_only = [r for r in resolved if not is_exact(r)]
 
     by_region = {}
     for name in REGIONS:
@@ -822,20 +907,46 @@ def build_trades_analysis(trades: dict, seed: dict) -> dict:
         "by_building_exact": building_rows,
         "exact_cases": cases,
         "matching": {
+            "n_matched": len(matched),
+            "nesting": (
+                "**exact ⊆ resolved 다 — 세 수를 그대로 더하면 안 된다.** 마스킹이 "
+                "없고 후보가 하나인 행은 수집기가 building_id 로 확정하므로 exact 는 "
+                "resolved 안에 들어 있다. 사다리를 그리려면 배타적인 세 칸"
+                "(ladder_exclusive)을 쓰라 — exact + resolved_only + ambiguous 가 "
+                "matched 와 정확히 같다."
+            ),
+            "ladder_exclusive": {
+                "exact": len(exact_all),
+                "resolved_only": len(resolved_only),
+                "ambiguous": len(ambiguous),
+                "sum": len(exact_all) + len(resolved_only) + len(ambiguous),
+                "n_matched": len(matched),
+            },
             "exact": {
                 "n": len(exact_all),
                 "n_live": len(exact_live),
                 "n_canceled_excluded": len(exact_all) - len(exact_live),
                 "parcel_confirmed": True,
-                "label": "마스킹 없는 지번이 시드 한 동에만 걸린 행 — 필지까지 확정됐다.",
+                "subset_of_resolved": True,
+                "label": ("마스킹 없는 지번이 시드 한 동에만 걸린 행 — 필지까지 "
+                          "확정됐다. resolved 의 부분집합이다."),
             },
             "resolved": {
                 "n": len(resolved),
+                "n_live": sum(1 for r in resolved if not r.get("canceled")),
+                "n_canceled_excluded": sum(1 for r in resolved if r.get("canceled")),
+                "n_resolved_only": len(resolved_only),
+                "n_resolved_only_live": sum(1 for r in resolved_only
+                                            if not r.get("canceled")),
+                "includes_exact": True,
                 "parcel_confirmed": False,
                 "label": (
-                    "**시드 55동 목록 안에서 후보가 유일**하다는 뜻일 뿐이다. 마스킹된 "
-                    "지번이라 같은 법정동의 비-시드 건물과 구분되지 않는다 — '확정'으로 "
-                    "읽으면 안 된다."
+                    "building_id 가 채워진 행 전체다. **이 중 exact "
+                    f"{len(exact_all)}행은 마스킹이 없어 필지까지 확정된 행이고**, "
+                    f"나머지 {len(resolved_only)}행(n_resolved_only)이 '시드 55동 "
+                    "목록 안에서 후보가 유일'할 뿐인 행이다 — 그쪽은 마스킹된 지번이라 "
+                    "같은 법정동의 비-시드 건물과 구분되지 않으므로 '확정'으로 읽으면 "
+                    "안 된다. parcel_confirmed 는 n_resolved_only 부분에 대한 라벨이다."
                 ),
                 "excluded_from_aggregation": False,
                 "reason": (
@@ -845,6 +956,8 @@ def build_trades_analysis(trades: dict, seed: dict) -> dict:
             },
             "ambiguous": {
                 "n": len(ambiguous),
+                "n_live": sum(1 for r in ambiguous if not r.get("canceled")),
+                "n_canceled_excluded": sum(1 for r in ambiguous if r.get("canceled")),
                 "parcel_confirmed": False,
                 "label": "마스킹된 지번이 여러 시드에 동시에 걸려 동을 특정하지 못한 행.",
                 "excluded_from_aggregation": True,
@@ -1143,13 +1256,16 @@ def _summary(payloads: dict) -> str:
                  f"{uw['summary']['pending_ledger']}동 · 언더라이팅 "
                  f"{uw['summary']['underwritten']}동 · 실패 {len(uw['errors'])}건 · "
                  f"implausible {len(uw['implausible_refi'])}건")
+    ladder = trades["matching"]["ladder_exclusive"]
     lines.append(f"== trades == {trades['filters']['rows_total']}행 중 해제 "
                  f"{trades['filters']['canceled_excluded']}행 제외 → "
-                 f"{trades['filters']['rows_used']}행 · exact "
-                 f"{trades['matching']['exact']['n']}행(해제 제외 "
-                 f"{trades['matching']['exact']['n_live']}) · resolved "
-                 f"{trades['matching']['resolved']['n']} · ambiguous "
-                 f"{trades['matching']['ambiguous']['n']}")
+                 f"{trades['filters']['rows_used']}행")
+    # 배타적 세 칸으로 적는다 — exact 는 resolved 의 부분집합이라 셋을 나란히
+    # 더하면 exact 를 두 번 센다.
+    lines.append(f"  매칭 {ladder['n_matched']}행 = exact {ladder['exact']}"
+                 f"(해제 제외 {trades['matching']['exact']['n_live']}) + resolved_only "
+                 f"{ladder['resolved_only']} + ambiguous {ladder['ambiguous']} "
+                 f"(resolved {trades['matching']['resolved']['n']} 은 exact 를 포함한다)")
     for name in REGIONS:
         years = trades["by_region"][name]["by_year"]
         latest = years[-1] if years else None
