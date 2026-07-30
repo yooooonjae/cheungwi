@@ -16,6 +16,7 @@
 
 import pytest
 
+from src.analysis.effective_rent import RENT_MAX_WON_M2_MO, RENT_MIN_WON_M2_MO
 from src.analysis.noi import noi
 
 
@@ -124,6 +125,49 @@ def test_rent_and_gfa_must_be_positive():
         noi(25_000, 0, 0.5, 0.05, 0.15)
     with pytest.raises(ValueError):
         noi(25_000, -100_000, 0.5, 0.05, 0.15)
+
+
+# ── 임대료 물리 게이트(단위 오입력 차단) ────────────────────────────────
+
+def test_gate_rejects_annual_rent_in_a_monthly_slot():
+    # 연액(300,000원/㎡·년)을 월액 자리에 넣으면 NOI 가 12배로 부푼다.
+    # 게이트가 없으면 1,453.5억이 조용히 나가고, 하류 value.appraise 는
+    # 그것을 12배 감정가로 바꾼다.
+    with pytest.raises(RuntimeError):
+        noi(300_000, 100_000, 0.5, 0.05, 0.15)
+
+
+def test_gate_rejects_pyeong_rent_in_a_m2_slot():
+    # 평당가(약 3.3배)도 같은 자리에서 막힌다.
+    with pytest.raises(RuntimeError):
+        noi(82_500, 100_000, 0.5, 0.05, 0.15)
+
+
+def test_gate_boundaries_are_inclusive():
+    noi(RENT_MIN_WON_M2_MO, 100_000, 0.5, 0.05, 0.15)   # 양끝은 통과
+    noi(RENT_MAX_WON_M2_MO, 100_000, 0.5, 0.05, 0.15)
+    with pytest.raises(RuntimeError):
+        noi(RENT_MIN_WON_M2_MO - 1, 100_000, 0.5, 0.05, 0.15)
+    with pytest.raises(RuntimeError):
+        noi(RENT_MAX_WON_M2_MO + 1, 100_000, 0.5, 0.05, 0.15)
+
+
+def test_gate_constants_have_a_single_source():
+    # 게이트 상수를 복제하지 않고 effective_rent 것을 그대로 쓴다.
+    # (여기서 다시 적으면 두 모듈이 따로 움직여 드리프트가 생긴다.)
+    import src.analysis.noi as noi_module
+
+    assert noi_module.RENT_MIN_WON_M2_MO is RENT_MIN_WON_M2_MO
+    assert noi_module.RENT_MAX_WON_M2_MO is RENT_MAX_WON_M2_MO
+
+
+def test_input_error_is_not_dressed_up_as_a_gate_violation():
+    # 0·음수 임대료도 게이트 범위 밖이지만 단위 문제가 아니라 입력 오류다 —
+    # 부르는 쪽이 둘을 다르게 다룰 수 있어야 하므로 ValueError 를 유지한다.
+    with pytest.raises(ValueError):
+        noi(-25_000, 100_000, 0.5, 0.05, 0.15)
+    with pytest.raises(ValueError):
+        noi(float("nan"), 100_000, 0.5, 0.05, 0.15)
 
 
 # ── NaN·무한대(조용한 통과 금지) ────────────────────────────────────────

@@ -10,15 +10,22 @@
     EGI = PGI × (1 − 공실률)                  (유효총수입)
     NOI = EGI × (1 − opex_ratio)              (순영업소득)
 
-전부 순수 함수다 — I/O 도 전역 상태도 없다. 표준 라이브러리만 쓴다(`import`
-문은 0개다). 앞 모듈(`fin_core`·`effective_rent`)을 부르지 않는다.
+전부 순수 함수다 — I/O 도 전역 상태도 없다. 서드파티는 쓰지 않고, 임포트는
+`effective_rent` 의 게이트 상수 둘뿐이다(아래 규약 1).
 
 규약이 셋 있다.
 
 1. **임대료 단위는 원/㎡·월이고 결과는 원/년이다.** ×12 는 이 안에서 한다.
-   연액을 넣으면 열두 배 부풀고, 평당가를 넣으면 3.3배 부푼다. 이 모듈은
-   임대료의 물리 범위를 다시 검사하지 않는다 — 그 게이트는 임대료를 만드는
-   `effective_rent` 쪽에 있고, 여기서는 부호와 유한성만 본다.
+   연액을 넣으면 열두 배 부풀고, 평당가를 넣으면 3.3배 부푼다. 그래서 진입
+   지점에서 임대료가 물리 범위(10,000~60,000원/㎡·월) 안인지 다시 확인하고
+   밖이면 `RuntimeError` 를 던진다. 범위 상수는 `effective_rent` 것을
+   임포트해 쓴다 — 여기 다시 적으면 두 모듈이 따로 움직인다.
+
+   임대료를 `effective_rent` 가 만들어 넘겼다면 이 검사는 통과가 보장된다.
+   막으려는 것은 그 경로를 거치지 않고 `noi()` 를 직접 부르는 자리다. 12배
+   부푼 NOI 는 그 자체로는 정상 숫자라 하류가 잡지 못한다 — `value.appraise`
+   는 12배 감정가를 그대로 내놓고, `max_loan` 은 `min()` 탓에 결속 조건만
+   ltv 로 뒤집혀 오히려 발견이 어려워진다.
 2. **전용률은 GFA 대비 임대면적(rentable/GFA) 비율이다.** 등기부의 전유면적
    비율이 아니다. 임대면적은 공용부 안분을 포함해 잡히므로 전유면적보다
    크다. 서울 오피스 관행 근사가 0.5 라 기본값으로 둔다.
@@ -32,7 +39,15 @@
 NaN·무한대는 도메인 검사가 아니라 별도 가드로 막는다. 크기 비교가 전부
 False 라 도메인 검사를 조용히 통과하는데, 그렇게 나온 NaN·inf 는 정상 float
 처럼 생겨서 하류(cap rate·가치·대출)까지 그대로 흘러가기 때문이다.
+
+오류 유형은 둘을 구분한다. 값이 물리적으로 말이 안 되면(전용률 0, 공실률
+음수, 임대료 0 이하, NaN·inf) `ValueError` 로 "입력이 틀렸다"고 하고, 값 자체는
+말이 되는데 임대료가 범위 밖이면 `RuntimeError` 로 "단위를 의심하라"고 한다.
+0·음수 임대료는 범위 밖이기도 하지만 단위 문제가 아니므로 게이트에 닿기 전에
+`ValueError` 로 걸린다.
 """
+
+from src.analysis.effective_rent import RENT_MAX_WON_M2_MO, RENT_MIN_WON_M2_MO
 
 # 조정 가능한 가정의 기본값(골든 상수가 아니다). 시그니처는 다섯 인자를 모두
 # 요구하므로 여기서 기본값을 주지 않는다 — 부르는 쪽이 이 상수를 넘긴다.
@@ -57,6 +72,22 @@ def _require_finite(x: float, what: str) -> None:
         raise ValueError(f"{what} 값이 무한대다 — 검사를 조용히 통과하므로 막는다")
 
 
+def _gate_rent(rent_won_m2_mo: float) -> None:
+    """임대료가 물리 범위(원/㎡·월) 안인지 확인한다. 밖이면 멈춘다.
+
+    범위 상수는 `effective_rent` 것을 그대로 쓴다(단일 출처). 부호·NaN 은
+    부르는 쪽이 먼저 `ValueError` 로 걸러 여기 오지 않는다 — 여기 걸리는 값은
+    "임대료로는 말이 되는데 자릿수가 이상한" 값뿐이라 메시지가 단위를 짚는다.
+    """
+    if not RENT_MIN_WON_M2_MO <= rent_won_m2_mo <= RENT_MAX_WON_M2_MO:
+        raise RuntimeError(
+            f"유효임대료 {rent_won_m2_mo:,.1f}원/㎡·월이 물리 범위"
+            f"[{RENT_MIN_WON_M2_MO:,.0f}, {RENT_MAX_WON_M2_MO:,.0f}] 밖이다 — "
+            "임대료가 아니라 단위(평/㎡, 월/연)를 의심하라. 이대로 두면 NOI 가 "
+            "배수로 부풀어 감정가·대출까지 조용히 어긋난다"
+        )
+
+
 def noi(
     eff_rent_won_m2_mo: float,
     gfa_m2: float,
@@ -78,6 +109,9 @@ def noi(
     소득이 0 인 건물은 있어도 임대면적이 0 이거나 운영경비가 수입 전부인
     건물은 입력이 틀린 것이다).
 
+    물리 게이트: 유효임대료는 10,000~60,000원/㎡·월(양끝 포함) 안이어야 한다.
+    밖이면 `RuntimeError` — 임대료가 틀린 것이 아니라 단위가 틀린 것이다.
+
     반환: `{"noi_won_y", "egi_won_y", "assumptions": {...}}`. `assumptions` 에
     임대면적·PGI 와 함께 전용률·관리비 상계·opex 가정의 뜻과 유보(`caveats`)를
     실어 보낸다. NOI 숫자만 떼어 인용하면 안 된다 — 세 가정이 바뀌면 값도
@@ -86,6 +120,7 @@ def noi(
     _require_finite(eff_rent_won_m2_mo, "유효임대료")
     if eff_rent_won_m2_mo <= 0:
         raise ValueError(f"유효임대료는 양수여야 한다: {eff_rent_won_m2_mo}")
+    _gate_rent(eff_rent_won_m2_mo)
     _require_finite(gfa_m2, "연면적")
     if gfa_m2 <= 0:
         raise ValueError(f"연면적은 양수여야 한다: {gfa_m2}")
