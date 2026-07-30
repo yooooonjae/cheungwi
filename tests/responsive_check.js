@@ -13,6 +13,21 @@
  *   ④ 눈금 라벨 겹침 0       「기준」 글자가 최소·최대 라벨 위에 올라타지 않는다
  * 그리고 뷰포트마다 **다크 모드 스크린샷**을 남긴다(사람이 볼 몫).
  *
+ * ── ⑤ 생존 신호(위 넷보다 먼저 봐야 하는 것) ──
+ * 위의 넷은 전부 **위반을 세는** 검사다. 그래서 지면이 통째로 비면 — 스크립트가
+ * 전부 던져 아무것도 그려지지 않으면 — 잴 요소가 없어 위반도 0 이고, 검사는
+ * 5/5 초록으로 통과한다. 빈 지면이 가장 반응형인 지면이 되는 것이다.
+ * 그래서 뷰포트마다 **살아 있다는 증거**를 함께 단언한다.
+ *
+ *   · 도면(viewBox 를 가진 svg)이 하한 이상 그려졌는가
+ *   · 원장 표(#method-manifest tbody)에 행이 있는가
+ *   · 눈금(.knob-scale)이 셋 이상인가
+ *   · `Runtime.exceptionThrown` 이 0 건인가 (스크립트가 조용히 죽지 않았는가)
+ *   · `.fail` 요소가 0 개인가 (지면이 스스로 "그리지 못했다"고 적지 않았는가)
+ *
+ * 하나라도 무너지면 그 뷰포트는 실패다. 폭 문제가 아니라 지면 문제지만, 폭
+ * 문제만 보는 검사는 지면이 사라진 것을 끝내 못 본다.
+ *
  * ── 헤드리스 함정 셋(앞선 태스크가 남긴 것) ──
  *   · `--window-size=390` 은 500px 로 클램프된다. 그래서 창 크기가 아니라
  *     CDP `Emulation.setDeviceMetricsOverride` 로 뷰포트를 만든다 — iframe
@@ -54,6 +69,14 @@ const TOUCH = [".brand", ".tabs a", ".theme-toggle", ".r-tab", ".rig-reset",
 const MIN_TOUCH = 44;
 // 도면 인-피겨 라벨의 하한. 이보다 작으면 종이에서 읽히지 않는다.
 const MIN_LABEL = 9;
+/**
+ * 생존 하한. 뷰포트마다 **적어도 이만큼은 그려져 있어야** 나머지 측정이 뜻을 갖는다.
+ *
+ * 도면 8 은 좁은 판형에서도 남는 수다(서장 계기판·Ⅰ장 산점과 사다리·Ⅱ장 계측기·
+ * Ⅲ장 단면과 스트레스·방법론 사다리…). 넉넉히 잡되 "한 장도 없다"와 "반이
+ * 사라졌다"를 둘 다 잡을 만큼은 높게 둔다. 눈금 셋은 Ⅱ장과 실험실의 조작부다.
+ */
+const ALIVE_MIN = { figs: 8, manifestRows: 1, knobs: 3 };
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
 function findChrome() {
@@ -78,13 +101,23 @@ class CDP {
   constructor(url) {
     this.ws = new WebSocket(url);
     this.id = 0; this.pending = new Map(); this.waiters = new Map();
+    // 페이지가 조용히 던진 예외를 여기 모은다 — 콘솔은 헤드리스에서 아무도 안 본다.
+    this.thrown = [];
     this.ws.addEventListener("message", (ev) => {
       const m = JSON.parse(ev.data);
       if (m.id && this.pending.has(m.id)) {
         const { res, rej } = this.pending.get(m.id);
         this.pending.delete(m.id);
         if (m.error) rej(new Error(m.error.message)); else res(m.result);
-      } else if (m.method && this.waiters.has(m.method)) {
+        return;
+      }
+      if (m.method === "Runtime.exceptionThrown") {
+        const d = (m.params && m.params.exceptionDetails) || {};
+        const one = (d.exception && (d.exception.description || d.exception.value)) ||
+          d.text || "알 수 없는 예외";
+        this.thrown.push(String(one).split("\n")[0].slice(0, 120));
+      }
+      if (m.method && this.waiters.has(m.method)) {
         const w = this.waiters.get(m.method); this.waiters.delete(m.method); w();
       }
     });
@@ -133,7 +166,23 @@ async function pageWsUrl(port) {
  */
 const PROBE = `(() => {
   const de = document.documentElement;
-  const out = { sw: de.scrollWidth, cw: de.clientWidth, touch: [], labels: [], overlap: [] };
+  const out = { sw: de.scrollWidth, cw: de.clientWidth, touch: [], labels: [],
+                overlap: [], figs: 0, manifestRows: 0, knobs: 0, fails: [] };
+
+  // ── 생존 신호 — 이 지면이 실제로 그려져 있는가 ──
+  // 아래의 위반 계수기들은 요소가 없으면 전부 0 이 된다. 그러니 "무엇이 있는가"를
+  // 먼저 센다. 여기가 무너진 뷰포트에서는 나머지 0 이 통과의 근거가 아니다.
+  for (const svg of document.querySelectorAll("svg")) {
+    const vb = svg.viewBox && svg.viewBox.baseVal;
+    if (!vb || !vb.width) continue;
+    if (svg.getBoundingClientRect().width > 0) out.figs += 1;
+  }
+  const manifest = document.getElementById("method-manifest");
+  if (manifest) out.manifestRows = manifest.querySelectorAll("tbody tr").length;
+  out.knobs = document.querySelectorAll(".knob-scale").length;
+  for (const f of document.querySelectorAll(".fail")) {
+    out.fails.push(f.textContent.trim().slice(0, 90));
+  }
 
   const seen = (el) => {
     const cs = getComputedStyle(el);
@@ -262,6 +311,7 @@ async function main() {
         width: vp.w, height: vp.h, deviceScaleFactor: 1, mobile: false,
       });
       const loaded = ws.wait("Page.loadEventFired");
+      ws.thrown.length = 0;   // 이 뷰포트가 던진 것만 센다
       await ws.send("Page.navigate", { url });
       await Promise.race([loaded, sleep(9000)]);
       await sleep(700);   // defer 스크립트가 그림을 그리고 계수를 잴 시간
@@ -271,11 +321,25 @@ async function main() {
       });
       if (res.exceptionDetails) {
         throw new Error("측정 중 예외: " +
-          (res.result && res.result.description) || "알 수 없음");
+          ((res.result && res.result.description) || "알 수 없음"));
       }
       const r = JSON.parse(res.result.value);
       r.vp = `${vp.w}×${vp.h}`;
       r.overflow = r.sw > r.cw + 1;
+      r.thrown = ws.thrown.slice();
+      // 생존 하한을 못 넘긴 신호만 문장으로 남긴다 — 폭이 아니라 지면의 문제다.
+      r.dead = [];
+      if (r.figs < ALIVE_MIN.figs) {
+        r.dead.push(`도면 ${r.figs}장 < 하한 ${ALIVE_MIN.figs}장 — 그려진 그림이 없다`);
+      }
+      if (r.manifestRows < ALIVE_MIN.manifestRows) {
+        r.dead.push(`원장 표 ${r.manifestRows}행 — 방법론이 마운트되지 않았다`);
+      }
+      if (r.knobs < ALIVE_MIN.knobs) {
+        r.dead.push(`눈금 ${r.knobs}개 < 하한 ${ALIVE_MIN.knobs}개 — 조작부가 없다`);
+      }
+      for (const t of r.thrown) r.dead.push("예외 " + t);
+      for (const f of r.fails) r.dead.push("지면이 실패를 적었다: " + f);
       rows.push(r);
 
       if (!noShot) {
@@ -290,29 +354,42 @@ async function main() {
     ws.close();
 
     console.log(`\n반응형 검사 — ${path.relative(ROOT, TARGET)}`);
-    console.log("  뷰포트        scrollW  clientW  가로넘침  터치<44px  도면활자  눈금겹침");
-    console.log("  " + "-".repeat(76));
+    console.log("  뷰포트        scrollW  clientW  가로넘침  터치<44px  도면활자  눈금겹침  생존");
+    console.log("  " + "-".repeat(84));
     let failed = 0;
     for (const r of rows) {
-      const bad = r.overflow || r.touch.length || r.labels.length || r.overlap.length;
+      const bad = r.overflow || r.touch.length || r.labels.length ||
+        r.overlap.length || r.dead.length;
       if (bad) failed += 1;
       console.log("  " + r.vp.padEnd(12) +
         String(r.sw).padStart(6) + "  " + String(r.cw).padStart(7) + "  " +
         (r.overflow ? "✗ 있음" : "✓ 없음").padEnd(9) + "  " +
         (r.touch.length ? "✗ " + r.touch.length : "✓ 0").padEnd(9) + "  " +
         (r.labels.length ? "✗ " + r.labels.length : "✓ 0").padEnd(8) + "  " +
-        (r.overlap.length ? "✗ " + r.overlap.length : "✓ 0"));
-      for (const line of [...r.touch, ...r.labels, ...r.overlap]) {
+        (r.overlap.length ? "✗ " + r.overlap.length : "✓ 0").padEnd(8) + "  " +
+        (r.dead.length ? "✗ " + r.dead.length : "✓ 살아 있다"));
+      for (const line of [...r.touch, ...r.labels, ...r.overlap, ...r.dead]) {
         console.log("      · " + line);
       }
     }
+
+    // 무엇이 그려져 있었는지를 통과할 때도 적는다 — 0 이 통과의 근거가 되려면
+    // 잴 것이 있었다는 사실이 함께 남아야 한다.
+    console.log("\n  생존 신호(도면 · 원장 표 · 눈금 · 예외 · 실패 표시)");
+    for (const r of rows) {
+      console.log("    " + r.vp.padEnd(12) +
+        `도면 ${r.figs}장 · 원장 ${r.manifestRows}행 · 눈금 ${r.knobs}개 · ` +
+        `예외 ${r.thrown.length}건 · .fail ${r.fails.length}개`);
+    }
+
     if (!noShot) console.log(`\n  다크 스크린샷: ${SHOTS}`);
     if (failed) {
       console.error(`\n✗ 반응형 검사 실패 — ${failed}/${rows.length} 뷰포트`);
       exitCode = 1;
     } else {
       console.log(`\n✓ 반응형 검사 통과 — ${rows.length} 뷰포트 · 가로 오버플로 0 · ` +
-        `터치 ≥ ${MIN_TOUCH}px · 도면 활자 ≥ ${MIN_LABEL}px · 눈금 겹침 0`);
+        `터치 ≥ ${MIN_TOUCH}px · 도면 활자 ≥ ${MIN_LABEL}px · 눈금 겹침 0 · ` +
+        `도면 ≥ ${ALIVE_MIN.figs}장 · 예외 0`);
     }
   } catch (err) {
     console.error("✗ 반응형 검사 오류:", err.message);
