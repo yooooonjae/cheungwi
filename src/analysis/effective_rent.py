@@ -23,6 +23,10 @@
 한다. 밖이면 값을 돌려주지 않고 `RuntimeError` 를 던진다. 서울 오피스
 임대료의 실측 범위를 넉넉히 감싼 값이라, 여기를 벗어났다면 임대료가 틀린
 것이 아니라 단위나 자릿수가 틀린 것이다.
+
+NaN 은 게이트가 아니라 입력 검증(`ValueError`)에서 막는다. 구간표는 크기
+비교로만 칸을 고르는데 NaN 은 모든 비교가 False 라 조용히 통과하고, 그렇게
+나온 계수는 정상 float 이라 게이트에도 걸리지 않기 때문이다.
 """
 
 # 물리 게이트 경계(원/㎡·월, 양끝 포함). 서울 오피스 실측 범위를 넉넉히 감쌌다.
@@ -54,12 +58,28 @@ _REGION_RENT_FREE_MO = {
 }
 
 
+def _reject_nan(x: float, what: str) -> None:
+    """NaN 을 입력 오류로 잡는다. 자기 자신과 다른 값은 NaN 뿐이다.
+
+    NaN 은 크기 비교가 전부 False 라 구간표(`_pick`)를 조용히 통과한다.
+    막지 않으면 연면적 NaN 이 최고 프리미엄(1.08), 연식 NaN 이 최대
+    감가(0.88)로 떨어지고, 결과가 정상 float 이라 물리 게이트도 잡지 못한다.
+    """
+    if x != x:
+        raise ValueError(f"{what} 값이 NaN 이다 — 구간표를 조용히 통과하므로 막는다")
+
+
 def _pick(table: tuple[tuple[float, float], ...], x: float) -> float:
-    """구간표에서 계수를 고른다. 경계는 [하한, 상한) 반열림."""
+    """구간표에서 계수를 고른다. 경계는 [하한, 상한) 반열림.
+
+    `x` 는 NaN 이 아니어야 한다(부르는 쪽이 `_reject_nan` 으로 막는다).
+    """
     for upper, factor in table:
         if x < upper:
             return factor
-    return table[-1][1]  # 도달 불가(마지막 상한이 inf) — 방어적 반환
+    # 마지막 상한이 inf 라 정상 수치는 여기 오지 않는다. NaN 만 도달하는데
+    # 그 경우는 부르는 쪽에서 이미 막았다 — 남겨 둔 방어적 반환이다.
+    return table[-1][1]
 
 
 def _gate(rent_won_m2_mo: float, what: str) -> float:
@@ -154,12 +174,16 @@ def building_adjust(
     "assumptions": [...], "caveats": [...]}`. 보정 결과도 물리 게이트를
     통과해야 한다.
     """
+    _reject_nan(age_years, "연식")
     if age_years < 0:
         raise ValueError(f"연식은 음수일 수 없다: {age_years}")
+    _reject_nan(gfa_m2, "연면적")
     if gfa_m2 <= 0:
         raise ValueError(f"연면적은 양수여야 한다: {gfa_m2}")
-    if dist_subway_m is not None and dist_subway_m < 0:
-        raise ValueError(f"역까지 거리는 음수일 수 없다: {dist_subway_m}")
+    if dist_subway_m is not None:
+        _reject_nan(dist_subway_m, "역까지 거리")
+        if dist_subway_m < 0:
+            raise ValueError(f"역까지 거리는 음수일 수 없다: {dist_subway_m}")
 
     age = _pick(_AGE_FACTORS, age_years)
     scale = _pick(_SCALE_FACTORS, gfa_m2)

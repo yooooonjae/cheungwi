@@ -89,6 +89,19 @@ def test_rent_free_out_of_domain_is_value_error():
         effective_rent(30_000, 13.0)
 
 
+def test_nan_inputs_are_rejected_not_silently_bucketed():
+    # NaN 은 모든 비교가 False 라 구간표를 조용히 통과한다. 막지 않으면
+    # gfa=NaN 이 최고 프리미엄(1.08), age=NaN 이 최대 감가(0.88)로 떨어지고
+    # 결과는 정상 float 이라 물리 게이트도 잡지 못한다.
+    nan = float("nan")
+    with pytest.raises(ValueError):
+        building_adjust(25_000, nan, 40_000, 300)
+    with pytest.raises(ValueError):
+        building_adjust(25_000, 5, nan, 300)
+    with pytest.raises(ValueError):
+        building_adjust(25_000, 5, 40_000, nan)
+
+
 def test_region_params_are_a_copy_not_shared_state():
     # 순수 함수 규약 — 부르는 쪽이 고쳐도 다음 호출이 오염되지 않아야 한다.
     p = region_params()
