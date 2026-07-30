@@ -1,0 +1,211 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  한 지번을 여러 시드가 공유하는 필지의 표제부 표본 (IFC·파크원·마제스타시티 형태).
+
+  ★ 실응답이 아니다 — bldrgst_item_sample.xml 과 같은 사정(BldRgstHubService 403)으로
+    공개 활용가이드의 항목 정의를 본떠 손으로 지었다. 건물명·수치는 자리표시자다.
+
+  여의도동 23 한 필지에 네 동이 선 형태다. 노리는 함정은 두 가지다.
+
+   1. 세 시드(ONE·TWO·THREE)가 **같은 지번**을 조회하므로 같은 네 동을 받는다.
+      이름 매칭이 실패하면 셋이 나란히 연면적 최대(THREE)를 집는다 — 조용히, 중복으로.
+   2. **필지 전체의 연면적 최대 업무시설(브라이튼여의도 200,000㎡)이 매칭 부분집합 밖에 있다.**
+      시드 '서울국제금융센터'는 ONE·TWO·THREE 세 동에만 걸린다. 그 부분집합 안에서 좁히면
+      THREE(168,000)가, 필지 전체에서 고르면 브라이튼여의도(200,000)가 잡힌다.
+      _fallback(매칭 부분집합) 과 _fallback(전체) 를 구분해 반증할 수 있게 배치했다.
+      (앵커원이 주거동 브라이튼 여의도와 지번을 공유하는 실제 형태를 본떴다.)
+
+    item 1  서울국제금융센터 ONE     업무시설      62,000.0㎡  지상 32
+    item 2  서울국제금융센터 TWO     업무시설      96,000.0㎡  지상 29
+    item 3  서울국제금융센터 THREE   업무시설     168,000.0㎡  지상 55  ← 부분집합 내 최대
+    item 4  아이에프씨몰            판매시설      88,000.0㎡  지상  4  ← 업무시설 아님
+    item 5  브라이튼여의도 오피스동   업무시설     200,000.0㎡  지상 40  ← 필지 전체 최대
+-->
+<response>
+  <header>
+    <resultCode>00</resultCode>
+    <resultMsg>NORMAL SERVICE.</resultMsg>
+  </header>
+  <body>
+    <items>
+      <item>
+        <rnum>1</rnum>
+        <platPlc>서울특별시 영등포구 여의도동 23</platPlc>
+        <sigunguCd>11560</sigunguCd>
+        <bjdongCd>11000</bjdongCd>
+        <platGbCd>0</platGbCd>
+        <bun>0023</bun>
+        <ji>0000</ji>
+        <mgmBldrgstPk>11560-110000001</mgmBldrgstPk>
+        <regstrGbCdNm>집합</regstrGbCdNm>
+        <regstrKindCdNm>일반</regstrKindCdNm>
+        <newPlatPlc>서울특별시 영등포구 국제금융로 10</newPlatPlc>
+        <bldNm>서울국제금융센터</bldNm>
+        <dongNm>ONE</dongNm>
+        <mainAtchGbCdNm>주건축물</mainAtchGbCdNm>
+        <platArea>33000</platArea>
+        <archArea>4100</archArea>
+        <bcRat>12.42</bcRat>
+        <totArea>62000</totArea>
+        <vlRat>560.1</vlRat>
+        <strctCdNm>철골철근콘크리트구조</strctCdNm>
+        <mainPurpsCdNm>업무시설</mainPurpsCdNm>
+        <etcPurps>업무시설, 제1종근린생활시설</etcPurps>
+        <hhldCnt>0</hhldCnt>
+        <heit>140.5</heit>
+        <grndFlrCnt>32</grndFlrCnt>
+        <ugrndFlrCnt>7</ugrndFlrCnt>
+        <indrMechUtcnt>0</indrMechUtcnt>
+        <oudrMechUtcnt>0</oudrMechUtcnt>
+        <indrAutoUtcnt>420</indrAutoUtcnt>
+        <oudrAutoUtcnt>0</oudrAutoUtcnt>
+        <useAprDay>20110801</useAprDay>
+        <hoCnt>0</hoCnt>
+        <crtnDay>20260101</crtnDay>
+      </item>
+      <item>
+        <rnum>2</rnum>
+        <platPlc>서울특별시 영등포구 여의도동 23</platPlc>
+        <sigunguCd>11560</sigunguCd>
+        <bjdongCd>11000</bjdongCd>
+        <platGbCd>0</platGbCd>
+        <bun>0023</bun>
+        <ji>0000</ji>
+        <mgmBldrgstPk>11560-110000002</mgmBldrgstPk>
+        <regstrGbCdNm>집합</regstrGbCdNm>
+        <regstrKindCdNm>일반</regstrKindCdNm>
+        <newPlatPlc>서울특별시 영등포구 국제금융로 10</newPlatPlc>
+        <bldNm>서울국제금융센터</bldNm>
+        <dongNm>TWO</dongNm>
+        <mainAtchGbCdNm>주건축물</mainAtchGbCdNm>
+        <platArea>33000</platArea>
+        <archArea>3600</archArea>
+        <bcRat>10.91</bcRat>
+        <totArea>96000</totArea>
+        <vlRat>860.4</vlRat>
+        <strctCdNm>철골철근콘크리트구조</strctCdNm>
+        <mainPurpsCdNm>업무시설</mainPurpsCdNm>
+        <etcPurps>업무시설</etcPurps>
+        <hhldCnt>0</hhldCnt>
+        <heit>122.0</heit>
+        <grndFlrCnt>29</grndFlrCnt>
+        <ugrndFlrCnt>7</ugrndFlrCnt>
+        <indrMechUtcnt>0</indrMechUtcnt>
+        <oudrMechUtcnt>0</oudrMechUtcnt>
+        <indrAutoUtcnt>560</indrAutoUtcnt>
+        <oudrAutoUtcnt>0</oudrAutoUtcnt>
+        <useAprDay>20120501</useAprDay>
+        <hoCnt>0</hoCnt>
+        <crtnDay>20260101</crtnDay>
+      </item>
+      <item>
+        <rnum>3</rnum>
+        <platPlc>서울특별시 영등포구 여의도동 23</platPlc>
+        <sigunguCd>11560</sigunguCd>
+        <bjdongCd>11000</bjdongCd>
+        <platGbCd>0</platGbCd>
+        <bun>0023</bun>
+        <ji>0000</ji>
+        <mgmBldrgstPk>11560-110000003</mgmBldrgstPk>
+        <regstrGbCdNm>집합</regstrGbCdNm>
+        <regstrKindCdNm>일반</regstrKindCdNm>
+        <newPlatPlc>서울특별시 영등포구 국제금융로 10</newPlatPlc>
+        <bldNm>서울국제금융센터</bldNm>
+        <dongNm>THREE</dongNm>
+        <mainAtchGbCdNm>주건축물</mainAtchGbCdNm>
+        <platArea>33000</platArea>
+        <archArea>5200</archArea>
+        <bcRat>15.76</bcRat>
+        <totArea>168000</totArea>
+        <vlRat>1120.8</vlRat>
+        <strctCdNm>철골철근콘크리트구조</strctCdNm>
+        <mainPurpsCdNm>업무시설</mainPurpsCdNm>
+        <etcPurps>업무시설</etcPurps>
+        <hhldCnt>0</hhldCnt>
+        <heit>284.0</heit>
+        <grndFlrCnt>55</grndFlrCnt>
+        <ugrndFlrCnt>7</ugrndFlrCnt>
+        <indrMechUtcnt>0</indrMechUtcnt>
+        <oudrMechUtcnt>0</oudrMechUtcnt>
+        <indrAutoUtcnt>980</indrAutoUtcnt>
+        <oudrAutoUtcnt>0</oudrAutoUtcnt>
+        <useAprDay>20120801</useAprDay>
+        <hoCnt>0</hoCnt>
+        <crtnDay>20260101</crtnDay>
+      </item>
+      <item>
+        <rnum>4</rnum>
+        <platPlc>서울특별시 영등포구 여의도동 23</platPlc>
+        <sigunguCd>11560</sigunguCd>
+        <bjdongCd>11000</bjdongCd>
+        <platGbCd>0</platGbCd>
+        <bun>0023</bun>
+        <ji>0000</ji>
+        <mgmBldrgstPk>11560-110000004</mgmBldrgstPk>
+        <regstrGbCdNm>집합</regstrGbCdNm>
+        <regstrKindCdNm>일반</regstrKindCdNm>
+        <newPlatPlc>서울특별시 영등포구 국제금융로 10</newPlatPlc>
+        <bldNm>아이에프씨몰</bldNm>
+        <dongNm> </dongNm>
+        <mainAtchGbCdNm>주건축물</mainAtchGbCdNm>
+        <platArea>33000</platArea>
+        <archArea>12000</archArea>
+        <bcRat>36.36</bcRat>
+        <totArea>88000</totArea>
+        <vlRat>210.5</vlRat>
+        <strctCdNm>철근콘크리트구조</strctCdNm>
+        <mainPurpsCdNm>판매시설</mainPurpsCdNm>
+        <etcPurps>판매시설, 문화및집회시설</etcPurps>
+        <hhldCnt>0</hhldCnt>
+        <heit>28.0</heit>
+        <grndFlrCnt>4</grndFlrCnt>
+        <ugrndFlrCnt>3</ugrndFlrCnt>
+        <indrMechUtcnt>0</indrMechUtcnt>
+        <oudrMechUtcnt>0</oudrMechUtcnt>
+        <indrAutoUtcnt>1200</indrAutoUtcnt>
+        <oudrAutoUtcnt>0</oudrAutoUtcnt>
+        <useAprDay>20120801</useAprDay>
+        <hoCnt>0</hoCnt>
+        <crtnDay>20260101</crtnDay>
+      </item>
+      <item>
+        <rnum>5</rnum>
+        <platPlc>서울특별시 영등포구 여의도동 23</platPlc>
+        <sigunguCd>11560</sigunguCd>
+        <bjdongCd>11000</bjdongCd>
+        <platGbCd>0</platGbCd>
+        <bun>0023</bun>
+        <ji>0000</ji>
+        <mgmBldrgstPk>11560-110000005</mgmBldrgstPk>
+        <regstrGbCdNm>집합</regstrGbCdNm>
+        <regstrKindCdNm>일반</regstrKindCdNm>
+        <newPlatPlc>서울특별시 영등포구 국제금융로 12</newPlatPlc>
+        <bldNm>브라이튼여의도</bldNm>
+        <dongNm>오피스동</dongNm>
+        <mainAtchGbCdNm>주건축물</mainAtchGbCdNm>
+        <platArea>33000</platArea>
+        <archArea>6100</archArea>
+        <bcRat>18.48</bcRat>
+        <totArea>200000</totArea>
+        <vlRat>1180.2</vlRat>
+        <strctCdNm>철골철근콘크리트구조</strctCdNm>
+        <mainPurpsCdNm>업무시설</mainPurpsCdNm>
+        <etcPurps>업무시설, 제1종근린생활시설</etcPurps>
+        <hhldCnt>0</hhldCnt>
+        <heit>168.0</heit>
+        <grndFlrCnt>40</grndFlrCnt>
+        <ugrndFlrCnt>6</ugrndFlrCnt>
+        <indrMechUtcnt>0</indrMechUtcnt>
+        <oudrMechUtcnt>0</oudrMechUtcnt>
+        <indrAutoUtcnt>1100</indrAutoUtcnt>
+        <oudrAutoUtcnt>0</oudrAutoUtcnt>
+        <useAprDay>20240301</useAprDay>
+        <hoCnt>0</hoCnt>
+        <crtnDay>20260101</crtnDay>
+      </item>
+    </items>
+    <numOfRows>100</numOfRows>
+    <pageNo>1</pageNo>
+    <totalCount>5</totalCount>
+  </body>
+</response>

@@ -1,9 +1,17 @@
+import json
+
+import pytest
+
 from src.collect.common import ROOT
 from src.collect.buildings import parse_title_items, pick_main_building, bun_ji, physical_flags
 
 
 def _xml():
     return (ROOT / "tests" / "fixtures" / "bldrgst_item_sample.xml").read_text()
+
+
+def _shared_xml():
+    return (ROOT / "tests" / "fixtures" / "bldrgst_shared_parcel_sample.xml").read_text()
 
 
 def test_bun_ji():
@@ -80,6 +88,233 @@ def test_ledger_parking_is_sum_of_four_counts():
     assert ledger["parking"] == 0 + 0 + 1462 + 36
     assert ledger["useAprDay"] == "20010601"
     assert ledger["bldNm"] == "가나타워"
-    assert set(ledger) == {"bldNm", "dongNm", "totArea", "archArea", "platArea",
+    assert ledger["mgmBldrgstPk"] == "11680-100000001"
+    assert set(ledger) == {"mgmBldrgstPk", "bldNm", "dongNm", "totArea", "archArea", "platArea",
                            "grndFlrCnt", "ugrndFlrCnt", "heit", "useAprDay",
                            "mainPurpsCdNm", "etcPurps", "vlRat", "bcRat", "parking", "hoCnt"}
+
+
+# ── 필지 공유 시드의 중복 배정 방지 (IFC 3동·파크원 2동·마제스타 2동 형태) ────────────
+
+def test_shared_parcel_alias_beats_area_max():
+    """필지 전체 최대(브라이튼 200,000)를 제치고 이름이 걸린 동을 집는다."""
+    from src.collect.buildings import pick_main_with_method
+    items = parse_title_items(_shared_xml())
+    assert len(items) == 5
+    assert max(i["totArea"] for i in items) == 200000.0      # 브라이튼여의도 오피스동
+    main, how = pick_main_with_method(items, {"name": "서울국제금융센터 ONE",
+                                              "aliases": ["IFC ONE", "IFC 1"]})
+    assert (main["dongNm"], main["totArea"], how) == ("ONE", 62000.0, "alias")
+
+
+def test_alias_fallback_narrows_within_matched_not_whole_parcel():
+    """매칭 부분집합 안에서 좁혀야 한다 — 필지 전체에서 고르면 남의 건물을 집는다.
+
+    '서울국제금융센터'는 ONE·TWO·THREE 에만 걸린다. 그 안의 최대는 THREE(168,000)이고,
+    필지 전체의 최대 업무시설은 브라이튼여의도(200,000)다. _fallback(items) 로 새면 후자가
+    잡히므로, 이 단언이 두 경로를 실제로 갈라낸다.
+    """
+    from src.collect.buildings import pick_main_with_method
+    items = parse_title_items(_shared_xml())
+    main, how = pick_main_with_method(items, {"name": "서울국제금융센터"})
+    assert how == "alias_fallback"
+    assert (main["dongNm"], main["totArea"]) == ("THREE", 168000.0)
+    assert main["bldNm"] != "브라이튼여의도", "필지 전체에서 골랐다 — 부분집합을 벗어났다"
+
+
+def test_shared_parcel_three_seeds_get_three_different_dongs():
+    """세 시드가 같은 응답을 받아도 서로 다른 동을 집어야 한다."""
+    from src.collect.buildings import pick_main_with_method
+    items = parse_title_items(_shared_xml())
+    picked = {}
+    for nm in ("서울국제금융센터 ONE", "서울국제금융센터 TWO", "서울국제금융센터 THREE"):
+        main, how = pick_main_with_method(items, {"name": nm})
+        picked[nm] = main["mgmBldrgstPk"]
+        assert how == "alias"
+    assert len(set(picked.values())) == 3, f"중복 배정: {picked}"
+
+
+def test_fallback_is_reported_so_duplicates_are_visible():
+    """이름이 안 걸리면 폴백이라는 사실이 드러나야 한다 — 조용히 넘어가면 안 된다."""
+    from src.collect.buildings import pick_main_with_method
+    items = parse_title_items(_shared_xml())
+    main, how = pick_main_with_method(items, {"name": "이름이 전혀 안 걸리는 빌딩"})
+    assert how == "fallback"
+    assert main["bldNm"] == "브라이튼여의도"   # 필지 전체에서 업무시설 우선 + 연면적 최대
+    # 같은 필지의 두 시드가 나란히 폴백하면 같은 동을 집는다 — 이게 바로 잡아야 할 사고다
+    other, _ = pick_main_with_method(items, {"name": "역시 안 걸리는 빌딩"})
+    assert other["mgmBldrgstPk"] == main["mgmBldrgstPk"]
+
+
+def test_duplicate_assignments_detects_collision():
+    from src.collect.buildings import duplicate_assignments
+    rows = [{"id": "ifc-one", "ledger": {"mgmBldrgstPk": "PK-3"}},
+            {"id": "ifc-two", "ledger": {"mgmBldrgstPk": "PK-3"}},
+            {"id": "ifc-three", "ledger": {"mgmBldrgstPk": "PK-9"}},
+            {"id": "no-ledger", "ledger": None}]
+    assert duplicate_assignments(rows) == {"PK-3": ["ifc-one", "ifc-two"]}
+    assert duplicate_assignments([{"id": "a", "ledger": {"mgmBldrgstPk": "X"}}]) == {}
+
+
+# ── data.go.kr 200-봉투 오류 분기 ────────────────────────────────────────────
+
+def _envelope(code, msg):
+    return ('<?xml version="1.0"?><OpenAPI_ServiceResponse><cmmMsgHeader>'
+            f'<errMsg>SERVICE ERROR</errMsg><returnAuthMsg>{msg}</returnAuthMsg>'
+            f'<returnReasonCode>{code}</returnReasonCode>'
+            '</cmmMsgHeader></OpenAPI_ServiceResponse>')
+
+
+def test_envelope_error_parses_gateway_envelope():
+    from src.collect.buildings import envelope_error
+    assert envelope_error(_envelope("22", "LIMITED_NUMBER_OF_SERVICE_REQUESTS_EXCEEDS_ERROR")) \
+        == ("22", "LIMITED_NUMBER_OF_SERVICE_REQUESTS_EXCEEDS_ERROR")
+    # 정상 응답은 봉투가 아니다 — resultCode 경로로 가야 한다
+    assert envelope_error(_xml()) is None
+    assert envelope_error("") is None and envelope_error("<html>Forbidden</html>") is None
+
+
+def test_envelope_branches_by_reason_code():
+    """권한·쿼터·데이터없음은 성격이 달라 서로 다른 예외로 갈라져야 한다."""
+    from src.collect.buildings import (_raise_for_envelope, LedgerAccessDenied,
+                                       LedgerQuotaExceeded, LedgerNoData)
+    with pytest.raises(LedgerAccessDenied):
+        _raise_for_envelope("30", "SERVICE_ACCESS_DENIED_ERROR", "어디")
+    with pytest.raises(LedgerQuotaExceeded):
+        _raise_for_envelope("22", "LIMITED_NUMBER_OF_SERVICE_REQUESTS_EXCEEDS_ERROR", "어디")
+    with pytest.raises(LedgerNoData):
+        _raise_for_envelope("03", "NODATA_ERROR", "어디")
+    # 사유코드를 못 읽어도 메시지로 판정한다
+    with pytest.raises(LedgerQuotaExceeded):
+        _raise_for_envelope("", "LIMITED_NUMBER_OF_SERVICE_REQUESTS_EXCEEDS_ERROR", "어디")
+    # 모르는 코드는 삼키지 않고 올린다
+    with pytest.raises(RuntimeError):
+        _raise_for_envelope("99", "WHAT_IS_THIS", "어디")
+
+
+def test_fetch_page_raises_typed_error_on_200_envelope(tmp_path, monkeypatch):
+    """HTTP 200 + 오류 봉투가 '빈 응답'으로 오인돼 재시도만 하다 죽지 않아야 한다."""
+    from src.collect import buildings as B
+    monkeypatch.setattr(B, "RAW_DIR", tmp_path)
+    monkeypatch.setattr(B.time, "sleep", lambda s: None)
+    calls = {"n": 0}
+
+    def fake_api_get(url, params, **kw):
+        calls["n"] += 1
+        return 200, _envelope("22", "LIMITED_NUMBER_OF_SERVICE_REQUESTS_EXCEEDS_ERROR")
+    monkeypatch.setattr(B, "api_get", fake_api_get)
+
+    with pytest.raises(B.LedgerQuotaExceeded):
+        B._fetch_page("11560", "11000", "0023", "0000", 1, "KEY")
+    assert calls["n"] == 1, f"봉투는 재시도해도 같은 답이다 — 1회로 끝나야 하는데 {calls['n']}회"
+    assert list(tmp_path.glob("*.xml")) == [], "오류 응답을 캐시에 박제하면 안 된다"
+
+
+def test_quota_stops_ledger_but_saves(tmp_path, monkeypatch):
+    """쿼터 소진은 실패가 아니다 — 저장까지 가고 RESUME_NEEDED 로 끝나야 한다."""
+    from src.collect import buildings as B
+    monkeypatch.setattr(B, "OUT_PATH", tmp_path / "buildings.json")
+    monkeypatch.setattr(B, "load_config", lambda: {"service_key": "K", "vworld_key": "V"})
+    monkeypatch.setattr(B, "_ensure_ldong", lambda: [])
+    monkeypatch.setattr(B, "bjdong_index", lambda lines: {("11560", "여의도동"): "11000"})
+    monkeypatch.setattr(B, "SEED_PATH", tmp_path / "seed.json")
+    (tmp_path / "seed.json").write_text(json.dumps({"buildings": [
+        {"id": "a", "name": "가", "region": "YBD", "sgg_cd": "11560", "umd": "여의도동",
+         "jibun": "23", "address_road": "서울 영등포구 국제금융로 10"},
+        {"id": "b", "name": "나", "region": "YBD", "sgg_cd": "11560", "umd": "여의도동",
+         "jibun": "22", "address_road": "서울 영등포구 여의대로 108"}]}, ensure_ascii=False))
+
+    def boom(*a, **kw):
+        raise B.LedgerQuotaExceeded("일일 쿼터 소진")
+    monkeypatch.setattr(B, "fetch_title_items", boom)
+    monkeypatch.setattr(B, "_vworld_cached", lambda key, seed, pnu: {
+        "lat": 37.5, "lon": 126.9, "zones": ["일반상업지역"], "pnu": pnu,
+        "land_price_won_m2": 1, "land_price_year": "2025",
+        "pnu_at_point": pnu, "jibun_check": ""})
+
+    result = B.collect()
+    assert result["meta"]["complete"] is False           # → main() 이 RESUME_NEEDED 를 찍는다
+    assert "쿼터" in result["meta"]["ledger_status"]
+    assert (tmp_path / "buildings.json").exists(), "쿼터 소진 시에도 저장에 도달해야 한다"
+    assert len(result["buildings"]) == 2
+
+
+def test_nodata_is_per_building_and_keeps_going(tmp_path, monkeypatch):
+    """데이터 없음은 그 건만 failed 로 남기고 나머지는 계속한다."""
+    from src.collect import buildings as B
+    monkeypatch.setattr(B, "OUT_PATH", tmp_path / "buildings.json")
+    monkeypatch.setattr(B, "load_config", lambda: {"service_key": "K", "vworld_key": "V"})
+    monkeypatch.setattr(B, "_ensure_ldong", lambda: [])
+    monkeypatch.setattr(B, "bjdong_index", lambda lines: {("11560", "여의도동"): "11000"})
+    monkeypatch.setattr(B, "SEED_PATH", tmp_path / "seed.json")
+    (tmp_path / "seed.json").write_text(json.dumps({"buildings": [
+        {"id": "a", "name": "서울국제금융센터 ONE", "region": "YBD", "sgg_cd": "11560",
+         "umd": "여의도동", "jibun": "23", "address_road": "서울 영등포구 국제금융로 10"},
+        {"id": "b", "name": "나", "region": "YBD", "sgg_cd": "11560", "umd": "여의도동",
+         "jibun": "22", "address_road": "서울 영등포구 여의대로 108"}]}, ensure_ascii=False))
+
+    def fetch(sgg, bj, bun, ji, key):
+        if bun == "0022":
+            raise B.LedgerNoData("대장 조회 결과 없음 — 사유코드 03 NODATA_ERROR")
+        return parse_title_items(_shared_xml())
+    monkeypatch.setattr(B, "fetch_title_items", fetch)
+    monkeypatch.setattr(B, "_vworld_cached", lambda key, seed, pnu: {
+        "lat": 37.5, "lon": 126.9, "zones": ["일반상업지역"], "pnu": pnu,
+        "land_price_won_m2": 1, "land_price_year": "2025",
+        "pnu_at_point": pnu, "jibun_check": ""})
+
+    result = B.collect()
+    assert result["meta"]["matched"] == 1
+    assert [f["id"] for f in result["meta"]["failed"]] == ["b"]
+    assert result["buildings"][0]["ledger"]["dongNm"] == "ONE"
+    assert result["buildings"][0]["match_method"] == "alias"
+
+
+# ── VWorld 캐시 ─────────────────────────────────────────────────────────────
+
+def test_vworld_cache_refetches_when_input_changed(tmp_path, monkeypatch):
+    """캐시 키가 시드 id 뿐이면 주소·PNU가 바뀌어도 옛 결과를 준다."""
+    from src.collect import buildings as B
+    monkeypatch.setattr(B, "VWORLD_RAW_DIR", tmp_path)
+    seed = {"id": "x", "address_road": "서울 강남구 테헤란로 152"}
+    calls = []
+
+    def fake_lookup(key, road, pnu=""):
+        calls.append((road, pnu))
+        return {"lat": 37.5, "lon": 127.0, "zones": ["일반상업지역"], "pnu": pnu,
+                "land_price_won_m2": 1, "land_price_year": "2025",
+                "pnu_at_point": "", "jibun_check": ""}
+    monkeypatch.setattr(B, "vworld_lookup", fake_lookup)
+
+    B._vworld_cached("K", seed, "PNU-A")
+    B._vworld_cached("K", seed, "PNU-A")            # 캐시 적중 — 호출 없음
+    assert len(calls) == 1
+    B._vworld_cached("K", seed, "PNU-B")            # PNU 바뀜 → 재조회
+    assert len(calls) == 2
+    B._vworld_cached("K", {**seed, "address_road": "서울 강남구 테헤란로 999"}, "PNU-B")
+    assert len(calls) == 3, "주소가 바뀌면 재조회해야 한다"
+
+
+def test_vworld_cache_skips_incomplete_results(tmp_path, monkeypatch):
+    """반쪽 결과(공시지가 오류·빈 용도지역)를 캐시에 박제하면 영구히 반쪽이 된다."""
+    from src.collect import buildings as B
+    monkeypatch.setattr(B, "VWORLD_RAW_DIR", tmp_path)
+    seed = {"id": "y", "address_road": "서울 어딘가"}
+    bad = [
+        {"error": "지오코딩 실패(NOT_FOUND)"},
+        {"lat": None, "lon": None, "zones": [], "pnu": "P", "land_price_won_m2": 0},
+        {"lat": 37.5, "lon": 127.0, "zones": [], "pnu": "P", "land_price_won_m2": 1},
+        {"lat": 37.5, "lon": 127.0, "zones": ["상업"], "pnu": "P", "land_price_won_m2": 0,
+         "land_price_error": "2025년 공시지가 행 없음"},
+    ]
+    for payload in bad:
+        monkeypatch.setattr(B, "vworld_lookup", lambda k, r, p="", _v=payload: dict(_v))
+        B._vworld_cached("K", seed, "P")
+        assert list(tmp_path.glob("*.json")) == [], f"캐시하면 안 되는 결과를 캐시했다: {payload}"
+
+    good = {"lat": 37.5, "lon": 127.0, "zones": ["일반상업지역"], "pnu": "P",
+            "land_price_won_m2": 67300000, "land_price_year": "2025",
+            "pnu_at_point": "P", "jibun_check": "737 대"}
+    monkeypatch.setattr(B, "vworld_lookup", lambda k, r, p="": dict(good))
+    B._vworld_cached("K", seed, "P")
+    assert len(list(tmp_path.glob("*.json"))) == 1

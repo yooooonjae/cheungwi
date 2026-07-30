@@ -22,12 +22,17 @@ VWorld가 돌려준 필지 지번은 `vworld.jibun_check` 에 참고로만 적�
 (1)에서 자동으로 밀려나고 '아셈' 같은 키가 앞선다.
 
 ── 2026-07-30 현재 대장 API는 잠겨 있다 ────────────────────────────────────
-BldRgstHubService 는 전 오퍼레이션이 HTTP 403 Forbidden 이다. 같은 service_key로
-RTMSDataSvcNrgTrade(200)·ArchPmsHubService(200)는 정상이고, 키를 망가뜨리면 401, 없는
-오퍼레이션은 404가 오므로 **키·경로 문제가 아니라 이 서비스에 활용신청이 안 된 것**이다
-(구 BldRgstService_v2 는 없는 서비스와 같은 500을 돌려준다 — 폐지된 것으로 보인다).
+BldRgstHubService 는 전 오퍼레이션이 HTTP 200 이 아닌 평문 403 Forbidden 이다. 같은
+service_key로 RTMSDataSvcNrgTrade(200)·ArchPmsHubService(200)는 정상이고, 키를 망가뜨리면
+401, 없는 오퍼레이션은 404가 온다. 그러므로 키도 경로도 유효한데 **이 키에 이 서비스
+접근 권한이 없다**는 뜻이다 — data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은
+게이트웨이 단 차단(IP·요금제 등)에서도 똑같이 나오므로 단정하지는 않는다.
+(구 BldRgstService_v2 는 없는 서비스와 같은 500을 돌려준다 — 폐지된 것으로 보인다.)
 그래서 collect()는 대장이 잠겨 있어도 VWorld 부분을 수집해 저장하고 마지막 줄에 RESUME_NEEDED
-를 찍는다. 활용신청이 승인된 뒤 다시 실행하면 캐시된 VWorld는 재호출 없이 통과하고 대장만 채운다.
+를 찍는다. 권한이 열린 뒤 다시 실행하면 캐시된 VWorld는 재호출 없이 통과하고 대장만 채운다.
+
+쿼터 소진(봉투 22)도 같은 방식으로 저장까지 가고 RESUME_NEEDED 로 끝난다 — 실패가 아니라
+다음 실행이 이어받을 일이다. 데이터 없음(봉투 03)만 건별 failed 로 남기고 계속한다.
 """
 
 import datetime
@@ -86,7 +91,55 @@ PARKING_FIELDS = ("indrMechUtcnt", "oudrMechUtcnt", "indrAutoUtcnt", "oudrAutoUt
 
 
 class LedgerAccessDenied(RuntimeError):
-    """대장 API가 서비스 단위로 잠겨 있다(401/403). 건별 실패가 아니라 전역 사유다."""
+    """대장 API에 이 키의 접근 권한이 없다(401/403 또는 봉투 20·30·31·32). 전역 사유다."""
+
+
+class LedgerQuotaExceeded(RuntimeError):
+    """일일 호출 쿼터 소진(봉투 22). 전역 사유이되 실패가 아니다 — 저장하고 다음 실행이 이어받는다."""
+
+
+class LedgerNoData(RuntimeError):
+    """조회 결과 없음(봉투 03). 건별 사유다 — 그 건만 failed에 남기고 계속한다."""
+
+
+# data.go.kr 게이트웨이 오류 봉투의 returnReasonCode 분류
+ENVELOPE_DENIED = {"20", "30", "31", "32"}   # 권한 없음·기한 만료·미등록 IP
+ENVELOPE_QUOTA = {"22"}                      # 일일 트래픽 초과
+ENVELOPE_NODATA = {"03"}                     # 데이터 없음
+
+
+def envelope_error(xml_text: str):
+    """data.go.kr 게이트웨이 오류 봉투 → (사유코드, 메시지). 봉투가 아니면 None.
+
+    이 게이트웨이는 오류를 **HTTP 200 + 다른 루트 엘리먼트**로 돌려준다. 정상 응답의
+    `<response><header><resultCode>` 대신 `<OpenAPI_ServiceResponse><cmmMsgHeader>`가 오므로
+    resultCode만 보고 판정하면 쿼터 소진·권한 거부가 '빈 응답'으로 오인돼 재시도만 하다 죽는다.
+    """
+    if "cmmMsgHeader" not in (xml_text or ""):
+        return None
+    try:
+        root = ET.fromstring(xml_text)
+    except ET.ParseError:
+        return None
+    hdr = root.find(".//cmmMsgHeader")
+    if hdr is None:
+        return None
+    code = (hdr.findtext("returnReasonCode") or "").strip()
+    msg = (hdr.findtext("returnAuthMsg") or hdr.findtext("errMsg") or "").strip()
+    return code, msg
+
+
+def _raise_for_envelope(code: str, msg: str, where: str):
+    """오류 봉투를 성격별 예외로 올린다. 재시도해도 소용없는 것들이라 즉시 던진다."""
+    detail = f"{where}: 사유코드 {code or '?'} {msg or '(메시지 없음)'}"
+    if code in ENVELOPE_QUOTA or "LIMITED_NUMBER_OF_SERVICE_REQUESTS" in msg:
+        raise LedgerQuotaExceeded(f"대장 API 일일 쿼터 소진 — {detail}")
+    if code in ENVELOPE_DENIED or "SERVICE_ACCESS_DENIED" in msg or "DEADLINE" in msg \
+            or "UNREGISTERED" in msg:
+        raise LedgerAccessDenied(f"대장 API 접근 권한 없음 — {detail}")
+    if code in ENVELOPE_NODATA or "NODATA" in msg:
+        raise LedgerNoData(f"대장 조회 결과 없음 — {detail}")
+    raise RuntimeError(f"대장 API 오류 봉투 — {detail}")
 
 
 # ── 순수 함수 ────────────────────────────────────────────────────────────────
@@ -144,15 +197,18 @@ def _fallback(items: list) -> dict:
     return sorted(items, key=rank)[0]
 
 
-def pick_main_building(items: list, seed: dict):
-    """한 필지의 여러 동 중 시드가 가리키는 본건물. 못 고르면 None.
+def pick_main_with_method(items: list, seed: dict):
+    """`pick_main_building`과 같되 (선택된 동, 선택 방법)을 함께 돌려준다.
 
-    이름 매칭이 먼저다. 시드의 name·aliases 각각이 몇 동에 걸리는지 세어 **가장 적은 동에
-    걸리는 키**(=필지 안에서 변별력이 가장 큰 키)를 채택한다. 단지명처럼 전 동에 걸리는
-    alias는 이 규칙에서 자동으로 밀려난다. 그래도 여러 동이 남으면 그 안에서만 폴백한다.
+    방법은 셋이다.
+      `"alias"`          이름·별칭이 정확히 한 동에 걸렸다 — 가장 믿을 만하다.
+      `"alias_fallback"` 이름이 여러 동에 걸려 그 부분집합 안에서 용도·연면적으로 좁혔다.
+      `"fallback"`       이름이 아무 동에도 안 걸려 필지 전체에서 골랐다 — **믿을 수 없다.**
+    필지를 공유하는 시드가 여럿일 때 `"fallback"`은 서로 같은 동을 집을 수 있으므로,
+    호출자는 이 값을 행에 남겨 사람이 볼 수 있게 해야 한다.
     """
     if not items:
-        return None
+        return None, "none"
     best = None  # (걸린 동 수, 키 순서) 가 가장 작은 후보
     for order, key in enumerate(_match_keys(seed)):
         # 포함 방향은 '키 ⊂ 대장 이름' 한쪽뿐이다. 반대 방향까지 허용하면 대장의 짧은 단지명이
@@ -164,15 +220,44 @@ def pick_main_building(items: list, seed: dict):
         if best is None or (len(hit), order) < (len(best[0]), best[1]):
             best = (hit, order)
     if best is not None:
-        return best[0][0] if len(best[0]) == 1 else _fallback(best[0])
+        if len(best[0]) == 1:
+            return best[0][0], "alias"
+        return _fallback(best[0]), "alias_fallback"
     if NOTE_BAN_AREA_MAX in (seed.get("note") or ""):
-        return None      # 이름으로만 고르라고 시드가 못박은 필지 — 엉뚱한 동을 집느니 실패로 남긴다
-    return _fallback(items)
+        return None, "none"  # 이름으로만 고르라고 못박은 필지 — 엉뚱한 동을 집느니 실패로 남긴다
+    return _fallback(items), "fallback"
+
+
+def pick_main_building(items: list, seed: dict):
+    """한 필지의 여러 동 중 시드가 가리키는 본건물. 못 고르면 None.
+
+    이름 매칭이 먼저다. 시드의 name·aliases 각각이 몇 동에 걸리는지 세어 **가장 적은 동에
+    걸리는 키**(=필지 안에서 변별력이 가장 큰 키)를 채택한다. 단지명처럼 전 동에 걸리는
+    alias는 이 규칙에서 자동으로 밀려난다. 그래도 여러 동이 남으면 그 안에서만 폴백한다.
+    """
+    return pick_main_with_method(items, seed)[0]
+
+
+def duplicate_assignments(rows: list) -> dict:
+    """두 시드가 같은 대장 동(`mgmBldrgstPk`)을 집었는지 찾는다 → {대장키: [시드 id, ...]}.
+
+    IFC 3동·파크원 2동·마제스타시티 2동처럼 **한 지번을 여러 시드가 공유**하는 경우, 이름
+    매칭이 실패하면 셋이 나란히 같은 폴백 동을 집는다. 그것도 조용히. 필지 단위로는 어떤
+    검증도 이 사고를 잡지 못하므로 수집이 끝난 뒤 전체를 훑어 교차 검사한다.
+    """
+    seen = {}
+    for row in rows:
+        pk = (row.get("ledger") or {}).get("mgmBldrgstPk")
+        if pk:
+            seen.setdefault(pk, []).append(row["id"])
+    return {pk: ids for pk, ids in seen.items() if len(ids) > 1}
 
 
 def to_ledger(item: dict) -> dict:
     """표제부 item → 산출 스키마의 ledger 딕셔너리. parking은 기계식·자주식 4항목의 합."""
     return {
+        # 대장 동의 고유키. 두 시드가 같은 동을 집는 사고를 잡는 유일한 근거라 반드시 보존한다.
+        "mgmBldrgstPk": item.get("mgmBldrgstPk", ""),
         "bldNm": item.get("bldNm", ""),
         "dongNm": item.get("dongNm", ""),
         "totArea": item.get("totArea", 0.0),
@@ -257,6 +342,7 @@ def _fetch_page(sgg: str, bjdong: str, bun: str, ji: str, page: int, key: str) -
         return cache.read_text(encoding="utf-8")
     params = {"sigunguCd": sgg, "bjdongCd": bjdong, "platGbCd": "0", "bun": bun, "ji": ji,
               "numOfRows": str(PER_PAGE), "pageNo": str(page), "serviceKey": key}
+    where = f"{sgg}/{bjdong}/{bun}-{ji} p{page}"
     status, text = -1, ""
     for attempt in range(EMPTY_RETRIES + 1):
         status, text = call_with_backoff(
@@ -264,20 +350,25 @@ def _fetch_page(sgg: str, bjdong: str, bun: str, ji: str, page: int, key: str) -
         time.sleep(CALL_GAP)
         if status in (401, 403):
             raise LedgerAccessDenied(
-                f"건축물대장 표제부 HTTP {status} — 이 service_key는 BldRgstHubService에 "
-                f"활용신청이 되어 있지 않다(응답: {text.strip()[:80]!r}). "
-                f"data.go.kr에서 활용신청·승인 후 다시 실행하라.")
-        if status == 200 and text and "<resultCode>" in text:
-            break
+                f"건축물대장 표제부 HTTP {status} — 이 service_key에 BldRgstHubService 접근 "
+                f"권한이 없다(응답: {text.strip()[:80]!r}). data.go.kr 활용신청 미승인이 가장 "
+                f"유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. {where}")
+        if status == 200 and text:
+            env = envelope_error(text)
+            if env:                       # 재시도해도 같은 답이 온다 — 성격별로 즉시 분기
+                _raise_for_envelope(env[0], env[1], where)
+            if "<resultCode>" in text:
+                break
         time.sleep(2.0 * (attempt + 1))
     if not (status == 200 and text and "<resultCode>" in text):
         raise RuntimeError(f"대장 빈/이상 응답 {sgg}/{bjdong}/{bun}-{ji} p{page}: "
                            f"status={status} len={len(text or '')} body={text[:200]!r}")
     root = ET.fromstring(text)
-    rc = root.findtext("./header/resultCode")
+    rc = (root.findtext("./header/resultCode") or "").strip()
     if rc not in ("00", "000"):
-        raise RuntimeError(f"대장 응답오류 {rc} {sgg}/{bjdong}/{bun}-{ji} p{page}: "
-                           f"{root.findtext('./header/resultMsg')}")
+        # 정상 봉투 안의 오류코드도 같은 분류를 쓴다(선행 0 제거: "03"·"030" 모두 NODATA)
+        _raise_for_envelope(rc.lstrip("0").zfill(2),
+                            (root.findtext("./header/resultMsg") or "").strip(), where)
     cache.write_text(text, encoding="utf-8")
     return text
 
@@ -302,11 +393,26 @@ def fetch_title_items(sgg: str, bjdong: str, bun: str, ji: str, key: str) -> lis
 
 # ── VWorld 체인 ──────────────────────────────────────────────────────────────
 
+VWORLD_TRIES = 3          # 일시적 타임아웃·끊김 재시도 횟수
+
+
 def _vworld_get(url: str, params: dict) -> dict:
+    """VWorld 한 단계 호출. 일시적 네트워크 오류만 재시도한다.
+
+    55동 × 4단계 = 220회를 도는 동안 한 번의 읽기 타임아웃이 전 실행을 죽이고 저장에도
+    이르지 못하는 일이 실제로 났다(2026-07-30). 마지막 시도까지 실패하면 예외를 그대로
+    올려 호출자가 그 건을 실패로 기록하게 한다 — 삼키지 않는다.
+    """
     qs = urllib.parse.urlencode(params, safe="%(),:|")
     req = urllib.request.Request(f"{url}?{qs}", headers={"User-Agent": "cheungwi/0.1"})
-    with urllib.request.urlopen(req, timeout=20) as r:
-        return json.loads(r.read())
+    for attempt in range(VWORLD_TRIES):
+        try:
+            with urllib.request.urlopen(req, timeout=20) as r:
+                return json.loads(r.read())
+        except Exception:
+            if attempt == VWORLD_TRIES - 1:
+                raise
+            time.sleep(2.0 * (attempt + 1))
 
 
 def seed_pnu(sgg_cd: str, bjdong: str, jibun: str) -> str:
@@ -380,15 +486,37 @@ def vworld_lookup(key: str, address_road: str, pnu: str = "") -> dict:
     return out
 
 
+def _vworld_complete(got: dict) -> bool:
+    """캐시해도 좋을 만큼 온전한 결과인가.
+
+    반쪽 결과를 캐시하면 "캐시가 있으면 호출하지 않는다" 규칙 탓에 영구히 반쪽으로 남는다.
+    좌표·용도지역·공시지가가 모두 채워진 것만 박제한다.
+    """
+    return ("error" not in got and got.get("lat") is not None and got.get("lon") is not None
+            and bool(got.get("zones")) and not got.get("land_price_error")
+            and bool(got.get("land_price_won_m2")))
+
+
 def _vworld_cached(key: str, seed: dict, pnu: str) -> dict:
-    """건물 단위 VWorld 캐시. 지오코딩 실패는 캐시하지 않는다(다음 실행이 다시 시도한다)."""
+    """건물 단위 VWorld 캐시. 입력이 바뀌었거나 결과가 반쪽이면 캐시를 쓰지 않는다.
+
+    캐시 키를 시드 id 하나로 두면 시드의 도로명주소나 지번이 고쳐져도 옛 좌표·공시지가를
+    그대로 돌려준다 — 조용히, 영원히. 그래서 조회에 쓴 입력을 캐시에 함께 적고 대조한다.
+    """
     VWORLD_RAW_DIR.mkdir(parents=True, exist_ok=True)
     cache = VWORLD_RAW_DIR / f"{seed['id']}.json"
+    want = {"address_road": seed["address_road"], "pnu": pnu}
     if cache.exists():
-        return json.loads(cache.read_text(encoding="utf-8"))
-    got = vworld_lookup(key, seed["address_road"], pnu)
-    if "error" not in got:
-        cache.write_text(json.dumps(got, ensure_ascii=False, indent=1), encoding="utf-8")
+        payload = json.loads(cache.read_text(encoding="utf-8"))
+        if payload.get("input") == want:
+            return payload["result"]
+    try:
+        got = vworld_lookup(key, seed["address_road"], pnu)
+    except Exception as e:      # 한 건의 네트워크 실패가 55동 수집 전체를 죽이면 안 된다
+        return {"error": f"{type(e).__name__}: {e}"[:120]}
+    if _vworld_complete(got):
+        cache.write_text(json.dumps({"input": want, "result": got}, ensure_ascii=False, indent=1),
+                         encoding="utf-8")
     return got
 
 
@@ -421,6 +549,7 @@ def collect() -> dict:
         row = {k: seed[k] for k in ("id", "name", "region", "sgg_cd", "umd", "jibun")}
         row["ledger"] = None
         row["ledger_dong_count"] = None   # 이 필지의 표제부 동 수(본건물 선택의 난이도 지표)
+        row["match_method"] = None        # alias | alias_fallback | fallback | none
         row["flags"] = []
 
         bj = bjdong.get((seed["sgg_cd"], seed["umd"]))
@@ -434,12 +563,18 @@ def collect() -> dict:
         else:
             try:
                 items = fetch_title_items(seed["sgg_cd"], bj, bun, ji, cfg["service_key"])
-            except LedgerAccessDenied as e:
+            except (LedgerAccessDenied, LedgerQuotaExceeded) as e:
+                # 둘 다 전역 사유라 이후 대장 호출을 생략한다. 쿼터는 실패가 아니라 '다음에 이어받기'다.
                 ledger_blocked = str(e)
                 row["flags"].append(f"대장 미조회: {ledger_blocked}")
+            except LedgerNoData as e:
+                reason = f"대장 데이터 없음: {e}"
+                failed.append({"id": seed["id"], "reason": reason})
+                row["flags"].append(reason)
             else:
                 row["ledger_dong_count"] = len(items)
-                main = pick_main_building(items, seed)
+                main, how = pick_main_with_method(items, seed)
+                row["match_method"] = how
                 if main is None:
                     reason = (f"대장 {len(items)}건 중 본건물 선택 실패"
                               if items else "대장 0건(지번 오류 의심)")
@@ -449,6 +584,11 @@ def collect() -> dict:
                 else:
                     row["ledger"] = to_ledger(main)
                     row["flags"] += physical_flags(row["ledger"])
+                    if how == "fallback" and len(items) > 1:
+                        row["flags"].append(
+                            f"이름 매칭 없이 폴백 선택({len(items)}동 중 '{main.get('bldNm', '')}"
+                            f"{(' ' + main['dongNm']) if main.get('dongNm') else ''}') — 시드 "
+                            f"aliases에 이 필지에서 변별력 있는 이름을 넣어야 한다. 사람 확인 필요.")
                     matched += 1
 
         vw = _vworld_cached(cfg["vworld_key"], seed, seed_pnu(seed["sgg_cd"], bj, seed["jibun"])
@@ -477,6 +617,15 @@ def collect() -> dict:
         print(f"  {seed['id']:<26} {seed['umd']} {seed['jibun']:<9} 대장={area} "
               f"용도지역={zones} 공시지가={price:,}원/㎡{warn}", flush=True)
 
+    # 필지 단위 검증으로는 절대 잡히지 않는 사고 — 두 시드가 같은 대장 동을 집었는지 전수 대조한다.
+    dupes = duplicate_assignments(rows)
+    for pk, ids in dupes.items():
+        for row in rows:
+            if row["id"] in ids:
+                row["flags"].append(
+                    f"대장 동 중복 배정({pk}) — {', '.join(ids)}가 같은 동을 집었다. "
+                    f"둘 중 하나 이상은 틀렸다. 시드 aliases로 동을 구분해야 한다.")
+
     result = {
         "buildings": rows,
         "meta": {
@@ -484,10 +633,14 @@ def collect() -> dict:
             "failed": failed,
             "vworld_ok": vworld_ok,
             "total": len(seeds),
+            "duplicate_ledger": dupes,
+            "match_methods": {m: sum(1 for r in rows if r["match_method"] == m)
+                              for m in ("alias", "alias_fallback", "fallback", "none")},
             "gate": {"min_floor_area_m2": MIN_FLOOR_AREA_M2, "max_floor_area_m2": MAX_FLOOR_AREA_M2,
                      "min_grnd_flr": MIN_GRND_FLR},
             "ledger_status": ledger_blocked or ("OK" if matched else "미조회"),
-            "complete": not ledger_blocked and matched == len(seeds),
+            "complete": (not ledger_blocked and not dupes
+                         and matched == len(seeds) and vworld_ok == len(seeds)),
             "collected_at": datetime.date.today().isoformat(),
             "source": "국토부 건축물대장 표제부 + VWorld",
             "endpoints_used": [BASE, "https://api.vworld.kr/req/address",
@@ -496,7 +649,9 @@ def collect() -> dict:
             "note": ("지번은 시드(도로명→지번으로 확정)가 단일 출처다. VWorld가 돌려준 필지 지번은 "
                      "vworld.jibun_check에 참고로만 두고 시드를 덮어쓰지 않는다. 필지 공유 건물은 "
                      "시드 name·aliases 중 변별력 있는 키로 동을 고르며, 이름이 안 걸리고 시드 note가 "
-                     "연면적 최대 선택을 금지한 필지는 고르지 않고 failed에 남긴다."),
+                     "연면적 최대 선택을 금지한 필지는 고르지 않고 failed에 남긴다. "
+                     "match_method가 'fallback'인 행은 이름이 안 걸려 필지 전체에서 고른 것이라 "
+                     "믿을 수 없고, duplicate_ledger는 두 시드가 같은 대장 동을 집은 사고다."),
         },
     }
     OUT_PATH.write_text(json.dumps(result, ensure_ascii=False, indent=1), encoding="utf-8")
@@ -512,6 +667,11 @@ def main():
           f"· 실패 {len(meta['failed'])}동 · flags {len(flagged)}동")
     for f in meta["failed"]:
         print(f"    실패 {f['id']}: {f['reason']}")
+    if meta["match_methods"]["fallback"]:
+        weak = [r["id"] for r in result["buildings"] if r["match_method"] == "fallback"]
+        print(f"  ⚠ 이름 매칭 없이 폴백으로 고른 동 {len(weak)}건: {', '.join(weak)}")
+    for pk, ids in meta["duplicate_ledger"].items():
+        print(f"  ⚠ 대장 동 중복 배정 {pk}: {', '.join(ids)}")
     if meta["ledger_status"] not in ("OK",):
         print(f"  ⚠ 대장 상태: {meta['ledger_status']}")
     print(f"  저장: {OUT_PATH}")
