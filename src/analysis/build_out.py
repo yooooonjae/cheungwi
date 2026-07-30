@@ -1071,25 +1071,69 @@ def _breakeven_land_price(hard_won: float, loan_rate: float, stabilized_noi: flo
     return (lo + hi) / 2
 
 
+_LAND_NOTE_PREFACE = ("시드는 3대 권역의 프라임 타워 표본이라 그 필지의 공시지가가 "
+                      "강남권 토지 원가의 상단이고")
+_LAND_NOTE_VALUE = "이 엔진의 가치(권역 평균 임대료 × R-ONE 소득수익률)로 환산한 완성 자산이"
+_LAND_NOTE_CLOSE = ("손익분기 토지 단가를 함께 실어 그 거리를 그대로 보인다 — 대표 사업지의 "
+                    "토지 단가는 실측이 아니라 가정이다.")
+
+
+def _land_verdict_kind(land_prices: list, breakeven) -> str:
+    """시드 공시지가와 손익분기 토지단가의 대소 판정 한 갈래.
+
+    판정 문장과 그 뒤의 논거가 같은 함수를 보게 해서 둘이 다른 말을 할 수 없게 한다.
+    """
+    if not land_prices or breakeven is None:
+        return "incomparable"
+    med = _median(land_prices)
+    if med is not None and med <= breakeven:
+        return "stands"
+    if any(p <= breakeven for p in land_prices):
+        return "partial"
+    return "fails"
+
+
 def _land_verdict_sentence(land_prices: list, breakeven) -> str:
     """시드 공시지가와 손익분기 토지단가의 대소를 그날의 수로 판정한 한 문장.
 
     **판정을 상수 문장으로 두지 않는다.** 손익분기 토지단가는 임대료·매각 cap·금리를 따라
     움직이므로 갱신 한 번에 최저 필지와의 대소가 뒤집힌다(2026Q2 갱신에서 실제로 시드 한
     곳이 손익분기 아래로 들어왔다). 문장을 박아 두면 화면의 판정(계산에서 나온다)과 이
-    각주가 서로 다른 말을 한다.
+    각주가 서로 다른 말을 한다. 필지 수도 마찬가지로 시드에서 세어 쓴다 — 대장이 열려
+    표본이 늘거나 공시지가가 없는 동이 생기면 박아 둔 수가 곧 거짓이 된다.
     """
-    below = [p for p in land_prices if breakeven is not None and p <= breakeven]
-    med = _median(land_prices)
-    if not land_prices or breakeven is None:
+    kind = _land_verdict_kind(land_prices, breakeven)
+    n = len(land_prices)
+    if kind == "incomparable":
         return "**시드 공시지가와 손익분기 토지단가를 견줄 수 없다**(둘 중 하나가 비어 있다)."
-    if med is not None and med <= breakeven:
+    if kind == "stands":
         return (f"**시드 중위 필지로도 이 사업이 선다** — 손익분기 토지단가가 시드 "
-                f"{len(land_prices)}필지 공시지가의 중위값을 넘어섰다.")
-    if below:
-        return (f"**시드 {len(land_prices)}필지 가운데 {len(below)}곳만 손익분기 토지단가 "
-                f"아래에 있다** — 중위 필지로는 이 사업이 서지 않는다.")
-    return "**시드 55동의 개별공시지가로는 이 사업이 서지 않는다.**"
+                f"{n}필지 공시지가의 중위값을 넘어섰다.")
+    if kind == "partial":
+        below = sum(1 for p in land_prices if p <= breakeven)
+        return (f"**시드 {n}필지 가운데 {below}곳만 손익분기 토지단가 아래에 있다** — "
+                f"중위 필지로는 이 사업이 서지 않는다.")
+    return f"**시드 {n}필지의 개별공시지가로는 이 사업이 서지 않는다.**"
+
+
+def _land_rationale_sentence(land_prices: list, breakeven) -> str:
+    """판정 뒤에 붙는 논거 — 판정과 같은 갈래에서 나온다.
+
+    "완성 자산이 그 원가를 덮지 못한다"는 시드 전부가 손익분기 위일 때만 참이다. 이 문장을
+    고정해 두면, 갱신으로 손익분기가 올라와 판정이 "선다"로 뒤집힌 날 한 각주 안에서 앞뒤가
+    맞부딪힌다(2026Q2 에 실제로 최저 필지를 넘어섰다).
+    """
+    kind = _land_verdict_kind(land_prices, breakeven)
+    if kind == "incomparable":
+        return (f"{_LAND_NOTE_PREFACE}, 두 수 가운데 하나가 비어 있어 {_LAND_NOTE_VALUE} "
+                f"그 원가를 덮는지 여기서는 말할 수 없다. {_LAND_NOTE_CLOSE}")
+    if kind == "stands":
+        body = "그 상단의 원가까지 덮는다"
+    elif kind == "partial":
+        body = "그 원가의 아래쪽 끝만 덮는다"
+    else:
+        body = "그 원가를 덮지 못한다"
+    return f"{_LAND_NOTE_PREFACE}, {_LAND_NOTE_VALUE} {body}. {_LAND_NOTE_CLOSE}"
 
 
 def build_pf_case(market: dict, buildings: dict, seed: dict) -> dict:
@@ -1199,17 +1243,12 @@ def build_pf_case(market: dict, buildings: dict, seed: dict) -> dict:
                 "max": land_prices[-1] if land_prices else None,
                 "source": "VWorld 개별공시지가(시드 건물의 대표 필지)",
             },
-            # 판정을 문장에 박아 두지 않는다. 손익분기 토지단가는 임대료·금리를 따라 움직여서
-            # 갱신 한 번에 최저 필지와의 대소가 뒤집힌다(2026Q2 갱신에서 실제로 한 곳이
-            # 손익분기 아래로 들어왔다). 박아 두면 화면의 판정 문장과 이 각주가 서로 어긋난다.
-            "note": (
-                _land_verdict_sentence(land_prices, breakeven)
-                + " 시드는 3대 권역의 "
-                "프라임 타워 표본이라 그 필지의 공시지가가 강남권 토지 원가의 상단이고, "
-                "이 엔진의 가치(권역 평균 임대료 × R-ONE 소득수익률)로 환산한 완성 자산이 "
-                "그 원가를 덮지 못한다. 손익분기 토지 단가를 함께 실어 그 거리를 그대로 "
-                "보인다 — 대표 사업지의 토지 단가는 실측이 아니라 가정이다."
-            ),
+            # 판정도 그 뒤의 논거도 문장에 박아 두지 않는다. 손익분기 토지단가는 임대료·금리를
+            # 따라 움직여서 갱신 한 번에 최저 필지와의 대소가 뒤집힌다(2026Q2 갱신에서 실제로
+            # 한 곳이 손익분기 아래로 들어왔다). 박아 두면 화면의 판정 문장과 이 각주가, 또는
+            # 각주 안의 앞뒤가 서로 어긋난다.
+            "note": (_land_verdict_sentence(land_prices, breakeven) + " "
+                     + _land_rationale_sentence(land_prices, breakeven)),
         },
         "model": {
             "total_cost": model["total_cost"],

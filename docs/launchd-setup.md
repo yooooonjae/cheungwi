@@ -66,9 +66,9 @@ launchctl print gui/$(id -u)/com.cheungwi.refresh | head -30
 # 지금 한 번 돌려 보기(예약과 무관하게 즉시 발화. -k 는 돌고 있으면 죽이고 다시)
 launchctl kickstart -k gui/$(id -u)/com.cheungwi.refresh
 
-# 결과 확인
+# 결과 확인 — started 를 함께 본다(오늘 날짜가 아니면 오늘은 아예 돌지 않은 것이다)
 python3 -c "import json;d=json.load(open('logs/refresh-status.json'));\
-print(d['ok'], d['failures'], d['resume_needed'])"
+print(d['started'], d['state'], d['ok'], d['failures'], d['resume_needed'])"
 tail -40 logs/refresh-launchd.log
 
 # 해제
@@ -123,9 +123,14 @@ plist 는 평문이고 Time Machine 에 그대로 실린다.
 | 자리 | 내용 |
 |---|---|
 | `logs/refresh-YYYYMMDD-HHMM.log` | 그 실행의 자식 출력 전량(수집기·엔진·빌더·wrangler) |
-| `logs/refresh-status.json` | 마지막 실행의 기계 판독 요약 — 단계별 ok·사유·초·마커, 실패 목록, 배포 여부 |
+| `logs/refresh-status.json` | 마지막 실행의 기계 판독 요약 — `started`·`state`·`ok`, 단계별 ok·사유·초·마커, 실패 목록, 배포 여부 |
 | `logs/refresh-launchd.log` | launchd 가 받은 stdout/stderr(파이프라인 요약 JSON 이 그대로 찍힌다) |
 
 성공·실패 모두 macOS 알림이 한 번 뜬다(하루 한 번이라 소음이 아니다).
 `resume_needed` 에 오른 수집기는 실패가 아니라 **다음 실행이 이어받을 것**이라는 뜻이다 —
 건축물대장 활용신청이 승인되기 전까지 `buildings` 는 늘 여기에 오른다.
+
+상태 파일은 **일하기 전에 한 번**(`state: running`·`ok: false`) 쓰고 끝에 다시 덮는다.
+그래서 파이프라인이 트레이스백으로 즉사한 날에도 이 파일이 전날의 `ok: true` 로 남아 있지
+않는다 — 예외는 `failures` 와 `traceback` 으로 환원되고 `state` 는 `crashed` 가 된다.
+`state` 가 `running` 인 채 멈춰 있으면 지금 돌고 있거나, 도중에 기계가 꺼진 것이다.

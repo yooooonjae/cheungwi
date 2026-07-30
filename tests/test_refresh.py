@@ -139,6 +139,21 @@ def test_analysis_failure_restores_out_and_stops_before_build(root, spy):
     assert code == 1
 
 
+def test_restoring_out_removes_files_the_failed_run_added(root, spy):
+    """복원은 백업 시점 그대로다 — 실패한 실행이 새로 만든 산출을 남기면 옛것과 섞인다."""
+    def corrupt(cmd):
+        (root / "out" / "새산출.json").write_text('{"신규": 1}', encoding="utf-8")
+        (root / "out" / "market.json").write_text("반쯤 쓰다 만 것", encoding="utf-8")
+        return _Done(1, "엔진 예외")
+
+    spy.when("src.analysis.build_out", corrupt)
+    refresh.main(["--skip-collect"], root=root)
+    assert not (root / "out" / "새산출.json").exists()
+    assert json.loads((root / "out" / "market.json").read_text(encoding="utf-8")) == {
+        "name": "market"}
+    assert not list((root / "out").glob("*.tmp"))      # 원자 교체의 tmp 를 남기지 않는다
+
+
 def test_manifest_failure_stops_before_build(root, spy):
     spy.when("manifest.py", _Done(1, "원장 실패"))
     refresh.main(["--skip-collect"], root=root)
@@ -290,6 +305,64 @@ def test_log_holds_the_child_output_and_status_points_at_it(root, spy):
     log = root / st["log"]
     assert log.exists() and "금리 세 계열 받았다" in log.read_text(encoding="utf-8")
     assert st["started"] and st["finished"]
+
+
+# ── 상태 파일은 어제를 오늘로 위장하지 않는다 ────────────────────────────────
+
+def _stale_ok_status(root):
+    """전날의 성공이 그대로 남아 있는 상태 파일."""
+    (root / "logs" / "refresh-status.json").write_text(
+        json.dumps({"started": "2026-07-29T09:10:00", "state": "done", "ok": True,
+                    "stages": {}, "failures": [], "deployed": True}, ensure_ascii=False),
+        encoding="utf-8")
+
+
+def test_a_crash_overwrites_yesterdays_ok_with_the_reason(root, spy, monkeypatch):
+    """트레이스백으로 즉사해도 상태 파일은 오늘의 실패를 말해야 한다.
+
+    상태 기록이 try 밖에 있으면 예외 한 번에 파일이 전날의 ok:true 로 남는다 —
+    launchd 문서가 시킨 확인 절차가 어제의 성공을 오늘의 성공으로 읽는다(백업이 2주 동안
+    조용히 죽어 있던 사고가 정확히 이 모양이었다).
+    """
+    _stale_ok_status(root)
+
+    def boom(**kw):
+        raise OSError("무효화 도중 파일이 잠겼다")
+
+    monkeypatch.setattr(refresh, "invalidate_trades_cache", boom)
+    code = refresh.main([], root=root)
+    st = _status(root)
+    assert st["ok"] is False and st["state"] == "crashed" and code == 1
+    assert any("무효화 도중 파일이 잠겼다" in f for f in st["failures"])
+    assert "OSError" in st["traceback"]
+    assert st["started"] > "2026-07-29" and st["finished"]
+    assert not spy.ran("wrangler")          # 크래시한 날에는 배포하지 않는다
+
+
+def test_a_crash_before_the_log_opens_still_lands_in_the_status_file(root, spy, monkeypatch):
+    """로그 파일을 열지 못하는 날에도 상태는 남는다 — 기록의 실패가 침묵이 되면 안 된다."""
+    _stale_ok_status(root)
+    monkeypatch.setattr(refresh, "_run_pipeline",
+                        lambda *a, **kw: (_ for _ in ()).throw(PermissionError("logs/ 쓰기 거부")))
+    assert refresh.main(["--skip-collect"], root=root) == 1
+    st = _status(root)
+    assert st["ok"] is False and any("logs/ 쓰기 거부" in f for f in st["failures"])
+
+
+def test_the_status_file_says_running_while_the_work_is_still_going(root, spy, monkeypatch):
+    """일하기 전에 먼저 쓴다 — 도중에 전원이 나가도 파일이 성공을 주장하지 않는다."""
+    _stale_ok_status(root)
+    seen = {}
+
+    def peek(cmd, **kw):
+        seen.setdefault("mid", _status(root))
+        return _Done(0, "COMPLETE\n")
+
+    monkeypatch.setattr(refresh.subprocess, "run", peek)
+    monkeypatch.setattr(refresh.shutil, "which", lambda name: f"/fake/bin/{name}")
+    refresh.main(["--skip-collect", "--no-deploy"], root=root)
+    assert seen["mid"]["state"] == "running" and seen["mid"]["ok"] is False
+    assert _status(root)["state"] == "done" and _status(root)["ok"] is True
 
 
 # ── 검증 ─────────────────────────────────────────────────────────────────────

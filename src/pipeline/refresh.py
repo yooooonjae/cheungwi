@@ -17,6 +17,11 @@
   되돌리고 빌드를 중단한다 — 직전 사이트가 그대로 서빙된다.
 - **실패가 하나라도 있으면 배포하지 않는다.** pages.dev 는 직전 배포를 계속 서빙하므로
   가만히 두는 쪽이 언제나 안전하다.
+- **상태 파일은 먼저 쓰고 마지막에 덮는다.** 시작하자마자 `ok:false, state:running` 을 써
+  두고, 본문 전체를 try 로 감싸 예외까지 failures 로 환원한 뒤 finally 에서 최종 상태를
+  쓴다. 트레이스백으로 즉사해 상태 파일이 갱신되지 않으면, 그 파일을 보라고 적어 둔 운영
+  절차가 **전날의 ok:true** 를 오늘의 성공으로 읽는다(백업이 2주 동안 조용히 죽어 있던
+  사고가 정확히 이 모양이었다).
 - **마커 규약.** 수집기 stdout 마지막 줄의 COMPLETE / RESUME_NEEDED 를 읽어 기록한다.
   RESUME_NEEDED 는 실패가 아니라 "다음 실행이 이어받는다"는 뜻이다(대장이 잠긴 지금
   buildings 는 늘 이 마커로 끝난다 — 이걸 실패로 세면 영영 배포하지 못한다).
@@ -34,6 +39,7 @@ import os
 import shutil
 import subprocess
 import sys
+import traceback
 from pathlib import Path
 
 if __package__ in (None, ""):  # 스크립트로 직접 실행할 때만 저장소 루트를 경로에 올린다
@@ -70,6 +76,24 @@ def _write_json(path: Path, payload: dict):
     tmp = path.with_name(path.name + ".tmp")
     tmp.write_text(json.dumps(payload, ensure_ascii=False, indent=1), encoding="utf-8")
     os.replace(tmp, path)
+
+
+def _restore_out(out_dir: Path, backup: dict):
+    """out/*.json 을 백업 시점 그대로 되돌린다 — 원자 교체 + 신규 파일 삭제.
+
+    되돌리는 쓰기가 반쯤 하다 멈추면(디스크 참·전원) 복원하려던 자리에 오히려 잘린 JSON 이
+    남는다. 그래서 한 파일씩 tmp→replace 로 갈아 끼운다. 실패한 실행이 **새로** 만든 산출도
+    지운다 — 백업에 없던 파일을 남겨 두면 옛 산출과 새 산출이 한 디렉터리에서 섞인다
+    (out/ 을 되돌리는 이유 자체가 그 혼재를 막는 것이다).
+    """
+    for fname, data in backup.items():
+        target = out_dir / fname
+        tmp = target.with_name(target.name + ".tmp")
+        tmp.write_bytes(data)
+        os.replace(tmp, target)
+    for p in out_dir.glob("*.json"):
+        if p.name not in backup:
+            p.unlink()
 
 
 def _marker(stdout) -> str | None:
@@ -231,17 +255,12 @@ def _parse_args(argv):
     return p.parse_args(argv)
 
 
-def main(argv=None, root=ROOT) -> int:
-    args = _parse_args(argv)
-    root = Path(root)
-    logs = root / "logs"
-    logs.mkdir(parents=True, exist_ok=True)
-    now = datetime.datetime.now()
-    log_rel = f"logs/refresh-{now:%Y%m%d-%H%M%S}.log"   # 초까지 — 같은 분에 두 번 돌려도 안 겹친다
-    status = {"started": now.isoformat(timespec="seconds"), "stages": {}, "failures": [],
-              "resume_needed": [], "deployed": False, "log": log_rel}
+def _run_pipeline(args, root: Path, log_path: Path, status: dict):
+    """무효화 → 수집 → 분석 → 원장 → 빌드 → 검증 → 배포. 결과는 status 에 쌓는다.
 
-    with open(root / log_rel, "w", encoding="utf-8") as log:
+    여기서 나는 예외는 main 이 받아 failures 로 환원한다 — 상태 파일이 반드시 갱신되도록.
+    """
+    with open(log_path, "w", encoding="utf-8") as log:
         # 0) 캐시 무효화 — 수집을 실제로 할 때만
         if not args.skip_collect and not args.no_invalidate and args.only in (None, "trades"):
             info = invalidate_trades_cache(root=root)
@@ -270,8 +289,7 @@ def main(argv=None, root=ROOT) -> int:
         res = run_step("analyze", [PY, "-m", "src.analysis.build_out"], ANALYZE_TIMEOUT, log, root)
         status["stages"]["analyze"] = res
         if not res["ok"]:
-            for fname, data in backup.items():
-                (out_dir / fname).write_bytes(data)
+            _restore_out(out_dir, backup)
             status["failures"].append(
                 f"analyze ({res['detail']}) — out/ 을 되돌리고 빌드를 중단했다(직전 사이트 유지)")
             aborted = True
@@ -314,9 +332,37 @@ def main(argv=None, root=ROOT) -> int:
                 if not res["ok"]:
                     status["failures"].append(f"deploy ({res['detail']}) — {SITE_URL} 는 직전 배포 유지")
 
-    status["finished"] = datetime.datetime.now().isoformat(timespec="seconds")
-    status["ok"] = not status["failures"]
-    _write_json(logs / "refresh-status.json", status)
+
+def main(argv=None, root=ROOT) -> int:
+    args = _parse_args(argv)
+    root = Path(root)
+    logs = root / "logs"
+    logs.mkdir(parents=True, exist_ok=True)
+    now = datetime.datetime.now()
+    log_rel = f"logs/refresh-{now:%Y%m%d-%H%M%S}.log"   # 초까지 — 같은 분에 두 번 돌려도 안 겹친다
+    status_path = logs / "refresh-status.json"
+    status = {"started": now.isoformat(timespec="seconds"), "state": "running", "ok": False,
+              "stages": {}, "failures": [], "resume_needed": [], "deployed": False,
+              "log": log_rel}
+    # 일하기 **전에** 한 번 쓴다. 이 뒤로 무엇이 터지든(로그 디렉터리 쓰기 실패·무효화 예외)
+    # 이 파일이 어제의 ok:true 를 오늘의 성공으로 위장하지 못한다.
+    _write_json(status_path, status)
+
+    try:
+        _run_pipeline(args, root, root / log_rel, status)
+        status["state"] = "done"
+    except Exception as e:   # 예외도 실패의 한 종류로 환원한다 — 조용한 즉사를 만들지 않는다
+        status["state"] = "crashed"
+        status["failures"].append(f"파이프라인이 예외로 멈췄다 — {type(e).__name__}: {e}")
+        status["traceback"] = traceback.format_exc()
+    finally:
+        # Ctrl-C·SystemExit 로 빠져나가는 길에도 running 이 박제되지 않게
+        if status["state"] == "running":
+            status["state"] = "interrupted"
+            status["failures"].append("파이프라인이 도중에 끊겼다 — 완주하지 못했다")
+        status["finished"] = datetime.datetime.now().isoformat(timespec="seconds")
+        status["ok"] = not status["failures"]
+        _write_json(status_path, status)
 
     n_ok = sum(1 for v in status["stages"].values() if v["ok"])
     resume = f" · 재개 대기 {','.join(status['resume_needed'])}" if status["resume_needed"] else ""

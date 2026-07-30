@@ -91,6 +91,11 @@ make refresh ARGS="--only trades"         # 한 수집기 + 이후 단계 전부
 그대로 두는 쪽이 낫다. 실패가 하나라도 있으면 배포하지 않는다(pages.dev 는 직전 배포를
 계속 서빙한다).
 
+**상태 파일은 일하기 전에 먼저 쓴다**(`state: running`·`ok: false`). 파이프라인이 예외로
+즉사한 날에도 `logs/refresh-status.json` 이 전날의 `ok: true` 로 남아 있으면, 그 파일을 보라고
+적어 둔 확인 절차가 어제의 성공을 오늘의 성공으로 읽는다. 예외는 `failures` 와 `traceback`
+으로 환원되고 `state` 는 `crashed` 가 된다.
+
 수집기 stdout 의 마지막 줄 `COMPLETE`/`RESUME_NEEDED` 가 마커다. `RESUME_NEEDED` 는 실패가
 아니라 다음 실행이 이어받는다는 뜻이고, 건축물대장이 잠겨 있는 지금 `buildings` 는 늘 이쪽이다.
 

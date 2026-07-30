@@ -36,7 +36,8 @@ from pathlib import Path
 import pytest
 
 from src.analysis import build_out
-from src.analysis.build_out import _land_verdict_sentence, build_all
+from src.analysis.build_out import (_land_rationale_sentence, _land_verdict_sentence,
+                                    build_all)
 from src.analysis.effective_rent import region_params
 
 
@@ -557,11 +558,35 @@ def test_the_land_note_verdict_follows_the_numbers_not_a_frozen_sentence():
     판정(계산에서 나온다)과 각주가 서로 다른 말을 하게 된다.
     """
     prices = [16_940_000, 70_590_000, 95_640_000]
-    assert "서지 않는다" in _land_verdict_sentence(prices, 10_000_000)      # 전부 손익분기 위
+    fails = _land_verdict_sentence(prices, 10_000_000)                      # 전부 손익분기 위
+    assert "서지 않는다" in fails
+    # 필지 수도 시드에서 센다 — "55동" 같은 상수는 표본이 바뀌는 날 곧바로 거짓이 된다
+    assert "3필지" in fails and "55" not in fails
     partial = _land_verdict_sentence(prices, 17_029_258)                    # 최저만 아래
     assert "1곳만" in partial and "중위 필지로는 이 사업이 서지 않는다" in partial
     assert "중위 필지로도 이 사업이 선다" in _land_verdict_sentence(prices, 80_000_000)
     assert "견줄 수 없다" in _land_verdict_sentence([], None)
+
+
+def test_the_land_note_argument_moves_with_the_verdict(built):
+    """판정 뒤의 논거도 함께 갈린다 — "원가를 덮지 못한다"는 전부 위일 때만 참이다.
+
+    논거를 고정해 두면 손익분기가 올라와 판정이 "선다"로 뒤집힌 날 한 각주 안에서 앞뒤가
+    맞부딪힌다(배포된 페이지에 실제로 두 말이 함께 떴다).
+    """
+    prices = [16_940_000, 70_590_000, 95_640_000]
+    stands = _land_rationale_sentence(prices, 80_000_000)
+    assert "덮는다" in stands and "덮지 못한다" not in stands
+    partial = _land_rationale_sentence(prices, 17_029_258)
+    assert "아래쪽 끝만 덮는다" in partial
+    assert "덮지 못한다" in _land_rationale_sentence(prices, 10_000_000)
+    assert "말할 수 없다" in _land_rationale_sentence([], None)
+    # 실제 산출의 각주는 판정 문장과 논거가 같은 갈래에서 나온 한 벌이다
+    _, out_dir = built
+    ctx = _read(out_dir, "pf_case.json")["land_price_context"]
+    breakeven, seed = ctx["breakeven_land_price_won_m2"], ctx["seed_land_price_won_m2"]
+    assert ("이 사업이 선다" in ctx["note"]) is (seed["median"] <= breakeven)
+    assert ("덮지 못한다" in ctx["note"]) is (seed["min"] > breakeven)
 
 
 # ── 원자적 쓰기·멱등 ─────────────────────────────────────────────────────────
