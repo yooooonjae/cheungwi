@@ -15,9 +15,16 @@ whole/partial로 승격된다(`--rebuild`는 네트워크를 아예 쓰지 않�
 ── 지번은 마스킹돼 온다 ─────────────────────────────────────────────────────
 응답의 jibun은 '7*'·'1**'처럼 뒷자리가 가려져 온다(실측 380개 값 중 20개가 마스킹형).
 그래서 매칭은 같은 시군구·법정동 안에서 마스크를 정규식으로 푼 fullmatch로 한다. 이건
-**한 동을 특정한다는 보장이 없다** — '7*'는 737에도 790에도 걸린다. 그래서 걸린 후보를
-전부 match.candidates에 남기고 마스킹 여부를 match.masked로 신고한다. 사람이 봐야 한다.
+**한 동을 특정한다는 보장이 없다** — '7*'는 737에도 790에도 걸린다. 후보가 여럿이면
+match.building_id는 **null**이고 후보 목록만 match.candidates에 남는다. 첫 후보를 고르면
+서초동 '1***' 1,688행이 통째로 한 동에 붙어 버린다 — 고르지 못하는 자리에서는 고르지 않는다.
 지번이 통째로 '*'인 행(정보량 0)은 아무 동에도 매칭하지 않는다.
+
+── 부분 수집이 완성본을 덮어쓰지 않는다 ─────────────────────────────────────
+raw 캐시는 커밋하지 않고 산출 JSON만 커밋한다. 그래서 새로 clone한 곳의 캐시는 비어 있는 게
+정상이고, 거기서 첫 실행은 쿼터·시간 때문에 반드시 일부만 받는다. 그 결과로 1,235셀짜리
+trades.json을 0셀로 덮어쓰면 커밋된 데이터가 조용히 사라진다. 그래서 이번 실행이 기존 산출보다
+얇으면 data/trades.partial.json 으로 비켜 쓰고 원본에 손대지 않는다(save_result 참조).
 
 ── 쿼터를 태우지 않는다 ─────────────────────────────────────────────────────
 셀 하나에서 쿼터 소진(HTTP 200 + LIMITED_NUMBER_OF_SERVICE_REQUESTS 봉투)을 만나면 그
@@ -45,6 +52,7 @@ URL = "https://apis.data.go.kr/1613000/RTMSDataSvcNrgTrade/getRTMSDataSvcNrgTrad
 SEED_PATH = ROOT / "data" / "seed_buildings.json"
 BUILDINGS_PATH = ROOT / "data" / "buildings.json"
 OUT_PATH = ROOT / "data" / "trades.json"
+PARTIAL_PATH = ROOT / "data" / "trades.partial.json"   # 기존 산출보다 얇은 결과가 비켜 가는 자리
 PROG_PATH = ROOT / "data" / "trades_progress.json"
 RAW_DIR = ROOT / "data" / "raw" / "trades"
 
@@ -60,6 +68,7 @@ CALL_GAP = 0.25
 SAVE_EVERY = 50            # 이만큼 호출할 때마다 진행 저장(중단 손실 최소화)
 TIMEOUT = 30
 
+MAX_FAIL_STREAK = 10       # 이만큼 연속으로 실패하면 서버가 앓는 것이다 — 저장하고 물러난다
 OFFICE_USE = "업무"        # trades에 남기는 유일한 용도. 나머지 용도는 raw 캐시로만 보존한다.
 # ㎡당 가격 물리 게이트(원). 하한 30만은 파싱·단위 오류와 지분거래 왜곡, 상한 2억은 건물 기준
 # 상식 상한이다(수지 rtms_commercial의 nrg 범위와 동일한 근거).
@@ -162,13 +171,18 @@ def jibun_match(masked: str, full: str) -> bool:
 
 
 def match_building(row: dict, seeds: list) -> dict | None:
-    """실거래 한 행 → 시드 건물 매칭. 같은 시군구·법정동 + 지번 일치. 못 찾으면 None.
+    """실거래 한 행 → 시드 건물 매칭. 같은 시군구·법정동 + 지번 일치. 후보가 없으면 None.
+
+    **후보가 여럿이면 `building_id`는 null이다.** 마스킹된 지번은 한 동을 특정하지 못한다 —
+    서초동 `1***`는 시드 여러 동에 동시에 걸린다. 예전에는 시드 파일 순서의 첫 후보를 골라
+    돌려줬는데, 그러면 소비자가 building_id로 groupby만 해도 1,600행이 엉뚱한 한 동에 몰린다.
+    고르지 못하는 자리에서는 고르지 않는다 — 후보 목록만 넘기고 판단을 소비자에게 넘긴다.
 
     seeds는 seed_buildings.json 행이거나 buildings.json 행이다. 후자는 `ledger`를 달고 오는데
     **대장 미승인 상태에서는 그 값이 null이다.** 그래서 ledger를 짚기 전에 반드시 존재를
     확인한다(`r["ledger"]["totArea"]`는 지금 TypeError로 죽는 코드다).
-      - 연면적을 알 수 있으면 거래면적/연면적으로 kind를 whole(≥0.8)·partial로 나눈다.
-      - 알 수 없으면 area_ratio=None, kind="jibun_only" — 대장이 열린 뒤 재실행하면 승격된다.
+      - 동이 특정되고 연면적을 알 수 있으면 거래면적/연면적으로 whole(≥0.8)·partial을 가른다.
+      - 아니면 area_ratio=None, kind="jibun_only" — 대장이 열린 뒤 재실행하면 승격된다.
     """
     masked = (row.get("jibun_masked") or "").strip()
     cands = [s for s in seeds
@@ -176,19 +190,20 @@ def match_building(row: dict, seeds: list) -> dict | None:
              and jibun_match(masked, s.get("jibun") or "")]
     if not cands:
         return None
-    # 마스킹이 없어 지번이 그대로 일치하는 시드가 있으면 그쪽이 먼저다.
+    # 마스킹 없이 지번이 그대로 일치하는 시드가 하나면 그것이 답이다. 후보가 하나뿐이어도 답이다.
+    # 그 밖(후보 복수·정확 일치 복수)은 특정 실패로 남긴다.
     exact = [s for s in cands if (s.get("jibun") or "").strip() == masked]
-    best = exact[0] if exact else cands[0]
+    chosen = exact[0] if len(exact) == 1 else (cands[0] if len(cands) == 1 else None)
 
-    tot = ((best.get("ledger") or {}).get("totArea")) or 0.0
+    tot = ((chosen or {}).get("ledger") or {}).get("totArea") or 0.0
     area = row.get("building_ar_m2") or 0.0
-    if tot > 0 and area > 0:
+    if chosen is not None and tot > 0 and area > 0:
         ratio = area / tot
         kind = "whole" if ratio >= WHOLE_RATIO else "partial"
         ratio = round(ratio, 6)
     else:
         ratio, kind = None, "jibun_only"
-    return {"building_id": best["id"], "kind": kind, "area_ratio": ratio,
+    return {"building_id": (chosen["id"] if chosen else None), "kind": kind, "area_ratio": ratio,
             "masked": "*" in masked, "candidates": [s["id"] for s in cands]}
 
 
@@ -213,17 +228,20 @@ def build_trades(rows: list, seeds: list):
 
 
 def build_year_conflicts(trades: list) -> dict:
-    """시드별로 매칭된 거래의 건축년도가 갈리는 곳 → {시드 id: [연도...]}.
+    """한 시드에 붙은 거래의 건축년도가 갈리는 곳 → {시드 id: [연도...]}. **매칭 오염의 증거다.**
 
-    지번은 필지를 가리키지 실체를 가리키지 않는다. 콘코디언(신문로1가)처럼 옛 사옥을 헐고 다시
-    지은 자리는 **같은 지번에 시대가 다른 건물이 차례로 선다.** 그래서 2008년 거래가 2018년
-    준공 건물에 붙는다. 이 함수는 그 자리를 세어 신고할 뿐 고르지 않는다 — 대장(사용승인일)이
-    열리면 그때 자동으로 가를 수 있고, 그전까지는 사람이 build_year를 보고 판단해야 한다.
+    한 건물의 거래는 건축년도가 하나여야 한다. 여러 해가 섞였다면 둘 중 하나다.
+      - 마스킹된 지번(`1**`)이 같은 법정동의 **다른 건물**을 끌어왔다(대부분 이쪽이다), 또는
+      - 그 자리에서 옛 건물을 헐고 다시 지었다(콘코디언처럼 준공 전 거래가 섞인다).
+    어느 쪽이든 그 시드의 매칭은 그대로 쓰면 안 된다. 이 함수는 세어 신고할 뿐 고르지 않는다 —
+    가르려면 대장 사용승인일이 필요하고, 그전까지는 사람이 build_year를 보고 판단해야 한다.
+    후보를 특정하지 못한 행(building_id=null)은 애초에 어느 시드의 것도 아니므로 세지 않는다.
     """
     years = {}
     for t in trades:
-        if t.get("match") and t.get("build_year"):
-            years.setdefault(t["match"]["building_id"], set()).add(t["build_year"])
+        bid = (t.get("match") or {}).get("building_id")
+        if bid and t.get("build_year"):
+            years.setdefault(bid, set()).add(t["build_year"])
     return {b: sorted(ys) for b, ys in sorted(years.items()) if len(ys) > 1}
 
 
@@ -294,13 +312,17 @@ def _fetch_page(sgg: str, ym: str, page: int, key: str):
     status, text = call_with_backoff(
         lambda: api_get(URL, params, timeout=TIMEOUT, retries=1), tries=3)
     time.sleep(CALL_GAP)
+    # **상태 코드보다 봉투를 먼저 읽는다.** 이 게이트웨이는 쿼터 소진을 200으로도 보내지만
+    # 429·5xx에 실어 보내기도 한다. 상태 코드부터 갈라 버리면 그런 응답이 '일시 오류'로 분류돼
+    # 남은 1,200셀을 백오프까지 곁들여 계속 두드린다(G2B에서 일 쿼터를 90분에 태운 그 경로다).
+    # api_get은 HTTPError 본문도 그대로 돌려주므로 비-200에도 봉투가 들어 있다.
+    env = envelope_error(text)
+    if env:
+        return "", classify_envelope(*env)
     if status in (401, 403):
         return "", "denied"
     if status != 200:
         return "", "transient"
-    env = envelope_error(text)          # HTTP 200 + 오류 봉투 — 쿼터 소진이 이 모습으로 온다
-    if env:
-        return "", classify_envelope(*env)
     try:
         root = ET.fromstring(text)
     except ET.ParseError:
@@ -334,9 +356,54 @@ def fetch_cell(sgg: str, ym: str, key: str):
 
 # ── 수집 ────────────────────────────────────────────────────────────────────
 
-def _save(result: dict, done: set):
+def prior_cells() -> int:
+    """이미 저장돼 있는 산출이 담고 있는 셀 수. 파일이 없거나 못 읽으면 0."""
+    try:
+        return int(json.loads(OUT_PATH.read_text(encoding="utf-8"))["meta"]["cells_done"])
+    except Exception:
+        return 0
+
+
+def save_result(result: dict, done: set) -> Path:
+    """산출을 쓴다. **이번 실행이 기존 산출보다 얇으면 덮어쓰지 않고 .partial 로 비켜 쓴다.**
+
+    raw 캐시는 용량 때문에 커밋하지 않고 산출 JSON만 커밋한다. 그래서 저장소를 새로 clone한
+    곳에서는 캐시가 비어 있는 게 정상이고, 거기서 수집기를 돌리면 첫 실행은 쿼터·시간 때문에
+    반드시 일부만 받는다. 그 결과로 1,235셀짜리 산출을 600셀짜리로 — 최악은 0셀로 — 덮어쓰면
+    커밋된 데이터가 조용히 사라진다. 키 권한이 없어 denied로 끝나는 실행, `--limit` 시험 실행도
+    같은 모양이다. 그래서 판정은 '이번에 담은 셀 수'와 '이미 담겨 있던 셀 수'의 비교로 한다.
+      - 이번이 더 얇다 → .partial (기존 산출·진행 파일은 손대지 않는다)
+      - 중단(quota/denied)됐는데 나아진 것도 없다 → .partial
+      - 그 밖(처음 만드는 산출 포함) → 정상 저장
+    이어받기는 진행 파일이 아니라 raw 캐시가 근거이므로, .partial로 비켜 써도 다음 실행은
+    중단 지점부터 그대로 잇는다.
+    """
     OUT_PATH.parent.mkdir(parents=True, exist_ok=True)
+    prior, built = prior_cells(), result["meta"]["cells_done"]
+    thinner = built < prior
+    stalled = bool(result["meta"]["stopped"]) and built <= prior
+    if thinner or stalled:
+        result["meta"]["written_to"] = PARTIAL_PATH.name
+        result["meta"]["partial_write_reason"] = (
+            f"이번 실행은 {built}셀만 담았고 기존 산출은 {prior}셀이라 덮어쓰지 않았다"
+            f"{' (중단: ' + result['meta']['stopped'] + ')' if result['meta']['stopped'] else ''}. "
+            f"다시 실행하면 raw 캐시를 이어받아 채운다.")
+        PARTIAL_PATH.write_text(json.dumps(result, ensure_ascii=False, indent=1), encoding="utf-8")
+        return PARTIAL_PATH
+    result["meta"]["written_to"] = OUT_PATH.name
     OUT_PATH.write_text(json.dumps(result, ensure_ascii=False, indent=1), encoding="utf-8")
+    write_progress(done)
+    return OUT_PATH
+
+
+def write_progress(done: set):
+    """진행 파일 기록. 기존 기록보다 줄어드는 쓰기는 하지 않는다(캐시 없는 clone 보호)."""
+    try:
+        before = len(json.loads(PROG_PATH.read_text(encoding="utf-8"))["done"])
+    except Exception:
+        before = 0
+    if len(done) < before:
+        return
     PROG_PATH.write_text(json.dumps({"done": sorted(done)}, ensure_ascii=False, indent=1),
                          encoding="utf-8")
 
@@ -374,7 +441,7 @@ def collect(limit: int = None, rebuild: bool = False) -> dict:
     # 믿으면 "1,235셀 전부 완료"라고 읽고 한 번도 호출하지 않은 채 **빈 trades.json으로 덮어쓴다.**
     # 그래서 진행 파일은 결과의 사본일 뿐이고, 판단 근거는 디스크에 실제로 있는 완결 셀이다.
     done = {f"{s}_{y}" for s, y in cells if _pages_complete(_cell_texts(s, y))}
-    stop, failed, calls, copied, saved_at = "", [], 0, 0, 0
+    stop, failed, calls, copied, saved_at, streak = "", [], 0, 0, 0, 0
 
     if not rebuild:
         key = load_config()["service_key"]
@@ -403,15 +470,20 @@ def collect(limit: int = None, rebuild: bool = False) -> dict:
                 break
             if err:
                 failed.append({"cell": cell, "reason": err})
+                streak += 1
+                if streak >= MAX_FAIL_STREAK:
+                    # 열 셀이 내리 실패하면 이 서버는 지금 대답할 상태가 아니다. 1,200셀을 끝까지
+                    # 두드려 실패 목록만 부풀리느니 물러난다 — 다음 실행이 이어받는다.
+                    stop = "fail_streak"
+                    break
                 continue
+            streak = 0
             done.add(cell)
             # 한 셀이 여러 페이지를 쓰면 호출 수가 건너뛰므로 나머지 연산으로 재면 저장이 통째로
             # 빠질 수 있다. 마지막 저장 시점과의 차이로 잰다.
             if calls - saved_at >= SAVE_EVERY:
                 saved_at = calls
-                PROG_PATH.write_text(
-                    json.dumps({"done": sorted(done)}, ensure_ascii=False, indent=1),
-                    encoding="utf-8")
+                write_progress(done)
                 print(f"  {calls}호출 · 최근 {cell}: {len(texts)}페이지", flush=True)
 
     trades, excl, n_all, built_cells, truncated = build_from_cache(months, seeds)
@@ -433,10 +505,12 @@ def collect(limit: int = None, rebuild: bool = False) -> dict:
             "failed_cells": failed,
             "api_calls": calls,
             "cells_from_suji_cache": copied,
-            "matched": len(matched),
+            "matched": len(matched),                 # 시드 후보가 하나라도 잡힌 행
             "match_kinds": kinds,
-            "match_ambiguous": sum(1 for t in matched if len(t["match"]["candidates"]) > 1),
-            # 마스킹이 없고 후보도 하나뿐인 행 — 지금 필지 수준에서 믿을 수 있는 유일한 부분집합이다.
+            # 동이 특정된 행(building_id != null)과 특정 실패로 남긴 행. 앞의 것만 쓸 수 있다.
+            "match_resolved": sum(1 for t in matched if t["match"]["building_id"]),
+            "match_ambiguous": sum(1 for t in matched if not t["match"]["building_id"]),
+            # 마스킹이 없고 후보도 하나뿐인 행 — 지금 필지 수준에서 가장 믿을 만한 부분집합이다.
             "match_exact": sum(1 for t in matched
                                if not t["match"]["masked"] and len(t["match"]["candidates"]) == 1),
             "match_build_year_conflicts": build_year_conflicts(trades),
@@ -448,17 +522,19 @@ def collect(limit: int = None, rebuild: bool = False) -> dict:
             "source": "국토부 RTMS 상업업무용",
             "note": ("trades는 buildingUse가 '업무'인 행만 담는다(그 외 용도는 raw 캐시에만 있다). "
                      "해제(cdealType) 행은 지우지 않고 canceled=true로 남긴다 — 취소된 계약도 "
-                     "그 시점의 호가 정보다. match.candidates가 둘 이상이면 마스킹된 지번이 여러 "
-                     "시드에 걸린 것이라 building_id를 믿을 수 없다. ledger_ready가 false면 "
-                     "연면적을 몰라 kind는 전부 jibun_only이며, 대장이 열린 뒤 재실행하면 "
-                     "수집 없이 whole/partial로 승격된다. match_build_year_conflicts에 오른 시드는 "
-                     "한 지번에 시대가 다른 건물이 차례로 섰다는 뜻이라(재건축) 준공 전 거래가 "
-                     "섞여 있다 — 각 행의 build_year로 갈라 봐야 한다."),
+                     "그 시점의 호가 정보다. **match.building_id가 null이면 마스킹된 지번이 여러 "
+                     "시드에 동시에 걸려 동을 특정하지 못한 행이다** — candidates에 후보를 다 적어 "
+                     "두었으니 소비자가 판단해야 하고, 첫 후보를 고르는 식의 처리는 금물이다. "
+                     "ledger_ready가 false면 연면적을 몰라 kind는 전부 jibun_only이며, 대장이 열린 "
+                     "뒤 재실행하면 수집 없이 whole/partial로 승격된다. match_build_year_conflicts에 "
+                     "오른 시드는 붙은 거래의 건축년도가 갈린다는 뜻이라 매칭이 오염됐다는 증거다 "
+                     "— 마스킹 지번이 같은 법정동의 다른 건물을 끌어왔거나, 그 자리를 헐고 다시 "
+                     "지은 것이다. 어느 쪽이든 그 시드 매칭은 build_year로 갈라 보기 전엔 못 쓴다."),
         },
     }
     # 진행 파일에는 **실제로 산출에 쓰인 셀**만 적는다. done은 이번 실행이 받았다고 믿는 집합이고
     # built_cells는 캐시가 증명한 집합이라, 둘이 어긋나면 증명된 쪽을 남긴다.
-    _save(result, set(built_cells))
+    save_result(result, set(built_cells))
     return result
 
 
@@ -473,22 +549,25 @@ def main():
           f"· 수지 캐시 재사용 {meta['cells_from_suji_cache']}셀")
     print(f"  제외: 게이트 밖 {meta['excluded']['price_gate']}행 · 파싱 실패 "
           f"{meta['excluded']['parse']}행 (게이트 {GATE[0]:,}~{GATE[1]:,}원/㎡)")
-    print(f"  시드 매칭 {meta['matched']}행 {meta['match_kinds']} · 마스킹 없는 단독 매칭 "
-          f"{meta['match_exact']}행 · 후보 복수 {meta['match_ambiguous']}행 "
-          f"· 대장 준비 {meta['ledger_ready']}")
+    print(f"  시드 후보 잡힌 행 {meta['matched']} → 동 특정 {meta['match_resolved']}행"
+          f"(마스킹 없는 단독 {meta['match_exact']}행) · 특정 실패 {meta['match_ambiguous']}행은 "
+          f"building_id=null · {meta['match_kinds']} · 대장 준비 {meta['ledger_ready']}")
     conflicts = meta["match_build_year_conflicts"]
     if conflicts:
-        print(f"  ⚠ 건축년도가 갈리는 시드 {len(conflicts)}곳(재건축 자리 — build_year로 갈라야 한다): "
-              + ", ".join(f"{b}{ys}" for b, ys in list(conflicts.items())[:4]))
+        print(f"  ⚠ 건축년도가 갈리는 시드 {len(conflicts)}곳 — 매칭 오염 증거(다른 건물이 섞였거나 "
+              f"헐고 다시 지은 자리다): " + ", ".join(f"{b}{ys}" for b, ys in list(conflicts.items())[:4]))
     if meta["cells_truncated"]:
         print(f"  ⚠ 절단 셀 {len(meta['cells_truncated'])}개: {meta['cells_truncated'][:5]}")
     if meta["failed_cells"]:
         print(f"  ⚠ 실패 셀 {len(meta['failed_cells'])}개: {meta['failed_cells'][:5]}")
     if meta["stopped"]:
-        print(f"  ⚠ 중단 사유: {meta['stopped']}"
-              + (" — 일일 쿼터 소진. 다음 실행이 이어받는다." if meta["stopped"] == "quota"
-                 else " — 키 권한 문제. 활용신청 상태를 확인해야 한다."))
-    print(f"  저장: {OUT_PATH}")
+        reason = {"quota": " — 일일 쿼터 소진. 다음 실행이 이어받는다.",
+                  "denied": " — 키 권한 문제. 활용신청 상태를 확인해야 한다.",
+                  "fail_streak": f" — {MAX_FAIL_STREAK}셀 연속 실패. 서버 상태를 보고 다시 돌린다."}
+        print(f"  ⚠ 중단 사유: {meta['stopped']}{reason.get(meta['stopped'], '')}")
+    if meta.get("partial_write_reason"):
+        print(f"  ⚠ 기존 산출을 지키려고 비켜 썼다: {meta['partial_write_reason']}")
+    print(f"  저장: {ROOT / 'data' / meta['written_to']}")
     print("COMPLETE" if meta["complete"] else "RESUME_NEEDED")
 
 
