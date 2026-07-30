@@ -5,7 +5,8 @@
   {"reits": {"293940": {"name": "신한알파리츠", "corp_code": "01276594", "holding": "mixed",
                         "office_assets": [{"building_id": "platinum-tower", "note": "..."}],
                         "fin": [{"year": 2025, "reprt": "11011", "assets": 0.0, "liab": 0.0,
-                                 "equity": 0.0, "revenue": 0.0, "basis": "2025.12.31 현재"}],
+                                 "equity": 0.0, "revenue": 0.0, "basis": "2025-12-31",
+                                 "basis_raw": "2025.12.31 현재"}],
                         "div": [{"stlm_dt": "2025.12.31", "dps": 0.0, "total_div": 0.0, "yld": 0.0}]}},
    "meta": {...}}
 
@@ -36,6 +37,7 @@
 import datetime
 import io
 import json
+import re
 import sys
 import time
 import urllib.request
@@ -106,6 +108,27 @@ def pick_revenue(rows: list[dict]) -> float | None:
             if value is not None:
                 found[name] = value
     return found.get("영업수익", found.get("매출액"))
+
+
+def _basis_date(raw: str) -> str:
+    """재무상태표 기준일 원문("2025.11.30 현재") → ISO 날짜("2025-11-30").
+
+    DART 는 이 값을 "YYYY.MM.DD 현재" 라는 산문으로 준다. 산출의 다른 날짜(collected_at·
+    seed_as_of)는 전부 ISO 라, 시간축의 근거가 되는 이 필드만 표기가 달라지면 소비자가
+    원천마다 파서를 따로 써야 한다. 그래서 basis 는 ISO 로 정규화하고 원문은 basis_raw 로
+    남긴다 — DART 표기가 바뀌면 그 사실 자체가 증거이기 때문이다.
+    빈 값은 빈 값 그대로 두되, 날짜로 읽히지 않는 값은 조용히 버리지 않고 멈춘다.
+    """
+    text = (raw or "").strip()
+    if not text:
+        return ""
+    m = re.match(r"(\d{4})[.\-/](\d{1,2})[.\-/](\d{1,2})", text)
+    if not m:
+        raise RuntimeError(f"재무상태표 기준일을 날짜로 읽지 못했다: {raw!r}")
+    try:
+        return datetime.date(*(int(x) for x in m.groups())).isoformat()
+    except ValueError as e:
+        raise RuntimeError(f"재무상태표 기준일이 달력에 없는 날짜다: {raw!r}") from e
 
 
 def _mask(text: str, key: str) -> str:
@@ -204,8 +227,9 @@ def fin_series(corp: str, rebuild: bool = False) -> tuple:
     """단일회사 주요계정(fnlttSinglAcnt) → (재무 행 목록, OFS 행이 없어 버린 응답 수).
 
     한 행 = 한 보고서. 자산·부채·자본은 재무상태표, revenue는 pick_revenue(손익계산서)에서 온다.
-    basis 는 자산총계 행의 thstrm_dt(재무상태표 기준일)다 — 결산월이 제각각인 리츠를 시간축에
-    올릴 때 bsns_year 대신 이 값을 봐야 한다.
+    basis 는 자산총계 행의 thstrm_dt(재무상태표 기준일)를 ISO 날짜로 정규화한 값이고, DART 의
+    원문 표기는 basis_raw 에 그대로 남는다 — 결산월이 제각각인 리츠를 시간축에 올릴 때
+    bsns_year 대신 이 값을 봐야 한다.
     """
     rows, skipped = [], 0
     for year in YEARS:
@@ -215,14 +239,15 @@ def fin_series(corp: str, rebuild: bool = False) -> tuple:
                 continue
             items = payload.get("list") or []
             row = {"year": year, "reprt": reprt, "assets": None, "liab": None,
-                   "equity": None, "revenue": pick_revenue(items), "basis": ""}
+                   "equity": None, "revenue": pick_revenue(items), "basis": "", "basis_raw": ""}
             for item in items:
                 if item.get("fs_div") != "OFS":  # 개별(별도) 재무제표만
                     continue
                 name = (item.get("account_nm") or "").strip()
                 if name == "자산총계":
                     row["assets"] = _num(item.get("thstrm_amount"))
-                    row["basis"] = (item.get("thstrm_dt") or "").strip()
+                    row["basis_raw"] = (item.get("thstrm_dt") or "").strip()
+                    row["basis"] = _basis_date(row["basis_raw"])
                 elif name == "부채총계":
                     row["liab"] = _num(item.get("thstrm_amount"))
                 elif name == "자본총계":
@@ -312,7 +337,14 @@ def _holding(ticker: str, meta: dict) -> str:
     return value
 
 
-def collect(rebuild: bool = False) -> None:
+def collect(rebuild: bool = False) -> dict:
+    """리츠 10종의 재무·배당을 모아 산출을 쓰고 **결과를 돌려준다**.
+
+    반환값이 필요한 이유: 중단(_Stop)으로 break 하고도 호출자가 그 사실을 알 방법이 없으면
+    마지막 줄에 COMPLETE 를 찍게 된다. 쿼터 소진으로 절반만 받은 실행을 완주로 보고하는 것은
+    데이터 계층에서 가장 비싼 거짓말이다 — meta.stopped 와 written_to 를 그대로 넘겨
+    main() 이 COMPLETE/RESUME_NEEDED 를 가르게 한다(trades·buildings 와 같은 형태).
+    """
     seed = json.load(open(SEED_PATH, encoding="utf-8"))
     tickers = list(seed["reits"])
     index = corp_index(tickers, rebuild=rebuild)
@@ -354,6 +386,8 @@ def collect(rebuild: bool = False) -> None:
                      "시간축은 basis(재무상태표 기준일)로 잡아야 한다. revenue 가 null 인 행은 "
                      "주요계정 응답에 매출액 줄이 빠진 경우로, 손익 섹션과 영업이익은 와 있으니 "
                      "복원이 필요하면 fnlttSinglAcntAll(전체 재무제표)을 따로 받아야 한다. "
+                     "basis 는 ISO 날짜(YYYY-MM-DD)로 정규화한 재무상태표 기준일이고, DART "
+                     "원문 표기('2025.11.30 현재')는 basis_raw 에 그대로 남겼다. "
                      "배당의 total_div 단위는 백만원, dps는 원, yld는 %다."),
             "seed_as_of": seed["meta"]["as_of"],
             "seed_criteria": seed["meta"]["criteria"],
@@ -384,11 +418,19 @@ def collect(rebuild: bool = False) -> None:
         print(f"  중단 사유가 기록됐다: {stopped} — 다음 실행이 raw 캐시를 이어받는다.")
     if result["meta"].get("partial_write_reason"):
         print(f"  ⚠ 기존 산출을 지키려고 비켜 썼다: {result['meta']['partial_write_reason']}")
+    return result
 
 
-if __name__ == "__main__":
+def main() -> None:
     # --rebuild: 네트워크를 아예 쓰지 않고 raw 캐시만으로 산출을 다시 만든다(스키마 변경 반영용).
     rebuild = "--rebuild" in sys.argv[1:]
     print("DART 리츠 앵커 수집:" if not rebuild else "DART 리츠 앵커 재생성(캐시만):")
-    collect(rebuild=rebuild)
-    print("COMPLETE")
+    meta = collect(rebuild=rebuild)["meta"]
+    # 완주는 두 조건을 모두 만족할 때뿐이다. 중단 사유가 없어야 하고, 산출이 제자리(reits.json)에
+    # 앉아야 한다. 기존 산출보다 얇아 .partial 로 비켜 쓴 실행도 이어받을 일이 남은 것이다.
+    print("COMPLETE" if not meta["stopped"] and meta["written_to"] == OUT_PATH.name
+          else "RESUME_NEEDED")
+
+
+if __name__ == "__main__":
+    main()

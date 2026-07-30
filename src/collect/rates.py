@@ -143,7 +143,8 @@ def _fetch_series(name: str, stat: str, item: str, start: str, end: str) -> dict
     _check_item(name, item, rows)
     payload = {"StatisticSearch": {"list_total_count": total, "row": rows}}
     RAW_DIR.mkdir(parents=True, exist_ok=True)
-    (RAW_DIR / f"{name}.json").write_text(json.dumps(payload, ensure_ascii=False))
+    (RAW_DIR / f"{name}.json").write_text(json.dumps(payload, ensure_ascii=False),
+                                          encoding="utf-8")
     return payload
 
 
@@ -208,11 +209,17 @@ def collect() -> None:
                      "아니므로 신규 조달 여건을 본다."),
         },
     }
-    OUT_PATH.write_text(json.dumps(result, ensure_ascii=False, indent=1))
+    OUT_PATH.write_text(json.dumps(result, ensure_ascii=False, indent=1), encoding="utf-8")
     print(f"  저장: {OUT_PATH} ({START}~{end}, 3계열)")
 
 
-if __name__ == "__main__":
+def main() -> None:
+    # 이 수집기는 부분 저장 경로가 없다 — _validate 가 어긋나면 그 자리에서 예외로 멈추므로
+    # 저장까지 도달했다는 것 자체가 완주다. 마커를 main() 에 두는 건 테스트가 부르기 위해서다.
     print("ECOS 금리 수집:")
     collect()
     print("COMPLETE")
+
+
+if __name__ == "__main__":
+    main()

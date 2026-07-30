@@ -31,7 +31,7 @@ SEOUL_GU = {
 
 
 def load_config() -> dict:
-    return json.load(open(ROOT / "config.json"))
+    return json.load(open(ROOT / "config.json", encoding="utf-8"))
 
 
 def api_get(url: str, params: dict, timeout: int = 15, retries: int = 1, headers: dict = None):

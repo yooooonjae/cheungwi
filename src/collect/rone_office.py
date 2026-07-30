@@ -175,7 +175,7 @@ def _fetch_table(statbl_id: str) -> list:
     """
     cache = RAW_DIR / f"{statbl_id}.json"
     if cache.exists():
-        return json.loads(cache.read_text())
+        return json.loads(cache.read_text(encoding="utf-8"))
     total, rows = _get_page(statbl_id, 1)
     page = 2
     while len(rows) < total:
@@ -190,7 +190,7 @@ def _fetch_table(statbl_id: str) -> list:
             f"(마지막으로 응답한 페이지 {page - 1}, pSize {PSIZE}, 마지막 행 "
             f"{rows[-1].get('CLS_FULLNM') if rows else '-'}@"
             f"{rows[-1].get('WRTTIME_IDTFR_ID') if rows else '-'}). 캐시를 기록하지 않는다.")
-    cache.write_text(json.dumps(rows, ensure_ascii=False))
+    cache.write_text(json.dumps(rows, ensure_ascii=False), encoding="utf-8")
     return rows
 
 
@@ -273,7 +273,7 @@ def collect() -> dict:
                        "두 키로 갈릴 수 있다 — 하위 상권 시계열을 이어 쓸 때는 명칭 매핑이 필요하다."),
         },
     }
-    OUT_PATH.write_text(json.dumps(result, ensure_ascii=False, indent=1))
+    OUT_PATH.write_text(json.dumps(result, ensure_ascii=False, indent=1), encoding="utf-8")
     return {"path": str(OUT_PATH), "cutoff": cutoff, "coverage": coverage,
             "empty_series": empty, "parsed": parsed}
 
@@ -288,7 +288,9 @@ def _fmt(series: str, entry: dict) -> str:
     return (f"{series:<11} {len(points):>2}분기  {points[0]['yq']}~{last['yq']}  최신={value}")
 
 
-if __name__ == "__main__":
+def main() -> None:
+    # 이 수집기도 부분 저장 경로가 없다 — 페이지네이션 절단이면 캐시조차 남기지 않고 예외로
+    # 멈춘다. 저장에 도달했으면 완주다. 마커를 main() 에 둔 건 테스트가 부르기 위해서다.
     print("R-ONE 오피스 권역 지표 수집:")
     r = collect()
     for name in REGION_ORDER:
@@ -303,3 +305,7 @@ if __name__ == "__main__":
         print(f"  ⚠ 권역 행이 전혀 없는 계열: {r['empty_series']}")
     print(f"  저장: {r['path']} (기준 {r['cutoff']} 이후)")
     print("COMPLETE")
+
+
+if __name__ == "__main__":
+    main()

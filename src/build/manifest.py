@@ -8,6 +8,9 @@
                        건물은 동 수, 실거래는 거래 건수, 지수·금리·리츠 재무는 관측치 수다.
   - coverage         : 지역·주기·기간과 **빠진 부분**까지 한 줄로 적은 커버리지
   - cache            : 재실행이 어디까지 캐시를 믿는가 — 수집기마다 정책이 다르다
+  - units            : 그 산출의 수치가 어느 단위로 적혀 있는가. 원·㎡·지수·%·연%가 한 원장에
+                       섞이는데 단위를 적어 두지 않으면 소비자가 값의 자릿수를 보고 되짚어야
+                       한다(리츠 total_div 만 백만원인 것이 대표적인 함정이다).
 
 관측월과 수집일의 간격이 곧 데이터 지연이다. 두 값을 뭉뚱그리지 않는 것이 이 파일의 목적이다.
 같은 날 수집해도 R-ONE 은 2026Q1(분기 지표), 금리는 2026-06, 실거래는 당일까지 관측한다.
@@ -238,27 +241,35 @@ def _h_rates(d):
 # time_axis: 데이터 자체에 시점 축이 있는가. 시드와 건물 마스터는 스냅샷이라 관측월이
 # 수집일에서 나온다 — 그런 원천을 data_cutoff 후보에 넣으면, 재수집 없이 달만 넘겨도
 # 기준월이 저 혼자 앞으로 간다. 그래서 후보 자격을 이 플래그로 가른다.
-Source = namedtuple("Source", "key dataset institution handler time_axis cache")
+Source = namedtuple("Source", "key dataset institution handler time_axis cache units")
 
 # 표시 순서 = 사이트 방법론 표 순서
 SOURCES = [
     Source("seed_buildings", "3대 권역 프라임 오피스 시드", "직접 작성(공개 자료 대조)", _h_seed, False,
-           "API 를 부르지 않는다. 사람이 고쳐 쓰는 단일 출처이고 다른 수집기가 이 지번을 기준으로 조회한다."),
+           "API 를 부르지 않는다. 사람이 고쳐 쓰는 단일 출처이고 다른 수집기가 이 지번을 기준으로 조회한다.",
+           "-"),
     Source("buildings", "건축물대장 표제부 + 좌표·용도지역·공시지가", "국토교통부 건축HUB · VWorld",
            _h_buildings, False,
-           "재개형. 건물 단위로 캐시하되 조회 입력이 바뀌거나 반쪽 결과면 캐시를 쓰지 않는다 — "
-           "대장 권한이 열린 뒤 다시 돌리면 VWorld 는 재호출 없이 통과하고 대장만 채운다."),
+           "VWorld 는 입력 지문·완전성 검사를 거쳐 캐시한다(조회 입력이 바뀌거나 반쪽 결과면 캐시를 "
+           "쓰지 않는다). 대장 표제부 XML 은 캐시 우선이고 무효화가 없다 — 활용신청이 승인된 뒤 "
+           "받은 첫 응답이 그대로 스냅샷으로 얼어붙으므로, 대장이 갱신됐는지 보려면 "
+           "data/raw/bldrgst/ 를 지우고 다시 돌려야 한다.",
+           "㎡·원/㎡(공시지가)"),
     Source("trades", "서울 5개 구 상업업무용 실거래", "국토교통부 RTMS", _h_trades, True,
            "캐시 우선 + 진행 파일(trades_progress.json)로 중단 지점 재개. raw 캐시가 단일 진실이라 "
-           "매 실행이 캐시 전체를 다시 읽어 산출을 새로 만든다."),
+           "매 실행이 캐시 전체를 다시 읽어 산출을 새로 만든다.",
+           "원·㎡"),
     Source("rone_office", "상업용부동산 임대동향(오피스)", "한국부동산원 R-ONE", _h_rone, True,
            "표(STATBL_ID) 단위 캐시 우선이고 무효화가 없다 — 새 분기를 받으려면 "
-           "data/raw/rone_office/ 를 지우고 다시 돌려야 한다."),
+           "data/raw/rone_office/ 를 지우고 다시 돌려야 한다.",
+           "지수·%·천원/㎡"),
     Source("reits", "오피스 보유 상장리츠 재무·배당", "금융감독원 OpenDART", _h_reits, True,
            "성공 응답(status 000)만 캐시한다. '자료 없음'은 아직 제출 전일 수 있어 캐시하지 않고 "
-           "다음 실행이 다시 부른다."),
+           "다음 실행이 다시 부른다.",
+           "원(total_div만 백만원)"),
     Source("rates", "국고채 10년·CD 91일·기업대출 금리", "한국은행 ECOS", _h_rates, True,
-           "캐시가 있어도 매 실행 API 를 다시 부른다 — 월 시계열이라 최신 월이 계속 늘기 때문이다."),
+           "캐시가 있어도 매 실행 API 를 다시 부른다 — 월 시계열이라 최신 월이 계속 늘기 때문이다.",
+           "연%"),
 ]
 
 
@@ -295,6 +306,7 @@ def build_manifest(write: bool = True, today=None, data_dir=None) -> dict:
             "rows": info["rows"],
             "coverage": info["coverage"],
             "cache": src.cache,
+            "units": src.units,
         })
         if not src.time_axis:
             continue

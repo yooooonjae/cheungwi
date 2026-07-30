@@ -1,9 +1,12 @@
 import json
+import re
+import sys
 
 import pytest
 
 from src.collect import reits
 from src.collect.common import ROOT
+from src.collect.reits import _basis_date as _iso
 from src.collect.reits import dividends, fin_series, pick_revenue
 
 
@@ -96,7 +99,8 @@ def test_fin_series_takes_separate_statements(monkeypatch):
                        "liab": 603_569_310_216.0,
                        "equity": 711_040_909_382.0,
                        "revenue": 37_238_582_035.0,     # 연결 85,330,922,743 이 아니다
-                       "basis": "2026.03.31 현재"}
+                       "basis": "2026-03-31",           # ISO 로 정규화한 재무상태표 기준일
+                       "basis_raw": "2026.03.31 현재"}  # DART 원문 표기는 여기 남는다
 
 
 def test_fin_series_drops_rows_without_separate_figures(monkeypatch):
@@ -109,11 +113,66 @@ def test_fin_series_drops_rows_without_separate_figures(monkeypatch):
     assert rows == [] and skipped == 1
 
 
+def test_basis_date_normalizes_and_refuses_to_guess():
+    """기준일은 ISO 로 정규화하되, 날짜로 읽히지 않는 값을 빈 값으로 뭉개지 않는다."""
+    assert _iso("2025.11.30 현재") == "2025-11-30"
+    assert _iso("2026.3.31 현재") == "2026-03-31"    # 한 자리 월·일도 받는다
+    assert _iso("") == "" and _iso(None) == ""       # 기준일이 없는 보고서는 빈 값 그대로
+    with pytest.raises(RuntimeError, match="날짜로 읽지 못했다"):
+        _iso("제3기 3분기말")
+    with pytest.raises(RuntimeError, match="달력에 없는"):
+        _iso("2025.02.30 현재")
+
+
+# ── 마커 ─────────────────────────────────────────────────────────────────────
+def _stub_run(monkeypatch, tmp_path, fetch):
+    """main() 을 네트워크·실산출 없이 돌린다. 산출 경로는 tmp_path 로 비켜 놓는다."""
+    monkeypatch.setattr(reits, "OUT_PATH", tmp_path / "reits.json")
+    monkeypatch.setattr(reits, "PARTIAL_PATH", tmp_path / "reits.partial.json")
+    monkeypatch.setattr(reits, "corp_index",
+                        lambda tickers, rebuild=False: {t: {"corp_code": "01234567"}
+                                                        for t in tickers})
+    monkeypatch.setattr(reits, "_fetch", fetch)
+    monkeypatch.setattr(sys, "argv", ["reits.py"])
+
+
+def test_marker_says_resume_needed_when_a_stop_status_cuts_the_run(monkeypatch, tmp_path, capsys):
+    """쿼터 소진(020)으로 중단한 실행은 COMPLETE 를 찍으면 안 된다.
+
+    이 한 줄이 '오늘 수집이 끝났는가'의 유일한 신호다. 절반만 받고 COMPLETE 를 찍으면
+    파이프라인도 사람도 다음 실행을 걸 이유를 잃는다.
+    """
+    def fetch(corp, op, year, reprt, rebuild=False):
+        raise reits._Stop("020", "요청 제한 초과")
+
+    _stub_run(monkeypatch, tmp_path, fetch)
+    reits.main()
+    out = capsys.readouterr().out
+    assert out.strip().splitlines()[-1] == "RESUME_NEEDED"
+    assert "중단" in out
+
+
+def test_marker_says_complete_when_every_reit_is_collected(monkeypatch, tmp_path, capsys):
+    """중단 없이 산출이 제자리에 앉으면 COMPLETE 다 — 마커가 항상 붉지는 않은지 함께 본다."""
+    payload = _fixture("dart_fnltt_single_acnt_sample.json")
+
+    def fetch(corp, op, year, reprt, rebuild=False):
+        return payload if (op, year, reprt) == ("fnlttSinglAcnt", 2026, "11011") else None
+
+    _stub_run(monkeypatch, tmp_path, fetch)
+    reits.main()
+    out = capsys.readouterr().out
+    assert out.strip().splitlines()[-1] == "COMPLETE"
+    doc = json.load(open(tmp_path / "reits.json", encoding="utf-8"))
+    assert doc["meta"]["stopped"] == "" and doc["meta"]["written_to"] == "reits.json"
+
+
 def test_reits_output_schema():
     """산출 data/reits.json 의 계약 — 소비자가 기대는 필드와 값 범위."""
     path = ROOT / "data" / "reits.json"
-    if not path.exists():
-        pytest.skip("data/reits.json 이 없다 (python3 src/collect/reits.py 로 만든다)")
+    # 산출이 없으면 건너뛰지 않고 실패시킨다. 스킵으로 두면 산출이 통째로 사라진 날에도
+    # 초록불이 켜져, 계약을 지키는 유일한 시험이 조용히 꺼진 채로 병합된다.
+    assert path.exists(), "data/reits.json 이 없다 (python3 src/collect/reits.py 로 만든다)"
     doc = json.load(open(path, encoding="utf-8"))
     bids = {b["id"] for b in json.load(open(ROOT / "data" / "seed_buildings.json"))["buildings"]}
     meta = doc["meta"]
@@ -132,7 +191,11 @@ def test_reits_output_schema():
             assert asset["note"]
             links += bool(asset["building_id"])
         for row in reit["fin"]:
-            assert set(row) == {"year", "reprt", "assets", "liab", "equity", "revenue", "basis"}
+            assert set(row) == {"year", "reprt", "assets", "liab", "equity", "revenue",
+                                "basis", "basis_raw"}
+            # 시간축의 근거인 basis 는 ISO 날짜다. 원문 표기는 basis_raw 에만 남는다.
+            assert re.fullmatch(r"\d{4}-\d{2}-\d{2}", row["basis"]) or row["basis"] == ""
+            assert row["basis_raw"] == "" or row["basis"] == _iso(row["basis_raw"])
             assert 2020 <= row["year"] <= meta["years"][1]
             assert row["reprt"] in meta["reprt_codes"]
             assert row["assets"] is None or row["assets"] > 0

@@ -15,6 +15,24 @@ def test_manifest_covers_all_sources():
     assert keys == {"seed_buildings", "buildings", "trades", "rone_office", "reits", "rates"}
     for s in m["sources"]:
         assert s["observed_through"] and s["rows"] >= 1, s["key"]
+        assert s["cache"] and s["units"], s["key"]
+
+
+def test_manifest_records_units_and_the_two_cache_policies_of_buildings():
+    """단위와 캐시 정책은 원장에서만 읽을 수 있어야 한다.
+
+    단위: 한 원장에 원·㎡·지수·%·연%가 섞이는데 리츠 total_div 만 백만원이다. 이 함정을
+    적어 두지 않으면 소비자가 자릿수를 보고 되짚는다.
+    캐시: buildings 는 한 문장으로 뭉뚱그릴 수 없다 — VWorld 는 입력 지문·완전성 검사를 거치고
+    대장 XML 은 무효화가 없어 승인 후 첫 응답이 그대로 스냅샷으로 언다.
+    """
+    m = build_manifest(write=False)
+    units = {s["key"]: s["units"] for s in m["sources"]}
+    assert units == {"seed_buildings": "-", "buildings": "㎡·원/㎡(공시지가)",
+                     "trades": "원·㎡", "rone_office": "지수·%·천원/㎡",
+                     "reits": "원(total_div만 백만원)", "rates": "연%"}
+    cache = _by_key(m, "buildings")["cache"]
+    assert "입력 지문" in cache and "무효화가 없다" in cache and "스냅샷" in cache
 
 
 def test_manifest_cutoff_is_month():

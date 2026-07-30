@@ -394,6 +394,8 @@ def test_transient_is_per_building_and_keeps_going(tmp_path, monkeypatch):
     assert result["meta"]["matched"] == 1                     # a는 살아남았다
     assert [f["id"] for f in result["meta"]["failed"]] == ["b"]
     assert "일시 오류" in result["meta"]["failed"][0]["reason"]
-    assert result["meta"]["ledger_status"] != "OK" or True    # 전역 차단으로 승격되지 않는다
+    # 일시 오류는 그 건만 격리한다 — 전역 차단(ledger_blocked)으로 승격되지 않으므로
+    # 대장 상태는 여전히 OK 다. 여기가 OK 가 아니면 뒤따르는 동들이 통째로 미조회가 된다.
+    assert result["meta"]["ledger_status"] == "OK"
     assert result["buildings"][1]["ledger"] is None
     assert (tmp_path / "buildings.json").exists(), "일시 오류에도 저장에 도달해야 한다"

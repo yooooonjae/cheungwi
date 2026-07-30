@@ -57,7 +57,7 @@ PROG_PATH = ROOT / "data" / "trades_progress.json"
 RAW_DIR = ROOT / "data" / "raw" / "trades"
 
 # 이미 받아 둔 남의 캐시(수지 프로젝트, 같은 엔드포인트·같은 numOfRows). 강남 최근 36개월이 있다.
-SUJI_RAW = (Path(os.environ.get("SUJI_DIR", str(Path.home() / "개발")))
+SUJI_RAW = (Path(os.path.expanduser(os.environ.get("SUJI_DIR", str(Path.home() / "개발"))))
             / "data" / "raw" / "rtms_commercial")
 
 SGG_LIST = ["11110", "11140", "11560", "11650", "11680"]  # 종로·중·영등포·서초·강남
@@ -522,7 +522,9 @@ def collect(limit: int = None, rebuild: bool = False) -> dict:
             "source": "국토부 RTMS 상업업무용",
             "note": ("trades는 buildingUse가 '업무'인 행만 담는다(그 외 용도는 raw 캐시에만 있다). "
                      "해제(cdealType) 행은 지우지 않고 canceled=true로 남긴다 — 취소된 계약도 "
-                     "그 시점의 호가 정보다. **match.building_id가 null이면 마스킹된 지번이 여러 "
+                     "그 시점의 호가 정보다. 설계 스펙 초안의 '해제 거래 제거'와 달리 "
+                     "보존+플래그가 확정 규약이고, 해제 건을 빼는 판단은 수집이 아니라 분석 "
+                     "단계에서 canceled로 거른다. **match.building_id가 null이면 마스킹된 지번이 여러 "
                      "시드에 동시에 걸려 동을 특정하지 못한 행이다** — candidates에 후보를 다 적어 "
                      "두었으니 소비자가 판단해야 하고, 첫 후보를 고르는 식의 처리는 금물이다. "
                      "ledger_ready가 false면 연면적을 몰라 kind는 전부 jibun_only이며, 대장이 열린 "
