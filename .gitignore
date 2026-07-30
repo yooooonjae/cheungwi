@@ -1,4 +1,5 @@
 config.json
+.superpowers/
 .env
 __pycache__/
 venv/
