@@ -12,8 +12,11 @@
 관측월과 수집일의 간격이 곧 데이터 지연이다. 두 값을 뭉뚱그리지 않는 것이 이 파일의 목적이다.
 같은 날 수집해도 R-ONE 은 2026Q1(분기 지표), 금리는 2026-06, 실거래는 당일까지 관측한다.
 
-data_cutoff = 여섯 원천의 관측월 중 **현재 달을 뺀** 최신 월. 현재 달은 아직 부분 관측이라
-              신뢰 기준월로 삼지 않는다. 사이트가 "언제까지의 데이터인가"로 내거는 값이다.
+data_cutoff = **자기 시점축을 가진** 원천(trades·rone_office·reits·rates)의 관측월 중 완결된
+              달의 최신 월. 완결 판정선은 오늘과 수집일 중 이른 달이다 — 재수집 없이 달만
+              넘어가도 기준월이 저 혼자 전진하지 않게 하려는 것이다. 시드·건물 마스터는
+              관측월이 수집일에서 나오는 스냅샷이라 후보에서 뺀다(time_axis=False).
+              사이트가 "언제까지의 데이터인가"로 내거는 값이다.
 
 실행:  python3 src/build/manifest.py      →  data/DATA_MANIFEST.json 기록·요약 출력
 사용:  from src.build.manifest import build_manifest
@@ -22,6 +25,7 @@ data_cutoff = 여섯 원천의 관측월 중 **현재 달을 뺀** 최신 월. �
 import datetime
 import json
 import re
+from collections import namedtuple
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[2]
@@ -160,12 +164,18 @@ def _h_rone(d):
     reg_pts = sum(len(x) for v in regions.values() for x in v.values())
     sub_pts = sum(len(x) for v in subs.values() for x in v.values())
     nq = len(set(qs))
+    # 하위 상권은 키 수가 곧 상권 수가 아니다. R-ONE 이 기간표마다 명칭을 바꿔(신사→신사역)
+    # 옛 이름 키가 중간 분기에서 끊긴다. 최신 분기까지 살아 있는 키만 따로 세어 결손을 드러낸다.
+    alive = sum(1 for v in subs.values()
+                if any(p.get("yq") == hi for x in v.values() for p in x))
+    full = sum(len(v) for v in subs.values()) * nq  # 끊김이 없을 때의 사각형 점수
     return dict(
         observed_through=_quarter_end_month(hi),
         collected_at=str(d["meta"].get("collected_at", ""))[:10],
         rows=reg_pts + sub_pts,
         coverage=f"{len(regions)}개 권역(3대 권역+서울) × {len(series)}계열({label}) "
-                 f"{nq}분기 {reg_pts:,}점 + 하위 상권 {len(subs)}곳 {sub_pts:,}점 · "
+                 f"{nq}분기 {reg_pts:,}점 + 하위 상권 {hi} 기준 {alive}곳"
+                 f"(명칭 분기로 끊긴 키 포함 {len(subs)}키) {sub_pts:,}/{full:,}점 · "
                  f"{lo}~{hi} 분기",
     )
 
@@ -196,77 +206,107 @@ def _h_reits(d):
 
 def _h_rates(d):
     meta = d["meta"]
-    series = [k for k in d if k != "meta"]
+    # 계열은 meta.stat_codes 가 단일 출처다. "meta 만 빼기" 식으로 고르면 상위 키가 하나 늘 때
+    # 그것까지 계열로 세어 rows 가 조용히 오염된다.
+    keys = meta.get("stat_codes") or d
+    series = [k for k in keys if isinstance(d.get(k), list)]
     lo, hi = _span_months({k: d[k] for k in series}, ("ym",))
     pts = sum(len(d[k]) for k in series)
     names = meta.get("series_names", {})
     short = {"treasury10y": "국고채10년", "cd91": "CD91일", "loan_corp_new": "기업대출(신규)"}
     label = "·".join(short.get(k, names.get(k, k)) for k in series)
-    per = min(len(d[k]) for k in series)
+    counts = [len(d[k]) for k in series]
+    per = f"{min(counts)}" if min(counts) == max(counts) else f"{min(counts)}~{max(counts)}"
+    # 관측월은 계열 최댓값이지만, 계열마다 최신월이 갈리면 그 사실을 커버리지에 드러낸다.
+    # 한 계열만 먼저 갱신돼도 원장은 전 계열이 그 달까지 온 것처럼 보이기 때문이다.
+    last = {k: _span_months(d[k], ("ym",))[1] for k in series}
+    lag = [k for k in series if last[k] != hi]
+    gap = ""
+    if lag:
+        gap = " · 계열별 최신월 상이: " + "·".join(
+            f"{short.get(k, k)} {_fmt_month(last[k])}" for k in lag
+        ) + f" (그 외 {_fmt_month(hi)})"
     return dict(
         observed_through=_fmt_month(hi),
         collected_at=str(meta.get("collected_at", ""))[:10],
         rows=pts,
         coverage=f"{label} {len(series)}계열 · 계열당 {per}개월 · "
-                 f"{_fmt_month(lo)}~{_fmt_month(hi)} 월별",
+                 f"{_fmt_month(lo)}~{_fmt_month(hi)} 월별{gap}",
     )
 
 
-# (key, 표시명, 기관, 핸들러, 캐시 정책) — 표시 순서 = 사이트 방법론 표 순서
+# time_axis: 데이터 자체에 시점 축이 있는가. 시드와 건물 마스터는 스냅샷이라 관측월이
+# 수집일에서 나온다 — 그런 원천을 data_cutoff 후보에 넣으면, 재수집 없이 달만 넘겨도
+# 기준월이 저 혼자 앞으로 간다. 그래서 후보 자격을 이 플래그로 가른다.
+Source = namedtuple("Source", "key dataset institution handler time_axis cache")
+
+# 표시 순서 = 사이트 방법론 표 순서
 SOURCES = [
-    ("seed_buildings", "3대 권역 프라임 오피스 시드", "직접 작성(공개 자료 대조)", _h_seed,
-     "API 를 부르지 않는다. 사람이 고쳐 쓰는 단일 출처이고 다른 수집기가 이 지번을 기준으로 조회한다."),
-    ("buildings", "건축물대장 표제부 + 좌표·용도지역·공시지가", "국토교통부 건축HUB · VWorld", _h_buildings,
-     "재개형. 건물 단위로 캐시하되 조회 입력이 바뀌거나 반쪽 결과면 캐시를 쓰지 않는다 — "
-     "대장 권한이 열린 뒤 다시 돌리면 VWorld 는 재호출 없이 통과하고 대장만 채운다."),
-    ("trades", "서울 5개 구 상업업무용 실거래", "국토교통부 RTMS", _h_trades,
-     "캐시 우선 + 진행 파일(trades_progress.json)로 중단 지점 재개. raw 캐시가 단일 진실이라 "
-     "매 실행이 캐시 전체를 다시 읽어 산출을 새로 만든다."),
-    ("rone_office", "상업용부동산 임대동향(오피스)", "한국부동산원 R-ONE", _h_rone,
-     "표(STATBL_ID) 단위 캐시 우선이고 무효화가 없다 — 새 분기를 받으려면 "
-     "data/raw/rone_office/ 를 지우고 다시 돌려야 한다."),
-    ("reits", "오피스 보유 상장리츠 재무·배당", "금융감독원 OpenDART", _h_reits,
-     "성공 응답(status 000)만 캐시한다. '자료 없음'은 아직 제출 전일 수 있어 캐시하지 않고 "
-     "다음 실행이 다시 부른다."),
-    ("rates", "국고채 10년·CD 91일·기업대출 금리", "한국은행 ECOS", _h_rates,
-     "캐시가 있어도 매 실행 API 를 다시 부른다 — 월 시계열이라 최신 월이 계속 늘기 때문이다."),
+    Source("seed_buildings", "3대 권역 프라임 오피스 시드", "직접 작성(공개 자료 대조)", _h_seed, False,
+           "API 를 부르지 않는다. 사람이 고쳐 쓰는 단일 출처이고 다른 수집기가 이 지번을 기준으로 조회한다."),
+    Source("buildings", "건축물대장 표제부 + 좌표·용도지역·공시지가", "국토교통부 건축HUB · VWorld",
+           _h_buildings, False,
+           "재개형. 건물 단위로 캐시하되 조회 입력이 바뀌거나 반쪽 결과면 캐시를 쓰지 않는다 — "
+           "대장 권한이 열린 뒤 다시 돌리면 VWorld 는 재호출 없이 통과하고 대장만 채운다."),
+    Source("trades", "서울 5개 구 상업업무용 실거래", "국토교통부 RTMS", _h_trades, True,
+           "캐시 우선 + 진행 파일(trades_progress.json)로 중단 지점 재개. raw 캐시가 단일 진실이라 "
+           "매 실행이 캐시 전체를 다시 읽어 산출을 새로 만든다."),
+    Source("rone_office", "상업용부동산 임대동향(오피스)", "한국부동산원 R-ONE", _h_rone, True,
+           "표(STATBL_ID) 단위 캐시 우선이고 무효화가 없다 — 새 분기를 받으려면 "
+           "data/raw/rone_office/ 를 지우고 다시 돌려야 한다."),
+    Source("reits", "오피스 보유 상장리츠 재무·배당", "금융감독원 OpenDART", _h_reits, True,
+           "성공 응답(status 000)만 캐시한다. '자료 없음'은 아직 제출 전일 수 있어 캐시하지 않고 "
+           "다음 실행이 다시 부른다."),
+    Source("rates", "국고채 10년·CD 91일·기업대출 금리", "한국은행 ECOS", _h_rates, True,
+           "캐시가 있어도 매 실행 API 를 다시 부른다 — 월 시계열이라 최신 월이 계속 늘기 때문이다."),
 ]
 
 
-def build_manifest(write: bool = True) -> dict:
-    """data/*.json 을 읽어 원장을 만든다. write=True 면 DATA_MANIFEST.json 을 기록한다."""
-    today = datetime.date.today()
-    cur_ym = today.strftime("%Y%m")
-    sources = []
-    complete_months = []  # 현재 달을 뺀 관측월 — data_cutoff 산정용
+def build_manifest(write: bool = True, today=None, data_dir=None) -> dict:
+    """data/*.json 을 읽어 원장을 만든다. write=True 면 DATA_MANIFEST.json 을 기록한다.
 
-    for key, dataset, inst, handler, cache in SOURCES:
-        path = DATA / f"{key}.json"
+    today·data_dir 는 주입구다. 달 롤오버와 결손 입력은 실데이터로는 재현할 수 없어
+    테스트가 날짜와 입력 디렉터리를 갈아 끼우고 규칙을 확인한다.
+    """
+    today = today or datetime.date.today()
+    cur_ym = today.strftime("%Y%m")
+    data_dir = Path(data_dir) if data_dir else DATA
+    sources = []
+    complete_months = []  # data_cutoff 후보 — 시점축이 있고 완결된 달만 들어온다
+
+    for src in SOURCES:
+        path = data_dir / f"{src.key}.json"
         if not path.exists():
             raise FileNotFoundError(f"manifest: {path} 없음 — 해당 수집기를 먼저 돌려야 한다")
         d = json.loads(path.read_text(encoding="utf-8"))
-        info = handler(d)
+        info = src.handler(d)
         ot = info["observed_through"]
         # 빈 산출을 원장에 조용히 싣지 않는다. 관측월이나 행이 없으면 그 자리에서 실패시킨다.
         if not ot or info["rows"] < 1:
-            raise RuntimeError(f"manifest: {key} 관측월={ot} 행수={info['rows']} — 산출이 비었다")
+            raise RuntimeError(f"manifest: {src.key} 관측월={ot} 행수={info['rows']} — 산출이 비었다")
         sources.append({
-            "key": key,
-            "dataset": dataset,
-            "institution": inst,
-            "source": d.get("meta", {}).get("source", inst),
+            "key": src.key,
+            "dataset": src.dataset,
+            "institution": src.institution,
+            "source": d.get("meta", {}).get("source", src.institution),
             "observed_through": ot,
             "collected_at": info["collected_at"],
+            "time_axis": src.time_axis,
             "rows": info["rows"],
             "coverage": info["coverage"],
-            "cache": cache,
+            "cache": src.cache,
         })
-        ym = ot.replace("-", "")
-        if ym < cur_ym:
-            complete_months.append(ym)
+        if not src.time_axis:
+            continue
+        # 완결 판정선은 오늘과 수집일 중 이른 달이다. 수집일 달까지만 데이터가 있는데
+        # 달이 넘어갔다고 그 달을 완결로 치면, 재수집 없이 기준월만 앞으로 간다.
+        collected_ym = re.sub(r"\D", "", info["collected_at"])[:6]
+        limit = min(cur_ym, collected_ym) if _YM.match(collected_ym or "") else cur_ym
+        if ot.replace("-", "") < limit:
+            complete_months.append(ot.replace("-", ""))
 
     if not complete_months:
-        raise RuntimeError("manifest: 현재 달 미만의 관측월이 하나도 없다 — data_cutoff 를 정할 수 없다")
+        raise RuntimeError("manifest: 완결된 관측월이 하나도 없다 — data_cutoff 를 정할 수 없다")
 
     manifest = {
         "generated_at": today.isoformat(),
@@ -275,7 +315,8 @@ def build_manifest(write: bool = True) -> dict:
         "sources": sources,
     }
     if write:
-        MANIFEST_PATH.write_text(json.dumps(manifest, ensure_ascii=False, indent=1), encoding="utf-8")
+        (data_dir / "DATA_MANIFEST.json").write_text(
+            json.dumps(manifest, ensure_ascii=False, indent=1), encoding="utf-8")
     return manifest
 
 
