@@ -1,0 +1,1408 @@
+{
+ "buildings": [
+  {
+   "id": "sfc",
+   "name": "서울파이낸스센터",
+   "region": "CBD",
+   "sgg_cd": "11140",
+   "umd": "태평로1가",
+   "jibun": "84",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라.",
+    "도로명 점 필지 불일치(시드 태평로1가 84 vs 점 97대) — 여러 필지에 걸친 건물이면 정상이다. 공시지가·PNU는 시드 지번으로 조회했다. 사람 확인 권장."
+   ],
+   "vworld": {
+    "lat": 37.568415,
+    "lon": 126.978284,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1114010300100840000",
+    "land_price_won_m2": 61960000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1114010100100970000",
+    "jibun_check": "97대"
+   }
+  },
+  {
+   "id": "grand-seoul",
+   "name": "그랑서울",
+   "region": "CBD",
+   "sgg_cd": "11110",
+   "umd": "청진동",
+   "jibun": "70",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5710142,
+    "lon": 126.9814357,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1111012200100700000",
+    "land_price_won_m2": 61200000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1111012200100700000",
+    "jibun_check": "70 대"
+   }
+  },
+  {
+   "id": "dtower-gwanghwamun",
+   "name": "광화문 D타워",
+   "region": "CBD",
+   "sgg_cd": "11110",
+   "umd": "청진동",
+   "jibun": "246",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5710682,
+    "lon": 126.9788968,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1111012200102460000",
+    "land_price_won_m2": 56390000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1111012200102460000",
+    "jibun_check": "246 대"
+   }
+  },
+  {
+   "id": "centropolis",
+   "name": "센트로폴리스",
+   "region": "CBD",
+   "sgg_cd": "11110",
+   "umd": "공평동",
+   "jibun": "17",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5716808,
+    "lon": 126.9835302,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1111012700100170000",
+    "land_price_won_m2": 37800000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1111012700100170000",
+    "jibun_check": "17 대"
+   }
+  },
+  {
+   "id": "jongno-tower",
+   "name": "종로타워",
+   "region": "CBD",
+   "sgg_cd": "11110",
+   "umd": "종로2가",
+   "jibun": "6",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라.",
+    "도로명 점 필지 불일치(시드 종로2가 6 vs 점 70대) — 여러 필지에 걸친 건물이면 정상이다. 공시지가·PNU는 시드 지번으로 조회했다. 사람 확인 권장."
+   ],
+   "vworld": {
+    "lat": 37.5707427,
+    "lon": 126.9836089,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1111013800100060000",
+    "land_price_won_m2": 68890000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1111012700100700000",
+    "jibun_check": "70대"
+   }
+  },
+  {
+   "id": "sk-seorin",
+   "name": "SK서린빌딩",
+   "region": "CBD",
+   "sgg_cd": "11110",
+   "umd": "서린동",
+   "jibun": "99",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5696909,
+    "lon": 126.9803035,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1111012300100990000",
+    "land_price_won_m2": 60860000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1111012300100990000",
+    "jibun_check": "99대"
+   }
+  },
+  {
+   "id": "twin-tree-tower",
+   "name": "트윈트리타워",
+   "region": "CBD",
+   "sgg_cd": "11110",
+   "umd": "중학동",
+   "jibun": "14",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5754722,
+    "lon": 126.9797725,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1111012500100140000",
+    "land_price_won_m2": 30690000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1111012500100140000",
+    "jibun_check": "14 대"
+   }
+  },
+  {
+   "id": "concordian",
+   "name": "콘코디언빌딩",
+   "region": "CBD",
+   "sgg_cd": "11110",
+   "umd": "신문로1가",
+   "jibun": "115",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.569802,
+    "lon": 126.973193,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1111012000101150000",
+    "land_price_won_m2": 42660000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1111012000101150000",
+    "jibun_check": "115 대"
+   }
+  },
+  {
+   "id": "susong-square",
+   "name": "수송스퀘어",
+   "region": "CBD",
+   "sgg_cd": "11110",
+   "umd": "수송동",
+   "jibun": "83-1",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라.",
+    "도로명 점 필지 불일치(시드 수송동 83-1 vs 점 85-7대) — 여러 필지에 걸친 건물이면 정상이다. 공시지가·PNU는 시드 지번으로 조회했다. 사람 확인 권장."
+   ],
+   "vworld": {
+    "lat": 37.5745373,
+    "lon": 126.9810189,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1111012400100830001",
+    "land_price_won_m2": 19970000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1111012400100850007",
+    "jibun_check": "85-7대"
+   }
+  },
+  {
+   "id": "center-one",
+   "name": "미래에셋 센터원",
+   "region": "CBD",
+   "sgg_cd": "11140",
+   "umd": "수하동",
+   "jibun": "67",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5673428,
+    "lon": 126.9851447,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1114010800100670000",
+    "land_price_won_m2": 50510000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1114010800100670000",
+    "jibun_check": "67 대"
+   }
+  },
+  {
+   "id": "ferrum-tower",
+   "name": "페럼타워",
+   "region": "CBD",
+   "sgg_cd": "11140",
+   "umd": "수하동",
+   "jibun": "66",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.566979,
+    "lon": 126.9842095,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1114010800100660000",
+    "land_price_won_m2": 50510000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1114010800100660000",
+    "jibun_check": "66 대"
+   }
+  },
+  {
+   "id": "eulji-twin-tower",
+   "name": "을지트윈타워",
+   "region": "CBD",
+   "sgg_cd": "11140",
+   "umd": "을지로4가",
+   "jibun": "323",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5661469,
+    "lon": 126.9973184,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1114015000103230000",
+    "land_price_won_m2": 33160000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1114015000103230000",
+    "jibun_check": "323 대"
+   }
+  },
+  {
+   "id": "signature-tower",
+   "name": "시그니처타워",
+   "region": "CBD",
+   "sgg_cd": "11140",
+   "umd": "수표동",
+   "jibun": "99",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5674728,
+    "lon": 126.9881132,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1114011000100990000",
+    "land_price_won_m2": 53630000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1114011000100990000",
+    "jibun_check": "99 대"
+   }
+  },
+  {
+   "id": "state-tower-namsan",
+   "name": "스테이트타워 남산",
+   "region": "CBD",
+   "sgg_cd": "11140",
+   "umd": "회현동2가",
+   "jibun": "88",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5601421,
+    "lon": 126.9829442,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1114012200100880000",
+    "land_price_won_m2": 41660000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1114012200100880000",
+    "jibun_check": "88 대"
+   }
+  },
+  {
+   "id": "booyoung-eulji",
+   "name": "더존을지타워",
+   "region": "CBD",
+   "sgg_cd": "11140",
+   "umd": "을지로1가",
+   "jibun": "87",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5664965,
+    "lon": 126.9810349,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1114010400100870000",
+    "land_price_won_m2": 67120000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1114010400100870000",
+    "jibun_check": "87대"
+   }
+  },
+  {
+   "id": "fine-avenue",
+   "name": "파인애비뉴",
+   "region": "CBD",
+   "sgg_cd": "11140",
+   "umd": "을지로2가",
+   "jibun": "203",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5656487,
+    "lon": 126.9881425,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1114010500102030000",
+    "land_price_won_m2": 60890000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1114010500102030000",
+    "jibun_check": "203 대"
+   }
+  },
+  {
+   "id": "seoul-square",
+   "name": "서울스퀘어",
+   "region": "CBD",
+   "sgg_cd": "11140",
+   "umd": "남대문로5가",
+   "jibun": "541",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5555219,
+    "lon": 126.9737628,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1114011800105410000",
+    "land_price_won_m2": 52980000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1114011800105410000",
+    "jibun_check": "541대"
+   }
+  },
+  {
+   "id": "hanwha-building",
+   "name": "한화빌딩",
+   "region": "CBD",
+   "sgg_cd": "11140",
+   "umd": "장교동",
+   "jibun": "1",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5675188,
+    "lon": 126.9865251,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1114010900100010000",
+    "land_price_won_m2": 53090000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1114010900100010000",
+    "jibun_check": "1대"
+   }
+  },
+  {
+   "id": "samsung-main-building",
+   "name": "삼성본관빌딩",
+   "region": "CBD",
+   "sgg_cd": "11140",
+   "umd": "태평로2가",
+   "jibun": "250",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5623145,
+    "lon": 126.975531,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1114011400102500000",
+    "land_price_won_m2": 48380000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1114011400102500000",
+    "jibun_check": "250대"
+   }
+  },
+  {
+   "id": "daishin-finance-center",
+   "name": "대신파이낸스센터",
+   "region": "CBD",
+   "sgg_cd": "11140",
+   "umd": "저동1가",
+   "jibun": "114",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5651179,
+    "lon": 126.9869606,
+    "zones": [
+     "중심상업지역"
+    ],
+    "pnu": "1114013100101140000",
+    "land_price_won_m2": 49730000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1114013100101140000",
+    "jibun_check": "114 대"
+   }
+  },
+  {
+   "id": "gfc",
+   "name": "강남파이낸스센터",
+   "region": "GBD",
+   "sgg_cd": "11680",
+   "umd": "역삼동",
+   "jibun": "737",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5000286,
+    "lon": 127.0365145,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1168010100107370000",
+    "land_price_won_m2": 67300000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1168010100107370000",
+    "jibun_check": "737 대"
+   }
+  },
+  {
+   "id": "parnas-tower",
+   "name": "파르나스타워",
+   "region": "GBD",
+   "sgg_cd": "11680",
+   "umd": "삼성동",
+   "jibun": "159-8",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5091745,
+    "lon": 127.0606252,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1168010500101590008",
+    "land_price_won_m2": 70590000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1168010500101590008",
+    "jibun_check": "159-8 대"
+   }
+  },
+  {
+   "id": "trade-tower",
+   "name": "트레이드타워",
+   "region": "GBD",
+   "sgg_cd": "11680",
+   "umd": "삼성동",
+   "jibun": "159-1",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5103226,
+    "lon": 127.0609991,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1168010500101590001",
+    "land_price_won_m2": 45660000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1168010500101590001",
+    "jibun_check": "159-1 대"
+   }
+  },
+  {
+   "id": "asem-tower",
+   "name": "아셈타워",
+   "region": "GBD",
+   "sgg_cd": "11680",
+   "umd": "삼성동",
+   "jibun": "159",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5130928,
+    "lon": 127.0597756,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1168010500101590000",
+    "land_price_won_m2": 45660000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1168010500101590000",
+    "jibun_check": "159 대"
+   }
+  },
+  {
+   "id": "centerfield",
+   "name": "센터필드",
+   "region": "GBD",
+   "sgg_cd": "11680",
+   "umd": "역삼동",
+   "jibun": "676",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5036246,
+    "lon": 127.0416283,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1168010100106760000",
+    "land_price_won_m2": 58620000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1168010100106760000",
+    "jibun_check": "676 대"
+   }
+  },
+  {
+   "id": "gangnam-n-tower",
+   "name": "강남N타워",
+   "region": "GBD",
+   "sgg_cd": "11680",
+   "umd": "역삼동",
+   "jibun": "648-9",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.4999398,
+    "lon": 127.0323664,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1168010100106480009",
+    "land_price_won_m2": 66390000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1168010100106480009",
+    "jibun_check": "648-9 대"
+   }
+  },
+  {
+   "id": "arc-place",
+   "name": "아크플레이스",
+   "region": "GBD",
+   "sgg_cd": "11680",
+   "umd": "역삼동",
+   "jibun": "736-1",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.499744,
+    "lon": 127.0349543,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1168010100107360001",
+    "land_price_won_m2": 64440000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1168010100107360001",
+    "jibun_check": "736-1 대"
+   }
+  },
+  {
+   "id": "posco-center",
+   "name": "포스코센터",
+   "region": "GBD",
+   "sgg_cd": "11680",
+   "umd": "대치동",
+   "jibun": "892",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5058305,
+    "lon": 127.0561399,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1168010600108920000",
+    "land_price_won_m2": 70790000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1168010600108920000",
+    "jibun_check": "892 대"
+   }
+  },
+  {
+   "id": "gs-tower",
+   "name": "GS타워",
+   "region": "GBD",
+   "sgg_cd": "11680",
+   "umd": "역삼동",
+   "jibun": "679",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라.",
+    "도로명 점 필지 불일치(시드 역삼동 679 vs 점 679-1 대) — 여러 필지에 걸친 건물이면 정상이다. 공시지가·PNU는 시드 지번으로 조회했다. 사람 확인 권장."
+   ],
+   "vworld": {
+    "lat": 37.5020018,
+    "lon": 127.037476,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1168010100106790000",
+    "land_price_won_m2": 63830000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1168010100106790001",
+    "jibun_check": "679-1 대"
+   }
+  },
+  {
+   "id": "glass-tower",
+   "name": "글라스타워",
+   "region": "GBD",
+   "sgg_cd": "11680",
+   "umd": "대치동",
+   "jibun": "946-1",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라.",
+    "도로명 점 필지 불일치(시드 대치동 946-1 vs 점 946-8 대) — 여러 필지에 걸친 건물이면 정상이다. 공시지가·PNU는 시드 지번으로 조회했다. 사람 확인 권장."
+   ],
+   "vworld": {
+    "lat": 37.5080429,
+    "lon": 127.0628076,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1168010600109460001",
+    "land_price_won_m2": 75020000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1168010600109460008",
+    "jibun_check": "946-8 대"
+   }
+  },
+  {
+   "id": "dongbu-finance-center",
+   "name": "동부금융센터",
+   "region": "GBD",
+   "sgg_cd": "11680",
+   "umd": "대치동",
+   "jibun": "891-10",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라.",
+    "도로명 점 필지 불일치(시드 대치동 891-10 vs 점 891-58 대) — 여러 필지에 걸친 건물이면 정상이다. 공시지가·PNU는 시드 지번으로 조회했다. 사람 확인 권장."
+   ],
+   "vworld": {
+    "lat": 37.5057221,
+    "lon": 127.0547507,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1168010600108910010",
+    "land_price_won_m2": 72240000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1168010600108910058",
+    "jibun_check": "891-58 대"
+   }
+  },
+  {
+   "id": "textile-center",
+   "name": "섬유센터",
+   "region": "GBD",
+   "sgg_cd": "11680",
+   "umd": "대치동",
+   "jibun": "944-31",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5075409,
+    "lon": 127.0605977,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1168010600109440031",
+    "land_price_won_m2": 73880000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1168010600109440031",
+    "jibun_check": "944-31 대"
+   }
+  },
+  {
+   "id": "yeoksam-i-tower",
+   "name": "역삼 아이타워",
+   "region": "GBD",
+   "sgg_cd": "11680",
+   "umd": "역삼동",
+   "jibun": "707-27",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5035472,
+    "lon": 127.0470337,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1168010100107070027",
+    "land_price_won_m2": 70410000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1168010100107070027",
+    "jibun_check": "707-27 대"
+   }
+  },
+  {
+   "id": "samsung-electronics-seocho",
+   "name": "삼성전자 서초사옥",
+   "region": "GBD",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1320-10",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.4965744,
+    "lon": 127.0269412,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1165010800113200010",
+    "land_price_won_m2": 95640000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1165010800113200010",
+    "jibun_check": "1320-10 대"
+   }
+  },
+  {
+   "id": "samsung-life-seocho-tower",
+   "name": "삼성생명 서초타워",
+   "region": "GBD",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1321-15",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.4968037,
+    "lon": 127.0256541,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1165010800113210015",
+    "land_price_won_m2": 92860000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1165010800113210015",
+    "jibun_check": "1321-15 대"
+   }
+  },
+  {
+   "id": "the-asset",
+   "name": "더에셋",
+   "region": "GBD",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1321-20",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.4959646,
+    "lon": 127.0261244,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1165010800113210020",
+    "land_price_won_m2": 79850000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1165010800113210020",
+    "jibun_check": "1321-20 대"
+   }
+  },
+  {
+   "id": "platinum-tower",
+   "name": "그레이츠강남",
+   "region": "GBD",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1321-11",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.4966361,
+    "lon": 127.0251045,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1165010800113210011",
+    "land_price_won_m2": 71250000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1165010800113210011",
+    "jibun_check": "1321-11대"
+   }
+  },
+  {
+   "id": "kyobo-tower",
+   "name": "교보타워",
+   "region": "GBD",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1303-22",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5037586,
+    "lon": 127.0241121,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1165010800113030022",
+    "land_price_won_m2": 90500000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1165010800113030022",
+    "jibun_check": "1303-22대"
+   }
+  },
+  {
+   "id": "majesta-city-tower1",
+   "name": "마제스타시티 타워1",
+   "region": "GBD",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1498-5",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.4904696,
+    "lon": 127.0053566,
+    "zones": [
+     "준주거지역"
+    ],
+    "pnu": "1165010800114980005",
+    "land_price_won_m2": 16940000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1165010800114980005",
+    "jibun_check": "1498-5 대"
+   }
+  },
+  {
+   "id": "majesta-city-tower2",
+   "name": "마제스타시티 타워2",
+   "region": "GBD",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1498-5",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.4904696,
+    "lon": 127.0053566,
+    "zones": [
+     "준주거지역"
+    ],
+    "pnu": "1165010800114980005",
+    "land_price_won_m2": 16940000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1165010800114980005",
+    "jibun_check": "1498-5 대"
+   }
+  },
+  {
+   "id": "gt-tower-east",
+   "name": "GT타워 EAST",
+   "region": "GBD",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1317-23",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라.",
+    "도로명 점 필지 불일치(시드 서초동 1317-23 vs 점 1317-28대) — 여러 필지에 걸친 건물이면 정상이다. 공시지가·PNU는 시드 지번으로 조회했다. 사람 확인 권장."
+   ],
+   "vworld": {
+    "lat": 37.4981096,
+    "lon": 127.0259223,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1165010800113170023",
+    "land_price_won_m2": 74110000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1165010800113170028",
+    "jibun_check": "1317-28대"
+   }
+  },
+  {
+   "id": "parc1-tower1",
+   "name": "파크원 타워1",
+   "region": "YBD",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "22",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.527054,
+    "lon": 126.9278476,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1156011000100220000",
+    "land_price_won_m2": 32090000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1156011000100220000",
+    "jibun_check": "22 대"
+   }
+  },
+  {
+   "id": "parc1-tower2",
+   "name": "파크원 타워2",
+   "region": "YBD",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "22",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.527054,
+    "lon": 126.9278476,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1156011000100220000",
+    "land_price_won_m2": 32090000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1156011000100220000",
+    "jibun_check": "22 대"
+   }
+  },
+  {
+   "id": "ifc-one",
+   "name": "서울국제금융센터 ONE",
+   "region": "YBD",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "23",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5250584,
+    "lon": 126.9259369,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1156011000100230000",
+    "land_price_won_m2": 32090000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1156011000100230000",
+    "jibun_check": "23대"
+   }
+  },
+  {
+   "id": "ifc-two",
+   "name": "서울국제금융센터 TWO",
+   "region": "YBD",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "23",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5250584,
+    "lon": 126.9259369,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1156011000100230000",
+    "land_price_won_m2": 32090000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1156011000100230000",
+    "jibun_check": "23대"
+   }
+  },
+  {
+   "id": "ifc-three",
+   "name": "서울국제금융센터 THREE",
+   "region": "YBD",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "23",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5250584,
+    "lon": 126.9259369,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1156011000100230000",
+    "land_price_won_m2": 32090000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1156011000100230000",
+    "jibun_check": "23대"
+   }
+  },
+  {
+   "id": "fki-tower",
+   "name": "FKI타워",
+   "region": "YBD",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "28-1",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5216933,
+    "lon": 126.9200453,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1156011000100280001",
+    "land_price_won_m2": 29793000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1156011000100280001",
+    "jibun_check": "28-1대"
+   }
+  },
+  {
+   "id": "sixty-three-square",
+   "name": "63스퀘어",
+   "region": "YBD",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "60",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5195762,
+    "lon": 126.9398376,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1156011000100600000",
+    "land_price_won_m2": 21960000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1156011000100600000",
+    "jibun_check": "60대"
+   }
+  },
+  {
+   "id": "lg-twin-towers",
+   "name": "LG트윈타워",
+   "region": "YBD",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "20",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5278855,
+    "lon": 126.9291392,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1156011000100200000",
+    "land_price_won_m2": 32090000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1156011000100200000",
+    "jibun_check": "20대"
+   }
+  },
+  {
+   "id": "tp-tower",
+   "name": "TP타워",
+   "region": "YBD",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "27-2",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5215485,
+    "lon": 126.9229429,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1156011000100270002",
+    "land_price_won_m2": 32403000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1156011000100270002",
+    "jibun_check": "27-2대"
+   }
+  },
+  {
+   "id": "krx-seoul",
+   "name": "한국거래소 서울사옥",
+   "region": "YBD",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "33",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5230469,
+    "lon": 126.9281785,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1156011000100330000",
+    "land_price_won_m2": 27950000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1156011000100330000",
+    "jibun_check": "33대"
+   }
+  },
+  {
+   "id": "yeouido-finance-tower",
+   "name": "여의도 파이낸스타워",
+   "region": "YBD",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "23-8",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5238803,
+    "lon": 126.9241264,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1156011000100230008",
+    "land_price_won_m2": 25980000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1156011000100230008",
+    "jibun_check": "23-8대"
+   }
+  },
+  {
+   "id": "hana-securities-yeouido",
+   "name": "하나증권 여의도 사옥",
+   "region": "YBD",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "27-3",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5226829,
+    "lon": 126.9218534,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1156011000100270003",
+    "land_price_won_m2": 28649000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1156011000100270003",
+    "jibun_check": "27-3대"
+   }
+  },
+  {
+   "id": "korea-investment-hq",
+   "name": "한국투자증권 본사",
+   "region": "YBD",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "27-1",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5221118,
+    "lon": 126.9222785,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1156011000100270001",
+    "land_price_won_m2": 28650000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1156011000100270001",
+    "jibun_check": "27-1대"
+   }
+  },
+  {
+   "id": "anchor-one",
+   "name": "앵커원",
+   "region": "YBD",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "525",
+   "ledger": null,
+   "ledger_dong_count": null,
+   "flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라."
+   ],
+   "vworld": {
+    "lat": 37.5242916,
+    "lon": 126.9293386,
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1156011000105250000",
+    "land_price_won_m2": 27950000,
+    "land_price_year": "2025",
+    "pnu_at_point": "1156011000105250000",
+    "jibun_check": "525 대"
+   }
+  }
+ ],
+ "meta": {
+  "matched": 0,
+  "failed": [],
+  "vworld_ok": 55,
+  "total": 55,
+  "gate": {
+   "min_floor_area_m2": 200,
+   "max_floor_area_m2": 6000,
+   "min_grnd_flr": 10
+  },
+  "ledger_status": "건축물대장 표제부 HTTP 403 — 이 service_key는 BldRgstHubService에 활용신청이 되어 있지 않다(응답: 'Forbidden'). data.go.kr에서 활용신청·승인 후 다시 실행하라.",
+  "complete": false,
+  "collected_at": "2026-07-30",
+  "source": "국토부 건축물대장 표제부 + VWorld",
+  "endpoints_used": [
+   "https://apis.data.go.kr/1613000/BldRgstHubService/getBrTitleInfo",
+   "https://api.vworld.kr/req/address",
+   "https://api.vworld.kr/req/data (LT_C_UQ111, LP_PA_CBND_BUBUN)",
+   "https://api.vworld.kr/ned/data/getIndvdLandPriceAttr"
+  ],
+  "note": "지번은 시드(도로명→지번으로 확정)가 단일 출처다. VWorld가 돌려준 필지 지번은 vworld.jibun_check에 참고로만 두고 시드를 덮어쓰지 않는다. 필지 공유 건물은 시드 name·aliases 중 변별력 있는 키로 동을 고르며, 이름이 안 걸리고 시드 note가 연면적 최대 선택을 금지한 필지는 고르지 않고 failed에 남긴다."
+ }
+}

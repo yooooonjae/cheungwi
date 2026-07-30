@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  건축HUB 건축물대장 표제부(getBrTitleInfo) 응답 표본.
+
+  ★ 실응답이 아니다. 2026-07-30 현재 이 저장소의 service_key 는 BldRgstHubService 에
+    활용신청이 되어 있지 않아(전 오퍼레이션 HTTP 403 Forbidden) 실응답을 확보할 수 없었다.
+    그래서 공개 활용가이드의 표제부 항목 정의와, 같은 인프라(ArchPmsHubService)에서 실측한
+    응답 봉투(header/body/items/item + totalCount)를 본떠 손으로 지었다.
+    건물명·수치는 자리표시자이며 특정 실존 건물의 대장 값이 아니다.
+    활용신청이 승인되면 강남구 역삼동 737 첫 페이지 원문으로 교체할 것.
+
+  한 필지에 두 동이 선 전형적 형태를 담았다.
+    item 1  가나타워        업무시설  연면적 212,615.6㎡  지상 45 / 지하 8
+    item 2  가나타워 부속동  제2종근린생활시설  연면적 1,820.5㎡  지상 2 / 지하 1
+  두 동의 bldNm 이 "가나타워"를 공유해, 단지명 수준의 이름은 필지 안에서 변별력이 없다는
+  실제 함정(삼성동 159 "ASEM 및 한국종합무역센타단지")을 그대로 재현한다.
+-->
+<response>
+  <header>
+    <resultCode>00</resultCode>
+    <resultMsg>NORMAL SERVICE.</resultMsg>
+  </header>
+  <body>
+    <items>
+      <item>
+        <rnum>1</rnum>
+        <platPlc>서울특별시 강남구 역삼동 737</platPlc>
+        <sigunguCd>11680</sigunguCd>
+        <bjdongCd>10100</bjdongCd>
+        <platGbCd>0</platGbCd>
+        <bun>0737</bun>
+        <ji>0000</ji>
+        <mgmBldrgstPk>11680-100000001</mgmBldrgstPk>
+        <regstrGbCd>2</regstrGbCd>
+        <regstrGbCdNm>집합</regstrGbCdNm>
+        <regstrKindCd>3</regstrKindCd>
+        <regstrKindCdNm>일반</regstrKindCdNm>
+        <newPlatPlc>서울특별시 강남구 테헤란로 152</newPlatPlc>
+        <bldNm>가나타워</bldNm>
+        <splotNm> </splotNm>
+        <block> </block>
+        <lot> </lot>
+        <bylotCnt>0</bylotCnt>
+        <naRoadCd>3120040</naRoadCd>
+        <naBjdongCd>10100</naBjdongCd>
+        <naUgrndCd>0</naUgrndCd>
+        <naMainBun>152</naMainBun>
+        <naSubBun>0</naSubBun>
+        <dongNm> </dongNm>
+        <mainAtchGbCd>0</mainAtchGbCd>
+        <mainAtchGbCdNm>주건축물</mainAtchGbCdNm>
+        <platArea>10685</platArea>
+        <archArea>5217.85</archArea>
+        <bcRat>48.83</bcRat>
+        <totArea>212615.6</totArea>
+        <vlRatEstmTotArea>139000.4</vlRatEstmTotArea>
+        <vlRat>1300.9</vlRat>
+        <strctCd>21</strctCd>
+        <strctCdNm>철골철근콘크리트구조</strctCdNm>
+        <etcStrct> </etcStrct>
+        <mainPurpsCd>14000</mainPurpsCd>
+        <mainPurpsCdNm>업무시설</mainPurpsCdNm>
+        <etcPurps>업무시설, 제1종근린생활시설, 제2종근린생활시설, 문화및집회시설</etcPurps>
+        <roofCd>10</roofCd>
+        <roofCdNm>(철근)콘크리트</roofCdNm>
+        <etcRoof> </etcRoof>
+        <hhldCnt>0</hhldCnt>
+        <fmlyCnt>0</fmlyCnt>
+        <heit>206</heit>
+        <grndFlrCnt>45</grndFlrCnt>
+        <ugrndFlrCnt>8</ugrndFlrCnt>
+        <rideUseElvtCnt>44</rideUseElvtCnt>
+        <emgenUseElvtCnt>4</emgenUseElvtCnt>
+        <atchBldCnt>1</atchBldCnt>
+        <atchBldArea>1820.5</atchBldArea>
+        <totDongTotArea>214436.1</totDongTotArea>
+        <indrMechUtcnt>0</indrMechUtcnt>
+        <indrMechArea>0</indrMechArea>
+        <oudrMechUtcnt>0</oudrMechUtcnt>
+        <oudrMechArea>0</oudrMechArea>
+        <indrAutoUtcnt>1462</indrAutoUtcnt>
+        <indrAutoArea>48226.5</indrAutoArea>
+        <oudrAutoUtcnt>36</oudrAutoUtcnt>
+        <oudrAutoArea>432</oudrAutoArea>
+        <pmsDay>19970902</pmsDay>
+        <stcnsDay>19980315</stcnsDay>
+        <useAprDay>20010601</useAprDay>
+        <pmsnoYear>1997</pmsnoYear>
+        <pmsnoKikCd>11680</pmsnoKikCd>
+        <pmsnoKikCdNm>강남구</pmsnoKikCdNm>
+        <pmsnoGbCd>1</pmsnoGbCd>
+        <pmsnoGbCdNm>건축과</pmsnoGbCdNm>
+        <hoCnt>0</hoCnt>
+        <engrGrade> </engrGrade>
+        <engrRat> </engrRat>
+        <engrEpi>0</engrEpi>
+        <gnBldGrade> </gnBldGrade>
+        <gnBldCert>0</gnBldCert>
+        <itgBldGrade> </itgBldGrade>
+        <itgBldCert>0</itgBldCert>
+        <crtnDay>20260101</crtnDay>
+      </item>
+      <item>
+        <rnum>2</rnum>
+        <platPlc>서울특별시 강남구 역삼동 737</platPlc>
+        <sigunguCd>11680</sigunguCd>
+        <bjdongCd>10100</bjdongCd>
+        <platGbCd>0</platGbCd>
+        <bun>0737</bun>
+        <ji>0000</ji>
+        <mgmBldrgstPk>11680-100000002</mgmBldrgstPk>
+        <regstrGbCd>1</regstrGbCd>
+        <regstrGbCdNm>일반</regstrGbCdNm>
+        <regstrKindCd>3</regstrKindCd>
+        <regstrKindCdNm>일반</regstrKindCdNm>
+        <newPlatPlc>서울특별시 강남구 테헤란로 152</newPlatPlc>
+        <bldNm>가나타워 부속동</bldNm>
+        <splotNm> </splotNm>
+        <block> </block>
+        <lot> </lot>
+        <bylotCnt>0</bylotCnt>
+        <naRoadCd>3120040</naRoadCd>
+        <naBjdongCd>10100</naBjdongCd>
+        <naUgrndCd>0</naUgrndCd>
+        <naMainBun>152</naMainBun>
+        <naSubBun>0</naSubBun>
+        <dongNm>부속동</dongNm>
+        <mainAtchGbCd>1</mainAtchGbCd>
+        <mainAtchGbCdNm>부속건축물</mainAtchGbCdNm>
+        <platArea>10685</platArea>
+        <archArea>910.25</archArea>
+        <bcRat>8.52</bcRat>
+        <totArea>1820.5</totArea>
+        <vlRatEstmTotArea>1820.5</vlRatEstmTotArea>
+        <vlRat>17.04</vlRat>
+        <strctCd>11</strctCd>
+        <strctCdNm>철근콘크리트구조</strctCdNm>
+        <etcStrct> </etcStrct>
+        <mainPurpsCd>03000</mainPurpsCd>
+        <mainPurpsCdNm>제2종근린생활시설</mainPurpsCdNm>
+        <etcPurps>제2종근린생활시설</etcPurps>
+        <roofCd>10</roofCd>
+        <roofCdNm>(철근)콘크리트</roofCdNm>
+        <etcRoof> </etcRoof>
+        <hhldCnt>0</hhldCnt>
+        <fmlyCnt>0</fmlyCnt>
+        <heit>9.6</heit>
+        <grndFlrCnt>2</grndFlrCnt>
+        <ugrndFlrCnt>1</ugrndFlrCnt>
+        <rideUseElvtCnt>1</rideUseElvtCnt>
+        <emgenUseElvtCnt>0</emgenUseElvtCnt>
+        <atchBldCnt>0</atchBldCnt>
+        <atchBldArea>0</atchBldArea>
+        <totDongTotArea>214436.1</totDongTotArea>
+        <indrMechUtcnt>0</indrMechUtcnt>
+        <indrMechArea>0</indrMechArea>
+        <oudrMechUtcnt>0</oudrMechUtcnt>
+        <oudrMechArea>0</oudrMechArea>
+        <indrAutoUtcnt>0</indrAutoUtcnt>
+        <indrAutoArea>0</indrAutoArea>
+        <oudrAutoUtcnt>12</oudrAutoUtcnt>
+        <oudrAutoArea>144</oudrAutoArea>
+        <pmsDay>19970902</pmsDay>
+        <stcnsDay>19980315</stcnsDay>
+        <useAprDay>20010601</useAprDay>
+        <pmsnoYear>1997</pmsnoYear>
+        <pmsnoKikCd>11680</pmsnoKikCd>
+        <pmsnoKikCdNm>강남구</pmsnoKikCdNm>
+        <pmsnoGbCd>1</pmsnoGbCd>
+        <pmsnoGbCdNm>건축과</pmsnoGbCdNm>
+        <hoCnt>0</hoCnt>
+        <engrGrade> </engrGrade>
+        <engrRat> </engrRat>
+        <engrEpi>0</engrEpi>
+        <gnBldGrade> </gnBldGrade>
+        <gnBldCert>0</gnBldCert>
+        <itgBldGrade> </itgBldGrade>
+        <itgBldCert>0</itgBldCert>
+        <crtnDay>20260101</crtnDay>
+      </item>
+    </items>
+    <numOfRows>100</numOfRows>
+    <pageNo>1</pageNo>
+    <totalCount>2</totalCount>
+  </body>
+</response>
