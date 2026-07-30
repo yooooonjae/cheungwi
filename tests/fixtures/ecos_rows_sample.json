@@ -1,0 +1,16 @@
+{
+ "StatisticSearch": {
+  "list_total_count": 3,
+  "row": [
+   {"STAT_CODE": "721Y001", "STAT_NAME": "1.3.2.2. 시장금리(월,분기,년)",
+    "ITEM_CODE1": "5050000", "ITEM_NAME1": "국고채(10년)", "UNIT_NAME": "연%",
+    "TIME": "202601", "DATA_VALUE": "3.12"},
+   {"STAT_CODE": "721Y001", "STAT_NAME": "1.3.2.2. 시장금리(월,분기,년)",
+    "ITEM_CODE1": "5050000", "ITEM_NAME1": "국고채(10년)", "UNIT_NAME": "연%",
+    "TIME": "202602", "DATA_VALUE": "3.245"},
+   {"STAT_CODE": "721Y001", "STAT_NAME": "1.3.2.2. 시장금리(월,분기,년)",
+    "ITEM_CODE1": "5050000", "ITEM_NAME1": "국고채(10년)", "UNIT_NAME": "연%",
+    "TIME": "202603", "DATA_VALUE": "3.301"}
+  ]
+ }
+}
