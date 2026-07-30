@@ -62,7 +62,12 @@ def test_the_card_says_who_it_is():
 
 
 def test_the_card_calls_nothing_from_outside():
-    """file:// 로 찍히므로 외부 자원은 그냥 빈칸이 된다 — 없는 것이 계약이다."""
+    """file:// 로 찍히므로 외부 자원은 그냥 빈칸이 된다 — 없는 것이 계약이다.
+
+    같은 계약을 굽힌 사이트 전체에 건 것은
+    `test_assemble.test_the_built_site_calls_nothing_from_outside` 다 — 카드 한 장만
+    자족적이어도 지면이 밖을 부르면 소용이 없다.
+    """
     html = CARD.read_text(encoding="utf-8")
     assert "http://" not in html
     assert not re.search(r"https://(?!cheungwi\.pages\.dev)", html), \

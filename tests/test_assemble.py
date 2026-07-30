@@ -81,6 +81,83 @@ def test_index_links_every_declared_asset(sandbox):
 
 
 # ------------------------------------------------------------------ #
+# (a') 외부 요청 0 — 밖을 부르지 않는 것이 이 사이트의 계약이다
+# ------------------------------------------------------------------ #
+SITE_URL = "https://cheungwi.pages.dev"
+
+# 밖을 부르는 방법들. 하나라도 굽힌 산출에 남으면 그 사이트는 더 이상 자족적이지
+# 않고, 상대의 화면에서 그 자리는 빈칸이 되거나 그의 방문이 남의 로그에 남는다.
+NETWORK_CALLS = ("fetch(", "XMLHttpRequest", "WebSocket", "EventSource",
+                 "sendBeacon", "importScripts", "@import", "navigator.connection")
+_PROTOCOL_RELATIVE = re.compile(r"""(?:src|href)\s*=\s*["']//|url\(\s*["']?//""")
+_EXTERNAL_HTTPS = re.compile(r"https://(?!cheungwi\.pages\.dev)")
+
+
+def _shipped(web):
+    """구워진 산출 가운데 브라우저가 실행·해석하는 것 전부(index·css·js·data)."""
+    return sorted(p for p in web.rglob("*")
+                  if p.suffix in {".html", ".css", ".js"} and p.is_file())
+
+
+def _outside_calls(name, src):
+    """밖을 부르는 자리 목록. 빈 리스트면 그 파일은 자족적이다."""
+    bad = []
+    if "http://" in src:
+        bad.append("%s: 평문 http" % name)
+    hit = _EXTERNAL_HTTPS.search(src)
+    if hit:
+        bad.append("%s: 외부 호스트 %r" % (name, src[hit.start():hit.start() + 48]))
+    if _PROTOCOL_RELATIVE.search(src):
+        bad.append("%s: 프로토콜 상대 주소" % name)
+    for call in NETWORK_CALLS:
+        if call in src:
+            bad.append("%s: %s" % (name, call))
+    return bad
+
+
+def test_the_built_site_calls_nothing_from_outside(sandbox):
+    """`test_og` 가 카드 원본에 걸어 둔 계약을 굽힌 사이트 전체로 옮긴 것이다.
+
+    카드 한 장만 자족적이어도 소용이 없다. 지면이 폰트 하나를 밖에서 끌어오는
+    순간 그 요청은 방문자의 화면에서 남의 로그가 되고, 그 호스트가 죽는 날 지면도
+    함께 무너진다. 그래서 "외부 요청 0"은 눈으로 지키는 규율이 아니라 빌드마다
+    기계가 세는 수여야 한다.
+    """
+    files = _shipped(sandbox.build_dist())
+    assert len(files) >= 15, "굽힌 산출이 이렇게 적을 리 없다: %d개" % len(files)
+    bad = []
+    for path in files:
+        bad += _outside_calls(path.name, path.read_text(encoding="utf-8"))
+    assert bad == [], "굽힌 산출이 밖을 부른다 — %s" % " · ".join(bad)
+
+
+def test_the_outside_call_check_is_not_vacuous():
+    """검사가 헛돌지 않는다는 증거 — 심어 둔 다섯 갈래를 전부 잡는다."""
+    for planted in ('<img src="http://example.com/a.png">',
+                    '<link href="https://fonts.googleapis.com/css2?f=X">',
+                    '<script src="//cdn.example.com/x.js"></script>',
+                    "<script>fetch('/x')</script>",
+                    "<style>@import url(x.css);</style>"):
+        assert _outside_calls("심은 것", planted), planted
+    # 제 집을 가리키는 절대 URL 은 외부 호출이 아니다(og:image 가 그렇다)
+    assert _outside_calls("자기 자신", '<meta content="%s/og.png">' % SITE_URL) == []
+
+
+def test_every_asset_the_index_points_at_is_shipped_beside_it(sandbox):
+    """가리키는 자리에 파일이 없으면 그 요청은 404 이거나 밖으로 나간다."""
+    web = sandbox.build_dist()
+    html = (web / "index.html").read_text(encoding="utf-8")
+    refs = re.findall(r'(?:src|href)="([^"]+)"', html)
+    assert refs, "index 가 아무 자산도 가리키지 않는다"
+    for ref in refs:
+        if ref.startswith("#"):
+            continue
+        rel = ref[len(SITE_URL) + 1:] if ref.startswith(SITE_URL + "/") else ref
+        assert not rel.startswith(("http", "//")), "밖을 가리킨다: %s" % ref
+        assert (web / rel).is_file(), "가리키는 자리에 파일이 없다: %s" % ref
+
+
+# ------------------------------------------------------------------ #
 # (d) window.__DATA_* 접두 정확성
 # ------------------------------------------------------------------ #
 def test_data_wrapper_prefix_is_exact(sandbox):
