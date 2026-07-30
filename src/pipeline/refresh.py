@@ -1,4 +1,4 @@
-"""일일 갱신 파이프라인 — 무효화 → 수집 → 분석 → 원장 → 빌드 → 검증 → 배포.
+"""일일 갱신 파이프라인 — 무효화 → 수집 → 분석 → 원장 → 빌드 → 검증 → 스위트 → 배포.
 
 실행:
   python3 src/pipeline/refresh.py                  # 전체 (launchd 가 매일 09:10 에 부르는 것)
@@ -17,6 +17,12 @@
   되돌리고 빌드를 중단한다 — 직전 사이트가 그대로 서빙된다.
 - **실패가 하나라도 있으면 배포하지 않는다.** pages.dev 는 직전 배포를 계속 서빙하므로
   가만히 두는 쪽이 언제나 안전하다.
+- **배포 직전에 계약 스위트를 돌린다.** `validate()` 가 보는 것은 index 가 있는가·오늘
+  구웠는가·JSON 이 파싱되는가뿐이다. 그 셋은 "파일이 생겼다"는 증거지 "값이 말이 된다"는
+  증거가 아니다. 새 분기 데이터로 구운 out/ 이 엔진의 계약(단위·게이트·사다리 항등식·
+  파이썬↔자바스크립트 패리티)을 깼는지는 스위트만 안다 — 그것을 CI 에만 맡기면 CI 는
+  **커밋된** 산출을 보고, 배포되는 것은 **방금 구운** 산출이라 검사받은 것과 나가는 것이
+  갈린다. 그래서 배포 경로 안에서 한 번 더 돈다(`CHEUNGWI_REQUIRE_ARTIFACTS=1` 로).
 - **상태 파일은 먼저 쓰고 마지막에 덮는다.** 시작하자마자 `ok:false, state:running` 을 써
   두고, 본문 전체를 try 로 감싸 예외까지 failures 로 환원한 뒤 finally 에서 최종 상태를
   쓴다. 트레이스백으로 즉사해 상태 파일이 갱신되지 않으면, 그 파일을 보라고 적어 둔 운영
@@ -61,6 +67,9 @@ COLLECTORS = [
     ("reits",       ["src/collect/reits.py"],       1800),
 ]
 ANALYZE_TIMEOUT, MANIFEST_TIMEOUT, BUILD_TIMEOUT, DEPLOY_TIMEOUT = 900, 300, 600, 900
+# 스위트는 지금 2분대다(그 중 큰 몫이 terser 를 부르는 빌드 게이트). 검사가 늘어도
+# 타임아웃이 먼저 터져 "실패로 오인"되지 않게 열 배 넘는 여유를 준다.
+TEST_TIMEOUT = 1800
 
 TRADES_INVALIDATE_MONTHS = 3   # 실거래는 뒤늦게 신고되는 달이 있어 최근 세 달을 다시 받는다
 MARKERS = ("COMPLETE", "RESUME_NEEDED")
@@ -118,12 +127,12 @@ def notify(title: str, msg: str):
         pass  # 알림 실패가 파이프라인을 죽이면 안 된다
 
 
-def run_step(name: str, cmd: list, timeout: int, log, root=ROOT) -> dict:
+def run_step(name: str, cmd: list, timeout: int, log, root=ROOT, env_extra=None) -> dict:
     """자식 하나를 돌리고 (성공 여부·사유·초·마커)를 돌려준다. 출력은 전량 로그로 옮긴다."""
     t0 = datetime.datetime.now()
     log.write(f"\n===== {name} — {t0:%H:%M:%S} =====\n$ {' '.join(map(str, cmd))}\n")
     log.flush()
-    env = {**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1"}
+    env = {**os.environ, "PYTHONIOENCODING": "utf-8", "PYTHONUTF8": "1", **(env_extra or {})}
     out, marker = "", None
     try:
         r = subprocess.run(cmd, cwd=root, timeout=timeout, env=env,
@@ -256,7 +265,7 @@ def _parse_args(argv):
 
 
 def _run_pipeline(args, root: Path, log_path: Path, status: dict):
-    """무효화 → 수집 → 분석 → 원장 → 빌드 → 검증 → 배포. 결과는 status 에 쌓는다.
+    """무효화 → 수집 → 분석 → 원장 → 빌드 → 검증 → 스위트 → 배포. 결과는 status 에 쌓는다.
 
     여기서 나는 예외는 main 이 받아 failures 로 환원한다 — 상태 파일이 반드시 갱신되도록.
     """
@@ -317,7 +326,20 @@ def _run_pipeline(args, root: Path, log_path: Path, status: dict):
                                             "seconds": 0, "marker": None}
             status["failures"].extend(probs)
 
-        # 6) 배포 — 실패가 하나라도 있으면 하지 않는다(pages.dev 는 직전 배포를 계속 서빙한다)
+        # 6) 계약 스위트 — 방금 구운 산출물을 실물로 놓고 전 검사를 돌린다.
+        #    validate 가 보는 것은 "파일이 있고 오늘 것이고 파싱된다"까지다. 새 데이터가
+        #    엔진의 계약을 깼는지는 여기서만 걸린다. 가드를 켜서 산출물 부재는 skip 이
+        #    아니라 실패로 받는다(CI 와 같은 규약).
+        if not aborted:
+            res = run_step("test", [PY, "-m", "pytest", "tests/", "-q"], TEST_TIMEOUT, log, root,
+                           env_extra={"CHEUNGWI_REQUIRE_ARTIFACTS": "1"})
+            status["stages"]["test"] = res
+            if not res["ok"]:
+                status["failures"].append(
+                    f"test ({res['detail']}) — 계약 스위트가 깨졌다. 배포하지 않는다"
+                    f"(직전 사이트 유지, 로그 {log_path.name} 를 보라)")
+
+        # 7) 배포 — 실패가 하나라도 있으면 하지 않는다(pages.dev 는 직전 배포를 계속 서빙한다)
         if not aborted and not status["failures"] and not args.no_deploy:
             npx = shutil.which("npx")   # 경로를 박아 두면 다른 기계에서 조용히 안 돈다
             if not npx:

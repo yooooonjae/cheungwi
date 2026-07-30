@@ -11,16 +11,23 @@ CI 는 사람이 안 볼 때 도는 유일한 검사다. 그래서 이 파일이
      한다. 워크플로에 wrangler 가 한 줄이라도 들어오면 초록 체크가 곧 배포가 되고,
      그때부터 "검증된 것만 나간다"는 순서가 뒤집힌다.
 
-`make check` 는 이 워크플로의 로컬 동등물이다. 둘이 갈라지면 로컬 초록이 CI 초록을
-보장하지 못하므로, 핵심 검사 넷이 양쪽에 다 있는지도 여기서 본다.
+`make check` 는 이 워크플로의 로컬 동등물이다. 둘을 **대조**하는 대신 CI 가 `make check` 를
+그대로 부르게 했다 — 동등이 검사가 아니라 정의가 되면 갈라질 자리가 없다. 그래서 여기서
+보는 것은 "CI 가 make check 를 부르는가"와 "make check 가 넷을 다 돌리는가" 둘이다.
+
+세 번째로, **커밋된 산출물이 낡지 않았는가**도 본다. 산출물을 커밋해 두는 계약은
+checkout 만으로 실측을 가능하게 하지만, `src/analysis` 를 고치고 `make analyze` 를 잊으면
+CI 는 낡은 산출물끼리의 정합만 초록으로 증명한다.
 """
 
+import hashlib
 import re
 import subprocess
 import sys
 from pathlib import Path
 
 import conftest
+from src.analysis.build_out import OUT_FILES, build_all
 
 ROOT = Path(__file__).resolve().parents[1]
 CI = ROOT / ".github" / "workflows" / "ci.yml"
@@ -30,6 +37,12 @@ MAKEFILE = ROOT / "Makefile"
 def ci_text():
     assert CI.is_file(), "CI 워크플로가 없다: %s" % CI
     return CI.read_text(encoding="utf-8")
+
+
+def ci_commands():
+    """워크플로에서 **실제로 실행되는** 줄만. 주석은 뺀다(주석은 검사를 돌리지 않는다)."""
+    return "\n".join(line for line in ci_text().splitlines()
+                     if not line.lstrip().startswith("#"))
 
 
 def make_target(name):
@@ -85,14 +98,14 @@ CORE_CHECKS = {
 }
 
 
-def test_the_workflow_runs_every_core_check():
-    text = ci_text()
-    for name, pattern in CORE_CHECKS.items():
-        assert re.search(pattern, text), "CI 가 %s 를 돌리지 않는다" % name
+def test_the_workflow_calls_make_check():
+    """CI 와 로컬을 대조하는 대신 **같은 것**을 부르게 한다 — 동등이 정의가 된다."""
+    assert re.search(r"^\s*run:\s*make check\s*$", ci_commands(), re.M), \
+        "CI 가 make check 를 부르지 않는다 — 스텝을 따로 나열하면 로컬과 갈라진다"
 
 
-def test_the_local_check_target_is_the_same_four():
-    """`make check` 가 CI 의 로컬 동등물이 아니면 로컬 초록은 아무것도 보장하지 않는다."""
+def test_the_check_target_is_the_single_source_of_the_core_four():
+    """검사 넷의 정의는 Makefile 한 곳에 있다. CI 는 그것을 부르기만 한다."""
     recipe = make_target("check")
     for name, pattern in CORE_CHECKS.items():
         assert re.search(pattern, recipe), "make check 가 %s 를 돌리지 않는다" % name
@@ -100,18 +113,25 @@ def test_the_local_check_target_is_the_same_four():
         "로컬 검증만 가드 없이 돌면 CI 에서 처음 걸리는 부재가 생긴다"
 
 
+def test_the_workflow_does_not_restate_the_core_checks():
+    """워크플로에 검사를 다시 적는 순간 둘은 조용히 갈라진다 — 부르는 줄 하나로 족하다."""
+    commands = ci_commands()
+    for name, pattern in CORE_CHECKS.items():
+        assert not re.search(pattern, commands), \
+            "CI 가 %s 를 직접 적고 있다 — make check 안으로 옮겨라" % name
+
+
 def test_the_script_syntax_check_looks_at_every_file():
     """`node --check a.js b.js` 는 첫 파일만 본다 — 반드시 파일마다 돌려야 한다."""
-    text = ci_text()
-    assert re.search(r"for f in site/js/\*\.js", text), \
+    recipe = make_target("check")
+    assert re.search(r"for f in site/js/\*\.js", recipe), \
         "사이트 스크립트를 파일별로 돌지 않는다 — 둘째 파일부터는 검사되지 않는다"
-    assert not re.search(r"node --check site/js/\*\.js", text)
+    assert not re.search(r"node --check site/js/\*\.js", recipe)
 
 
 def test_the_python_bytecompile_covers_every_source():
     """`src/*.py` 만 훑으면 하위 패키지가 통째로 빠진다 — find 로 전부 건다."""
-    text = ci_text()
-    assert re.search(r"find src -name '\*\.py'", text), \
+    assert re.search(r"find src -name '\*\.py'", make_target("check")), \
         "py_compile 대상이 전 소스가 아니다"
 
 
@@ -140,6 +160,26 @@ def test_every_required_artifact_is_committed():
     assert tracked, "git ls-files 가 비었다 — 저장소가 아니거나 git 이 없다"
     for rel in conftest.REQUIRED_ARTIFACTS:
         assert rel in tracked, "%s 가 커밋돼 있지 않다 — CI 러너에는 없는 파일이다" % rel
+
+
+def test_the_committed_out_is_what_the_current_engine_builds(tmp_path):
+    """산출물이 **낡지 않았는가** — 있다는 것만으로는 부족하다.
+
+    `src/analysis` 를 고치고 `make analyze` 를 잊은 커밋에서, CI 가 읽는 out/ 은 옛 코드의
+    산물이다. 그러면 초록 체크가 증명하는 것은 "지금 코드가 옳다"가 아니라 "낡은 산출물끼리
+    아귀가 맞는다"가 된다 — 배포되는 값과 검사받은 값이 갈리는, 가장 조용한 실패다.
+    커밋된 데이터로 지금 코드가 다시 구운 넷을 바이트로 맞대면 그 자리에서 걸린다(1초 미만).
+    """
+    build_all(data_dir=ROOT / "data", out_dir=tmp_path)
+    stale = []
+    for name in OUT_FILES:
+        fresh = hashlib.sha256((tmp_path / name).read_bytes()).hexdigest()
+        committed = hashlib.sha256((ROOT / "out" / name).read_bytes()).hexdigest()
+        if fresh != committed:
+            stale.append("out/%s (커밋 %s… ≠ 재생성 %s…)" % (name, committed[:12], fresh[:12]))
+    assert not stale, ("커밋된 산출물이 지금 코드·데이터가 만드는 것과 다르다: %s — "
+                       "make analyze 를 돌리고 out/ 을 함께 커밋하라"
+                       % " · ".join(stale))
 
 
 def test_the_guard_lists_what_is_missing():

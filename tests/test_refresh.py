@@ -180,6 +180,42 @@ def test_validation_failure_skips_deploy(root, spy):
     assert not spy.ran("wrangler") and st["deployed"] is False
 
 
+def test_a_broken_contract_suite_skips_deploy(root, spy):
+    """"검증까지 통과한 것만 배포한다"는 문장의 실체 — 스위트가 깨지면 그 자리에서 멈춘다."""
+    spy.when("pytest", _Done(1, "3 failed, 922 passed"))
+    code = refresh.main([], root=root)
+    st = _status(root)
+    assert st["stages"]["test"]["ok"] is False
+    assert not spy.ran("wrangler") and st["deployed"] is False
+    assert any(f.startswith("test (") for f in st["failures"])
+    assert code == 1
+
+
+def test_the_contract_suite_runs_between_the_build_and_the_deploy(root, spy):
+    """빌드보다 먼저 돌면 옛 산출을 검사하고, 배포보다 뒤면 검사 전에 나간다."""
+    refresh.main([], root=root)
+    joined = [" ".join(c) for c in spy.cmds]
+    order = [next(i for i, c in enumerate(joined) if needle in c)
+             for needle in ("assemble.py", "pytest", "wrangler")]
+    assert order == sorted(order), joined
+
+
+def test_the_contract_suite_runs_with_the_artifact_guard_armed(root, spy):
+    """가드 없이 돌면 산출물이 사라진 날 순수 함수만 통과하고 그대로 배포된다."""
+    refresh.main(["--no-deploy"], root=root)
+    call = next(c for c in spy.calls if any("pytest" in a for a in c["cmd"]))
+    assert call["cmd"][1:] == ["-m", "pytest", "tests/", "-q"]
+    assert call["kw"]["env"]["CHEUNGWI_REQUIRE_ARTIFACTS"] == "1"
+
+
+def test_the_suite_is_not_run_when_the_build_never_happened(root, spy):
+    """분석이 무너져 빌드를 건너뛴 실행에서 2분짜리 스위트를 돌릴 이유가 없다."""
+    spy.when("src.analysis.build_out", _Done(1, "엔진 예외"))
+    refresh.main(["--skip-collect"], root=root)
+    assert not spy.ran("pytest")
+    assert "test" not in _status(root)["stages"]
+
+
 def test_clean_run_deploys_to_cheungwi(root, spy):
     code = refresh.main([], root=root)
     deploy = spy.ran("wrangler")

@@ -31,12 +31,12 @@ serve: ## web/ 을 로컬에서 서빙한다 (기본 8768, 봇 차단·noindex)
 	$(PY) serve.py
 test: ## pytest
 	$(PY) -m pytest tests/ -q
-check: ## CI 동등 검증 — 바이트컴파일·스크립트 문법·전체 스위트·빌드 게이트 (web/ 을 다시 굽는다)
+check: ## 검사 묶음 — 바이트컴파일·스크립트 문법·전체 스위트·빌드 게이트 (CI 가 이것을 그대로 부른다)
 	find src -name '*.py' -print0 | xargs -0 $(PY) -m py_compile
 	@for f in site/js/*.js; do echo "node --check $$f"; node --check "$$f" || exit 1; done
 	CHEUNGWI_REQUIRE_ARTIFACTS=1 $(PY) -m pytest tests/ -q
 	$(PY) src/build/assemble.py
-	@echo "CI 동등 검증 통과 (바이트컴파일·스크립트 문법·전체 스위트·빌드 게이트)"
+	@echo "검사 통과 (바이트컴파일·스크립트 문법·전체 스위트·빌드 게이트) — CI 와 같은 명령이다"
 responsive: ## web/ 을 다섯 뷰포트에서 실제로 재고 다크 스크린샷을 남긴다 (make build 뒤)
 	node tests/responsive_check.js
 og: ## OG 카드 재생성 (src/build/og_card.html → site/static/og.png · 정확히 1200×630)
