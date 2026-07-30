@@ -207,7 +207,8 @@
   line-height: 1.7;
   color: var(--ink-2);
 }
-.rung-src {
+/* `.rung-body p` 보다 구체적이어야 색이 실제로 바뀐다(!important 를 쓰지 않는다) */
+.rung-body .rung-src {
   border-left: 2px solid var(--stratum-2);
   padding-left: var(--sp-2);
   color: var(--ink-2);
@@ -218,10 +219,10 @@
   color: var(--ink-3);
   padding-right: 4px;
 }
-.rung-caveat {
-  font-size: var(--t-caption) !important;
-  line-height: 1.65 !important;
-  color: var(--ink-3) !important;
+.rung-body .rung-caveat {
+  font-size: var(--t-caption);
+  line-height: 1.65;
+  color: var(--ink-3);
 }
 
 /* ---------- ③ 매칭 사다리 재게시 ---------- */
@@ -301,6 +302,15 @@
 .check-blank span {
   background: var(--surface);
   box-shadow: 0 0 0 3px var(--surface);
+}
+/* 목록이 아예 없는 자리 — 비어 있는 것과 다른 사실이라 사선도 긋지 않는다 */
+.check-missing {
+  margin: 0;
+  padding: var(--sp-3);
+  border: 1px solid var(--alert);
+  font-size: var(--t-caption);
+  line-height: 1.7;
+  color: var(--alert);
 }
 .check-rows {
   list-style: none;

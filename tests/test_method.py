@@ -338,3 +338,32 @@ def test_the_page_refuses_when_its_own_arithmetic_and_the_data_disagree():
     drifted["regions"]["도심"]["effective_rent_won_m2_mo"] = 30000.0
     r = js("method", "estimationSteps", drifted, "도심")
     assert r["ok"] is False and r["error"] == "gate", r
+
+
+def test_a_list_that_does_not_exist_is_not_drawn_as_zero():
+    """목록이 아예 없는 것과 비어 있는 것은 다른 사실이다.
+
+    앞의 것을 0건으로 그리면 파이프라인이 그 자리를 채우지 않았다는 사실이
+    화면에서 사라진다 — 사선(의도된 공백)을 그어서도 안 된다.
+    """
+    gone = copy.deepcopy(DATA)
+    del gone["underwriting"]["errors"]
+    checks = {c["key"]: c for c in value("method", "checkModel", gone)}
+    assert checks["errors"]["missing"] is True
+    assert checks["gate_violations"]["missing"] is False
+    html = value("method", "checkHtml", value("method", "checkModel", gone))
+    assert "is-missing" in html and "목록이 아예 없다" in html
+    assert html.count("is-blank") == 2, "없는 목록에 사선을 그으면 안 된다"
+
+
+def test_the_lines_take_their_numbers_from_the_ledger_not_from_the_prose():
+    """문장에 손으로 박은 수는 다음 수집에서 조용히 어긋난다."""
+    said = " ".join(value("method", "manifestLines", MANIFEST))
+    trades = [s for s in MANIFEST["sources"] if s["key"] == "trades"][0]
+    assert "{:,}".format(trades["rows"]) in said
+    smaller = copy.deepcopy(MANIFEST)
+    for s in smaller["sources"]:
+        if s["key"] == "trades":
+            s["rows"] = 1234
+    assert "1,234" in " ".join(value("method", "manifestLines", smaller))
+    assert "**" not in said, "마크다운 별표는 화면에 그대로 찍힌다"

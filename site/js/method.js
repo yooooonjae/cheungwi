@@ -158,18 +158,21 @@
     var stale = rows.filter(function (r) {
       return /무효화가 없다/.test(r.cache);
     }).map(function (r) { return r.key; });
+    // 수는 원장에서 온다. 문장에 손으로 박으면 다음 수집에서 조용히 어긋난다.
+    var trades = rows.filter(function (r) { return r.key === "trades"; })[0];
     return [
       "원천은 " + rows.length + "종이고 관측월은 하나가 아니다 — " +
         observed.join(" · ") + " 가 한 화면에 함께 있다. 수집일(" +
-        rows[0].collected + ")은 관측월이 아니라 **내려받은 날**이다. " +
+        rows[0].collected + ")은 관측월이 아니라 내려받은 날이다. " +
         "원장의 데이터 기준월 " + (manifest.data_cutoff || "―") +
         " 은 그 가운데 가장 이른 축을 따른 것이지 전 원천의 공통 기준월이 아니다.",
       "캐시 무효화가 없는 원천이 " + stale.length + "종 있다(" + stale.join(" · ") +
         "). 새 분기가 나와도 다시 받지 않으므로, 여기 실린 분기가 곧 데이터층의 " +
         "한계다 — 갱신하려면 data/raw/ 아래 해당 폴더를 지우고 다시 수집해야 한다.",
-      "행 수는 수집한 원시 행이고 분석에 쓴 행이 아니다. 실거래 14,521행 가운데 " +
-        "해제 404건은 가격 집계에서 빠졌고, 하위 상권 한 곳은 계열이 짧아 행째 " +
-        "제외됐다(아래 점검표)."
+      "행 수는 수집한 원시 행이고 분석에 쓴 행이 아니다" +
+        (trades ? " — 실거래 " + F.group(String(trades.rows)) + "행 가운데 해제 " +
+          "거래는 가격 집계에서 빠졌고, 하위 상권 한 곳은 계열이 짧아 행째 " +
+          "제외됐다(아래 점검표)." : ".")
     ];
   }
 
@@ -374,14 +377,20 @@
 
   function checkHtml(model) {
     return '<ul class="checks">' + (model || []).map(function (c) {
-      var body = c.empty
+      // 목록 자체가 없는 것과 목록이 비어 있는 것은 다른 사실이다. 앞의 것을
+      // 0건으로 그리면, 파이프라인이 이 자리를 채우지 않았다는 사실이 사라진다.
+      var body = c.missing
+        ? '<p class="check-missing">이 산출물에는 목록이 아예 없다 — 0건이 ' +
+          "아니라 파이프라인이 이 자리를 채우지 않았다는 뜻이다.</p>"
+        : c.empty
         ? '<p class="check-blank"><span>' + esc(c.emptyNote) + "</span></p>"
         : '<ul class="check-rows">' + c.rows.map(function (r) {
           return "<li><b>" + esc(r.head) + "</b>" +
             (r.kind ? '<span class="check-kind">' + esc(r.kind) + "</span>" : "") +
             "<span>" + esc(r.body) + "</span></li>";
         }).join("") + "</ul>";
-      return '<li class="check' + (c.empty ? " is-blank" : "") + '">' +
+      return '<li class="check' + (c.empty && !c.missing ? " is-blank" : "") +
+        (c.missing ? " is-missing" : "") + '">' +
         '<h4>' + esc(c.label) +
         '<span class="check-n num">' + c.count + "건</span></h4>" +
         '<p class="check-of">' + esc(c.of) +
