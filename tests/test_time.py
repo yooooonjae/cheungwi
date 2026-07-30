@@ -231,9 +231,43 @@ def test_the_worst_row_is_read_from_the_data_not_written_by_hand():
     assert value("chapter3", "stressModel", pf)["worst"]["name"] == "준공지연 +6개월"
 
 
+def test_the_reading_lines_survive_a_table_where_no_irr_was_found():
+    """근을 하나도 못 찾은 표에서 '최악'을 말하려다 화면 전체가 죽으면 안 된다."""
+    pf = copy.deepcopy(PF)
+    for row in pf["stress"]["rows"]:
+        row["equity_irr"] = None
+        row["delta"] = None
+    m = value("chapter3", "stressModel", pf)
+    assert m["worst"] is None and m["best"] is None
+    said = " ".join(value("chapter3", "stressLines", m))
+    assert "가장 나쁜 것은" not in said, "없는 값으로 최악을 지어내지 않는다"
+    assert "구해진 행이 없다" in said
+    assert "하나만 인용하지 말 것" in said
+
+
+def test_the_operating_band_thins_again_when_a_month_turns_cash_positive():
+    """다섯째 층은 손실의 합이 아니라 **누적 순유출**이다 — 돌아온 현금은 얇아진다."""
+    pf = copy.deepcopy(PF)
+    rows = pf["model"]["monthly"]
+    lease = [r for r in rows if r["phase"] != "construction"]
+    lease[-1]["operating_cash_won"] = 2_000_000_000.0
+    m = value("chapter3", "depositModel", pf)
+    assert m["cols"][-1]["parts"]["op"] < m["cols"][-2]["parts"]["op"]
+    assert m["cols"][-1]["parts"]["op"] >= 0, "지층의 두께는 음수일 수 없다"
+
+
 # ================================================================== #
 # ③ 자기자본 제도 사다리 5 → 20%
 # ================================================================== #
+def test_an_empty_ladder_is_refused_instead_of_drawn_as_a_blank_figure():
+    pf = copy.deepcopy(PF)
+    pf["stress"]["rows"] = [r for r in pf["stress"]["rows"]
+                            if not r["name"].startswith("자기자본")]
+    r = js("chapter3", "ladderModel", pf)
+    assert not r["ok"] and r["error"] == "input"
+
+
+
 def test_the_ladder_has_four_rungs_plus_the_case_itself():
     m = value("chapter3", "ladderModel", PF)
     assert [r["equityShare"] for r in m["rungs"]] == pytest.approx([.05, .10, .15, .20])

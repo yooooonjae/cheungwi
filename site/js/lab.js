@@ -169,10 +169,8 @@
    * 돌아다닌다.
    */
   function run(inputs, fixedOverride) {
-    var fixed = fixedOverride || {
-      debtYieldMin: 0.08, noiGrowth: 0.02, holdYears: 5,
-      costRate: 0.05, refiLtvMax: 0.6
-    };
+    // 기본값은 한 곳에서만 나온다 — `defaultFixed(null)` 이 그 한 곳이다.
+    var fixed = fixedOverride || defaultFixed(null);
     var res = { inputs: inputs, fixed: fixed, banners: [], ok: false };
 
     // ① 칸 자체가 수가 아닌 경우. 엔진에 넘기기 전에 여기서 갈린다.
@@ -454,11 +452,21 @@
       y: L.topY, height: L.groundY - L.topY, total: L.total, waves: 8
     });
     if (res.hold.ok) {
-      var ey = g.y(Math.min(res.hold.exitValueWon * g.idx, L.total - 4));
+      var exitIdx = res.hold.exitValueWon * g.idx;
+      var clipped = exitIdx > L.total - 4;
+      var ey = g.y(Math.min(exitIdx, L.total - 4));
       inner += tag("line", {
         x1: r4(L.column.x - 14), x2: r4(L.column.x + L.column.width + 14),
         y1: ey, y2: ey, class: "exit-rule"
       });
+      if (clipped) {
+        // 파단선 — 값이 판형을 넘었다는 도면의 표기다(Ⅱ장의 규약 그대로).
+        // 자리는 잃어도 수는 라벨이 그대로 싣는다.
+        inner += tag("path", {
+          d: "M" + r4(L.column.x + 8) + " " + r4(ey - 5) +
+             " l6 -4 l6 8 l6 -8 l6 4", class: "break-mark"
+        });
+      }
       inner += text(r4(L.column.x + L.column.width + 16), r4(ey - 4),
                     "매각가 " + eok(res.hold.exitValueWon) + "억",
                     { class: "lab lab-exit" });
@@ -508,7 +516,8 @@
     var e = v * spec.scale;
     if (spec.scale === 1e8) return "→ " + F.group(Math.round(e).toFixed(0)) + "원";
     if (spec.scale === 0.01) return "→ " + F.fx(e, 6) + " (소수)";
-    return "→ " + F.fx(e, 4);
+    // 배수는 환산이 없다 — "그대로"라고 적는 편이 화살표만 두는 것보다 정직하다.
+    return "→ " + F.fx(e, 4) + " (그대로)";
   }
 
   function bannerHtml(res) {

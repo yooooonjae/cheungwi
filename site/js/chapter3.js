@@ -103,8 +103,13 @@
       var row = monthly[i];
       var built = Math.min(i + 1, buildMonths);
       if (row.phase === "construction") interestCum += row.interest_won;
-      // 임대기간의 순현금은 음수다 — 그 절댓값이 쌓이는 다섯 번째 층이다.
-      if (row.phase !== "construction") opCum += Math.max(0, -row.operating_cash_won);
+      // 임대기간의 순현금은 음수다 — 그 **누적 순유출**이 다섯 번째 층이다.
+      // 달마다의 손실을 더하지 않고 순액을 누적하는 이유는, 언젠가 NOI 가
+      // 이자를 넘는 달이 오면 그 층도 다시 얇아져야 하기 때문이다. 0 에서
+      // 멈추는 것은 지층의 두께가 음수일 수 없어서다(그 아래는 이익이지 층이 아니다).
+      if (row.phase !== "construction") {
+        opCum = Math.max(0, opCum - row.operating_cash_won);
+      }
       var parts = {
         land: A.land_won,
         hard: hardPerMo * built,
@@ -395,19 +400,22 @@
                     F.fx(m.margin * 100) + "%", { class: "lab lab-profit" });
       // 두 지시선은 퇴적 위의 빈 종이에서 출발해 각자의 경계로 내려간다 —
       // 라벨을 지층 위에 얹으면 읽히지 않고, 빼면 그림이 스스로 설명하지 못한다.
-      var pt = g.cols[9];
+      // 짚는 달은 공사기간 안에서 고른다(기간이 짧은 사업에서도 자리가 있도록).
+      var iDry = Math.min(9, g.cols.length - 1);
+      var iWet = Math.min(20, g.cols.length - 1);
+      var pt = g.cols[iDry];
       var callout = r4(g.costY + 22);
       inner += tag("line", {
         x1: r4(pt.x + pt.width / 2), x2: r4(pt.x + pt.width / 2),
-        y1: r4(callout + 4), y2: r4(g.yOf[9].cumY), class: "callout"
+        y1: r4(callout + 4), y2: r4(g.yOf[iDry].cumY), class: "callout"
       });
       inner += text(r4(pt.x + pt.width / 2), callout,
                     "여기까지가 자기자본 " + eok(m.equity) + "억",
                     { class: "lab lab-dry", "text-anchor": "middle" });
-      var wpt = g.cols[20];
+      var wpt = g.cols[iWet];
       inner += tag("line", {
         x1: r4(wpt.x + wpt.width / 2), x2: r4(wpt.x + wpt.width / 2),
-        y1: r4(callout + 22), y2: r4(g.yOf[20].loanY), class: "callout is-water"
+        y1: r4(callout + 22), y2: r4(g.yOf[iWet].loanY), class: "callout is-water"
       });
       inner += text(r4(wpt.x + wpt.width / 2), r4(callout + 18),
                     "수면 = 대출잔액",
@@ -540,6 +548,12 @@
   }
 
   function stressLines(m) {
+    // 모든 행의 IRR 이 없으면 최악·최선을 말할 수 없다. 지어내지 않고 그렇게 적는다.
+    if (!m.worst || !m.best) {
+      return ["열다섯 행 가운데 지분 IRR 이 구해진 행이 없다 — 부호 변화가 " +
+              "없거나 근이 탐색 범위 밖이라는 뜻이지 '0%' 가 아니다.",
+              llcrPair(m), plain(m.stressNote)];
+    }
     return [
       "열다섯 개의 충격 가운데 지분 IRR 이 음수로 돌아서는 것이 " + m.negatives +
         "개다. 가장 나쁜 것은 " + m.worst.name + "(" + F.pct(m.worst.irr) +
@@ -571,6 +585,11 @@
           ]
         };
       });
+    if (!rungs.length) {
+      throw new TypeError(
+        "제도 사다리 행이 없다 — 스트레스 표에 '자기자본' 시나리오가 실리지 " +
+        "않았다. 사다리를 빈 그림으로 그리면 제도가 없는 것처럼 읽힌다");
+    }
     var base = {
       name: "이 사업의 가정", equityShare: 1 - pf.model.ltc, ltc: pf.model.ltc,
       irr: pf.model.equity_irr, delta: null, llcr: pf.model.llcr,
