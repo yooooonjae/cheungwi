@@ -54,7 +54,7 @@
 | # | 수집기 | 원천 | 재사용/신규 | 산출 |
 |---|---|---|---|---|
 | 1 | `buildings.py` | 건축물대장 표제부 `BldRgstService_v2` + VWorld(좌표·용도지역·공시지가) | **신규** — archub.py 구조 복제(빈 바디 대응 `Accept` 헤더 포함), vworld.py 재사용 | `data/buildings.json` — 50동 마스터(주소·지번·권역·연면적·층수·사용승인일·주차) |
-| 2 | `trades.py` | RTMS 상업업무용 실거래 | rtms_commercial.py 확장 | `data/trades.json` — 지번→건물 매칭, 통매각/구분소유 판별(거래면적÷연면적 비율), 해제 거래 제거, 평당가 |
+| 2 | `trades.py` | RTMS 상업업무용 실거래 | rtms_commercial.py 확장 | `data/trades.json` — 지번→건물 매칭, 통매각/구분소유 판별(거래면적÷연면적 비율), 해제 거래 보존+`canceled` 플래그(분석 단계에서 제외), 평당가 |
 | 3 | `rone_office.py` | R-ONE 오피스 임대동향 | rone_commercial.py 확장 — **하위 상권 축(`CLS_FULLNM`의 '>' 계층)을 풀어 도심/강남/여의도 분기 시계열 확보** | `data/rone_office.json` — 권역별 임대료·공실률·소득/자본/투자수익률 |
 | 4 | `reits.py` | DART 전자공시 (오피스 보유 상장리츠) | 순환 dart_corp/dart_fin 재사용 | `data/reits.json` — 리츠 임대수익·자산가액. 추정 NOI의 실측 앵커 |
 | 5 | `rates.py` | ECOS 국고채 10y·CD·예금은행 대출금리 | 재사용 | `data/rates.json` |

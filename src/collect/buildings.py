@@ -33,6 +33,10 @@ service_key로 RTMSDataSvcNrgTrade(200)·ArchPmsHubService(200)는 정상이고,
 
 쿼터 소진(봉투 22)도 같은 방식으로 저장까지 가고 RESUME_NEEDED 로 끝난다 — 실패가 아니라
 다음 실행이 이어받을 일이다. 데이터 없음(봉투 03)만 건별 failed 로 남기고 계속한다.
+
+**승인이 떨어진 뒤 해야 할 일은 docs/ledger-unlock-checklist.md 에 모아 두었다** — 이 독스트링의
+403 절 정정, 연속 일시오류 서킷브레이커, 미상 봉투의 저장 없는 사망 경로, fixture 실응답 교체,
+필지 공유 8동의 match_method 확인, mgmBldrgstPk 실태그명 확인, trades --rebuild 승격이 거기 있다.
 """
 
 import datetime
