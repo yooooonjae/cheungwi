@@ -1,0 +1,6 @@
+[
+ {"CLS_ID": 500002, "CLS_FULLNM": "서울", "ITM_NM": "지수", "DTA_VAL": 105.7524, "WRTTIME_IDTFR_ID": "202601"},
+ {"CLS_ID": 510003, "CLS_FULLNM": "서울>도심", "ITM_NM": "지수", "DTA_VAL": 104.2, "WRTTIME_IDTFR_ID": "202601"},
+ {"CLS_ID": 510005, "CLS_FULLNM": "서울>여의도마포", "ITM_NM": "지수", "DTA_VAL": 106.9, "WRTTIME_IDTFR_ID": "202601"},
+ {"CLS_ID": 520004, "CLS_FULLNM": "서울>도심>광화문", "ITM_NM": "지수", "DTA_VAL": 103.1, "WRTTIME_IDTFR_ID": "202601"}
+]
