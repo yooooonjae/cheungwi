@@ -13,6 +13,8 @@ cp config.example.json config.json   # 그리고 각 키 값을 채운다
 make collect                # 수집기 5종 실행 (재개형)
 make manifest               # 수집 산출을 훑어 데이터 원장 갱신
 make analyze                # 엔진을 실데이터에 적용해 out/*.json 4종 생성
+make build                  # site/ 소스를 web/ 정적 산출로 굽는다
+make serve                  # web/ 을 로컬에서 본다 (기본 8768)
 ```
 
 수집기는 파이썬 표준 라이브러리만 쓴다(pytest는 테스트 전용). 저장 형식은 JSON 단일이고,

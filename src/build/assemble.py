@@ -192,7 +192,10 @@ def build_dist() -> Path:
     static = SITE / "static"
     if static.is_dir():  # _headers·robots.txt·og.png — web/ 루트로 평면 복사
         for f in static.iterdir():
-            if f.is_file():
+            # 하위 디렉터리를 조용히 건너뛰면 나중에 넣을 이미지 폴더가 소리 없이 사라진다
+            if f.is_dir():
+                shutil.copytree(f, TMP / f.name)
+            else:
                 shutil.copy(f, TMP / f.name)
     for key, (name, path) in DATA_MAP.items():
         (TMP / "data" / ("%s.js" % name)).write_text(
