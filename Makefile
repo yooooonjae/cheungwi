@@ -43,7 +43,8 @@ og: ## OG 카드 재생성 (src/build/og_card.html → site/static/og.png · 정
 	@rm -f site/static/og.png
 	"$(CHROME)" --headless=new --disable-gpu --hide-scrollbars --force-device-scale-factor=1 \
 	  --window-size=1200,630 --screenshot=site/static/og.png "file://$(CURDIR)/src/build/og_card.html"
-	@$(PY) -c "import sys,pathlib;b=pathlib.Path('site/static/og.png').read_bytes();\
-	w=int.from_bytes(b[16:20],'big');h=int.from_bytes(b[20:24],'big');\
-	sys.exit(0) if (b[:8]==b'\x89PNG\r\n\x1a\n' and (w,h)==(1200,630)) else sys.exit('og.png 이 1200x630 이 아니다: %dx%d' % (w,h))"
+	@$(PY) -c "import sys,pathlib;p=pathlib.Path('site/static/og.png');\
+	sys.exit('og.png 이 만들어지지 않았다 — 크롬을 찾았는지 보라(CHROME=... 로 지정 가능)') if not p.is_file() else None;\
+	b=p.read_bytes();w=int.from_bytes(b[16:20],'big');h=int.from_bytes(b[20:24],'big');\
+	sys.exit(None if b[:8]==b'\x89PNG\r\n\x1a\n' and (w,h)==(1200,630) else 'og.png 이 1200x630 PNG 가 아니다: %dx%d' % (w,h))"
 	@echo "og.png 재생성 (1200×630) — 커밋 대상이다"

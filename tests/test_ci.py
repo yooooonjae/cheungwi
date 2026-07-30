@@ -78,7 +78,7 @@ def test_the_workflow_runs_on_push_and_by_hand():
 # 무엇을 돌리는가 — 넷은 반드시 돈다
 # ------------------------------------------------------------------ #
 CORE_CHECKS = {
-    "pytest": r"pytest",              # 전체 스위트(패리티·조형 러너 포함 — node 필요)
+    "pytest": r"pytest tests/",       # 전체 스위트(패리티·조형 러너 포함 — node 필요)
     "node --check": r"node --check",  # 사이트 스크립트 문법
     "py_compile": r"py_compile",      # 파이썬 전 소스 바이트컴파일
     "assemble": r"src/build/assemble\.py",  # 빌드 게이트(미치환·조사 분리)
@@ -96,6 +96,8 @@ def test_the_local_check_target_is_the_same_four():
     recipe = make_target("check")
     for name, pattern in CORE_CHECKS.items():
         assert re.search(pattern, recipe), "make check 가 %s 를 돌리지 않는다" % name
+    assert "CHEUNGWI_REQUIRE_ARTIFACTS=1" in recipe, \
+        "로컬 검증만 가드 없이 돌면 CI 에서 처음 걸리는 부재가 생긴다"
 
 
 def test_the_script_syntax_check_looks_at_every_file():
