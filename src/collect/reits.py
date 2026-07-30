@@ -2,7 +2,7 @@
 
 실행: python3 src/collect/reits.py
 산출: data/reits.json
-  {"reits": {"293940": {"name": "신한알파리츠", "corp_code": "01276594",
+  {"reits": {"293940": {"name": "신한알파리츠", "corp_code": "01276594", "holding": "mixed",
                         "office_assets": [{"building_id": "platinum-tower", "note": "..."}],
                         "fin": [{"year": 2025, "reprt": "11011", "assets": 0.0, "liab": 0.0,
                                  "equity": 0.0, "revenue": 0.0, "basis": "2025.12.31 현재"}],
@@ -19,7 +19,8 @@
   · **별도(OFS) 기준이다.** 자리츠·펀드를 통해 간접 보유하는 리츠(NH프라임·KB스타·대신밸류·
     디앤디플랫폼 등)의 별도 영업수익은 임대료가 아니라 배당·이자 수익 성격이다. 임대료 자체는
     자리츠 재무제표에 있다. 연결(CFS)을 섞지 않는 이유는 리츠마다 연결 범위가 달라 한 표에
-    나란히 놓으면 비교가 무너지기 때문이다 — 대신 시드의 portfolio 필드에 보유 형태를 적었다.
+    나란히 놓으면 비교가 무너지기 때문이다 — 대신 리츠마다 holding(direct·indirect·mixed)을
+    실어 소비자가 산문을 읽지 않고도 가중치를 정할 수 있게 했다.
   · **분기 금액은 그 분기분이다.** fnlttSinglAcnt의 thstrm_amount는 해당 보고 기간의 값이고
     누적이 아니다. 리츠는 결산월이 제각각이라(삼성FN리츠는 사업연도가 3개월) 연 환산은
     bsns_year가 아니라 basis(재무상태표 기준일)와 결산기로 해야 한다.
@@ -56,6 +57,7 @@ BASE = "https://opendart.fss.or.kr/api"
 YEARS = range(2020, datetime.date.today().year + 1)
 REPRTS = ("11013", "11012", "11014", "11011")  # 1분기·반기·3분기·사업
 CALL_GAP = 0.1
+HOLDINGS = {"direct", "indirect", "mixed"}  # 별도 손익에 임대료가 잡히는가 배당이 잡히는가
 
 # DART 응답 status. "000" 외에는 성격을 갈라 행동을 정한다.
 OK, NODATA = "000", "013"
@@ -88,8 +90,10 @@ def _num(value):
 def pick_revenue(rows: list[dict]) -> float | None:
     """fnlttSinglAcnt 응답 행에서 별도(OFS) 영업수익을 뽑는다. 없으면 None.
 
-    리츠 손익계산서의 최상단 계정은 대개 "영업수익"이지만 자기관리 리츠 등 일부는 "매출액"으로
-    적는다. 그래서 영업수익을 먼저 찾고 없을 때만 매출액을 쓴다(둘 다 있으면 영업수익).
+    리츠 손익계산서의 최상단 계정은 재무제표에서는 "영업수익"이지만, **주요계정 API가 실제로
+    돌려주는 이름은 실측 10종 전부 "매출액"이다**(2026-07 캐시 86건에서 영업수익 0건·매출액 68건).
+    그래서 실제로 값을 물어오는 경로는 매출액 쪽이고, 영업수익 우선순위는 계정명 표기가 바뀌거나
+    다른 리츠가 편입될 때를 대비한 방어다(둘 다 있으면 영업수익).
     fs_div가 "CFS"(연결)인 행은 보지 않는다 — 연결 범위가 리츠마다 달라 섞으면 비교가 깨진다.
     """
     found: dict = {}
@@ -124,12 +128,23 @@ def _call(op: str, params: dict) -> dict:
                            f"{_mask(text, key)[:400]}") from e
 
 
-def corp_index(tickers: list[str]) -> dict:
+def corp_index(tickers: list[str], rebuild: bool = False) -> dict:
     """corpCode.xml(zip) 전체를 받아 **종목코드로** corp_code를 찾는다.
 
     시드 종목이 하나라도 없으면 조용히 건너뛰지 않고 멈춘다 — 상장폐지·종목코드 변경을
     '수집 안 됨'으로 뭉개면 앵커가 소리 없이 비기 때문이다.
+    rebuild=True 면 네트워크를 쓰지 않고 지난 실행이 남긴 매핑 사본만 읽는다.
     """
+    if rebuild:
+        path = RAW_DIR / "corp_code_map.json"
+        if not path.exists():
+            raise RuntimeError(f"--rebuild 인데 {path} 가 없다. 먼저 네트워크로 한 번 수집하라.")
+        cached = json.loads(path.read_text(encoding="utf-8"))["map"]
+        missing = [t for t in tickers if t not in cached]
+        if missing:
+            raise RuntimeError(f"--rebuild: 매핑 사본에 없는 시드 종목코드 {missing}. "
+                               f"네트워크 수집으로 사본을 갱신하라.")
+        return {t: cached[t] for t in tickers}
     key = load_config()["dart_key"]
     req = urllib.request.Request(f"{BASE}/corpCode.xml?crtfc_key={key}",
                                  headers={"User-Agent": "cheungwi/0.1"})
@@ -159,15 +174,18 @@ def corp_index(tickers: list[str]) -> dict:
     return hit
 
 
-def _fetch(corp: str, op: str, year: int, reprt: str):
+def _fetch(corp: str, op: str, year: int, reprt: str, rebuild: bool = False):
     """(corp, op, 연도, 보고서) 한 칸. 성공 응답만 캐시하고, 자료 없음은 None.
 
     캐시는 data/raw/dart/{corp_code}_{op}_{year}_{reprt}.json 이다. "013"(자료 없음)을 캐시하면
     아직 제출 전인 최근 분기가 영원히 빈 칸으로 박제되므로 성공 응답만 남긴다.
+    rebuild=True 면 캐시에 없는 칸을 호출하지 않고 없는 것으로 둔다(네트워크를 아예 쓰지 않는다).
     """
     path = RAW_DIR / f"{corp}_{op}_{year}_{reprt}.json"
     if path.exists():
         return json.loads(path.read_text(encoding="utf-8"))
+    if rebuild:
+        return None
     payload = _call(op, {"corp_code": corp, "bsns_year": str(year), "reprt_code": reprt})
     status = payload.get("status")
     if status == OK:
@@ -182,7 +200,7 @@ def _fetch(corp: str, op: str, year: int, reprt: str):
                        f"{payload.get('message')}")
 
 
-def fin_series(corp: str) -> tuple:
+def fin_series(corp: str, rebuild: bool = False) -> tuple:
     """단일회사 주요계정(fnlttSinglAcnt) → (재무 행 목록, OFS 행이 없어 버린 응답 수).
 
     한 행 = 한 보고서. 자산·부채·자본은 재무상태표, revenue는 pick_revenue(손익계산서)에서 온다.
@@ -192,7 +210,7 @@ def fin_series(corp: str) -> tuple:
     rows, skipped = [], 0
     for year in YEARS:
         for reprt in REPRTS:
-            payload = _fetch(corp, "fnlttSinglAcnt", year, reprt)
+            payload = _fetch(corp, "fnlttSinglAcnt", year, reprt, rebuild=rebuild)
             if payload is None:
                 continue
             items = payload.get("list") or []
@@ -216,7 +234,7 @@ def fin_series(corp: str) -> tuple:
     return rows, skipped
 
 
-def dividends(corp: str) -> list[dict]:
+def dividends(corp: str, rebuild: bool = False) -> list[dict]:
     """배당에 관한 사항(alotMatter) → 결산기(stlm_dt)별 보통주 현금배당.
 
     리츠는 반기·분기 결산이라 "연 1회 사업보고서" 가정이 깨진다. 그래서 bsns_year가 아니라
@@ -225,11 +243,15 @@ def dividends(corp: str) -> list[dict]:
     """
     blocks: dict = {}
     for year in YEARS:
-        payload = _fetch(corp, "alotMatter", year, "11011")
+        payload = _fetch(corp, "alotMatter", year, "11011", rebuild=rebuild)
         if payload is None:
             continue
         for item in payload.get("list") or []:
-            if item.get("stock_knd") == "종류주":  # 보통주만
+            # **화이트리스트다.** "종류주"만 걸러내는 블랙리스트로 두면 우선주 배당이 그대로
+            # 통과해 같은 결산기 블록의 보통주 dps를 소리 없이 덮어쓴다. 실제 캐시의 stock_knd
+            # 분포가 {'-': 1233, '보통주': 320, '우선주': 116, '종류주': 56}이라 우선주를 배당하는
+            # 리츠가 하나만 편입돼도 앵커가 오염된다. "-"는 종류 구분이 없는 표기다.
+            if item.get("stock_knd") not in ("보통주", "-"):
                 continue
             stlm = (item.get("stlm_dt") or "").strip()
             value = _num(item.get("thstrm"))
@@ -276,25 +298,41 @@ def save_result(result: dict) -> Path:
     return OUT_PATH
 
 
-def collect() -> None:
+def _holding(ticker: str, meta: dict) -> str:
+    """시드의 holding(direct|indirect|mixed)을 검증해 돌려준다.
+
+    산출을 읽는 쪽이 재간접 여부를 알려면 note 산문에서 회사명을 파싱해야 했다. 별도 손익에
+    임대료가 잡히는 리츠와 배당이 잡히는 리츠를 가르는 값이라 캘리브레이션 가중치가 여기서
+    갈린다 — 기계가 읽을 수 있게 필드로 승격했다. 값이 없거나 낯설면 조용히 넘기지 않는다.
+    """
+    value = meta.get("holding")
+    if value not in HOLDINGS:
+        raise RuntimeError(f"시드 {ticker}({meta.get('name')})의 holding 이 {value!r}다. "
+                           f"{sorted(HOLDINGS)} 중 하나여야 한다.")
+    return value
+
+
+def collect(rebuild: bool = False) -> None:
     seed = json.load(open(SEED_PATH, encoding="utf-8"))
     tickers = list(seed["reits"])
-    index = corp_index(tickers)
-    print(f"  corp_code 매칭 {len(index)}/{len(tickers)}종")
+    index = corp_index(tickers, rebuild=rebuild)
+    print(f"  corp_code 매칭 {len(index)}/{len(tickers)}종"
+          f"{' (--rebuild: 캐시만 읽는다)' if rebuild else ''}")
 
     out, stopped, skipped = {}, "", {}
     for ticker in tickers:
         meta = seed["reits"][ticker]
         corp = index[ticker]["corp_code"]
         try:
-            fin, no_ofs = fin_series(corp)
-            div = dividends(corp)
+            fin, no_ofs = fin_series(corp, rebuild=rebuild)
+            div = dividends(corp, rebuild=rebuild)
         except _Stop as e:
             stopped = str(e)
             print(f"  ⚠ {meta['name']}에서 중단: {stopped}")
             break
         skipped[ticker] = no_ofs
         out[ticker] = {"name": meta["name"], "corp_code": corp,
+                       "holding": _holding(ticker, meta),
                        "office_assets": meta["office_assets"], "fin": fin, "div": div}
         linked = sum(1 for a in meta["office_assets"] if a["building_id"])
         span = f"{fin[0]['year']}~{fin[-1]['year']}" if fin else "없음"
@@ -307,18 +345,27 @@ def collect() -> None:
         "meta": {
             "collected_at": datetime.date.today().isoformat(),
             "source": "OpenDART",
-            "note": ("자산·자본은 장부가 기준(감정 NAV 아님). revenue=영업수익, 단위 원. "
-                     "재무는 별도(OFS) 기준이라 자리츠·펀드로 간접 보유하는 리츠의 영업수익은 "
-                     "임대료가 아니라 배당·이자 수익 성격이다. 분기·반기 금액은 누적이 아니라 "
-                     "해당 기간분이고, 결산월이 리츠마다 달라 시간축은 basis(재무상태표 기준일)로 "
-                     "잡아야 한다. 배당의 total_div 단위는 백만원, dps는 원, yld는 %다."),
+            "note": ("자산·자본은 장부가 기준(감정 NAV 아님). revenue는 별도 손익계산서의 "
+                     "최상단 수익이고 단위는 원이다 — 주요계정 API가 이 계정을 돌려주는 이름은 "
+                     "실측 10종 모두 '매출액'이라 계정명으로 필터링하지 말고 이 필드를 써라. "
+                     "재무는 별도(OFS) 기준이라 holding 이 indirect·mixed 인 리츠의 revenue 에는 "
+                     "임대료가 아니라 자리츠·펀드 배당이 섞인다(holding 필드로 가중치를 정하라). "
+                     "분기·반기 금액은 누적이 아니라 해당 기간분이고, 결산월이 리츠마다 달라 "
+                     "시간축은 basis(재무상태표 기준일)로 잡아야 한다. revenue 가 null 인 행은 "
+                     "주요계정 응답에 매출액 줄이 빠진 경우로, 손익 섹션과 영업이익은 와 있으니 "
+                     "복원이 필요하면 fnlttSinglAcntAll(전체 재무제표)을 따로 받아야 한다. "
+                     "배당의 total_div 단위는 백만원, dps는 원, yld는 %다."),
             "seed_as_of": seed["meta"]["as_of"],
             "seed_criteria": seed["meta"]["criteria"],
             "years": [YEARS.start, YEARS.stop - 1],
             "reprt_codes": list(REPRTS),
             "reits_count": len(out),
+            "holdings": {h: sum(1 for r in out.values() if r["holding"] == h)
+                         for h in sorted(HOLDINGS)},
+            "holding_field": seed["meta"]["holding_field"],
             "fin_rows": fin_rows,
-            # 주요계정 응답에 손익 최상단 계정이 아예 없는 보고서가 있다(재무상태표만 온다).
+            # 주요계정(fnlttSinglAcnt)은 손익계산서를 보내면서도 최상단 매출액 한 줄을 빠뜨리는
+            # 보고서가 있다 — 캐시 86건 전부 OFS 손익 섹션과 영업이익이 있는데 매출액은 68건뿐이다.
             # 그 행은 revenue=None 으로 남으므로 앵커로 쓸 수 있는 행수를 따로 적어 둔다.
             "fin_rows_with_revenue": sum(1 for r in out.values() for f in r["fin"]
                                          if f["revenue"] is not None),
@@ -340,6 +387,8 @@ def collect() -> None:
 
 
 if __name__ == "__main__":
-    print("DART 리츠 앵커 수집:")
-    collect()
+    # --rebuild: 네트워크를 아예 쓰지 않고 raw 캐시만으로 산출을 다시 만든다(스키마 변경 반영용).
+    rebuild = "--rebuild" in sys.argv[1:]
+    print("DART 리츠 앵커 수집:" if not rebuild else "DART 리츠 앵커 재생성(캐시만):")
+    collect(rebuild=rebuild)
     print("COMPLETE")

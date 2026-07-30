@@ -3,6 +3,7 @@
   "0030R0": {
    "name": "대신밸류리츠",
    "corp_code": "01885222",
+   "holding": "indirect",
    "office_assets": [
     {
      "building_id": "daishin-finance-center",
@@ -59,6 +60,7 @@
   "293940": {
    "name": "신한알파리츠",
    "corp_code": "01276594",
+   "holding": "mixed",
    "office_assets": [
     {
      "building_id": "platinum-tower",
@@ -300,6 +302,7 @@
   "334890": {
    "name": "이지스밸류리츠",
    "corp_code": "01394377",
+   "holding": "indirect",
    "office_assets": [
     {
      "building_id": "twin-tree-tower",
@@ -516,6 +519,7 @@
   "338100": {
    "name": "NH프라임리츠",
    "corp_code": "01391033",
+   "holding": "indirect",
    "office_assets": [
     {
      "building_id": "arc-place",
@@ -727,6 +731,7 @@
   "377190": {
    "name": "디앤디플랫폼리츠",
    "corp_code": "01475609",
+   "holding": "mixed",
    "office_assets": [
     {
      "building_id": "susong-square",
@@ -904,6 +909,7 @@
   "395400": {
    "name": "SK리츠",
    "corp_code": "01535150",
+   "holding": "mixed",
    "office_assets": [
     {
      "building_id": "sk-seorin",
@@ -1090,6 +1096,7 @@
   "417310": {
    "name": "코람코더원리츠",
    "corp_code": "01180118",
+   "holding": "direct",
    "office_assets": [
     {
      "building_id": "hana-securities-yeouido",
@@ -1251,6 +1258,7 @@
   "432320": {
    "name": "KB스타리츠",
    "corp_code": "01622720",
+   "holding": "indirect",
    "office_assets": [
     {
      "building_id": "signature-tower",
@@ -1405,6 +1413,7 @@
   "448730": {
    "name": "삼성FN리츠",
    "corp_code": "01688896",
+   "holding": "direct",
    "office_assets": [
     {
      "building_id": null,
@@ -1537,6 +1546,7 @@
   "451800": {
    "name": "한화리츠",
    "corp_code": "01669226",
+   "holding": "direct",
    "office_assets": [
     {
      "building_id": "hanwha-building",
@@ -1670,7 +1680,7 @@
  "meta": {
   "collected_at": "2026-07-30",
   "source": "OpenDART",
-  "note": "자산·자본은 장부가 기준(감정 NAV 아님). revenue=영업수익, 단위 원. 재무는 별도(OFS) 기준이라 자리츠·펀드로 간접 보유하는 리츠의 영업수익은 임대료가 아니라 배당·이자 수익 성격이다. 분기·반기 금액은 누적이 아니라 해당 기간분이고, 결산월이 리츠마다 달라 시간축은 basis(재무상태표 기준일)로 잡아야 한다. 배당의 total_div 단위는 백만원, dps는 원, yld는 %다.",
+  "note": "자산·자본은 장부가 기준(감정 NAV 아님). revenue는 별도 손익계산서의 최상단 수익이고 단위는 원이다 — 주요계정 API가 이 계정을 돌려주는 이름은 실측 10종 모두 '매출액'이라 계정명으로 필터링하지 말고 이 필드를 써라. 재무는 별도(OFS) 기준이라 holding 이 indirect·mixed 인 리츠의 revenue 에는 임대료가 아니라 자리츠·펀드 배당이 섞인다(holding 필드로 가중치를 정하라). 분기·반기 금액은 누적이 아니라 해당 기간분이고, 결산월이 리츠마다 달라 시간축은 basis(재무상태표 기준일)로 잡아야 한다. revenue 가 null 인 행은 주요계정 응답에 매출액 줄이 빠진 경우로, 손익 섹션과 영업이익은 와 있으니 복원이 필요하면 fnlttSinglAcntAll(전체 재무제표)을 따로 받아야 한다. 배당의 total_div 단위는 백만원, dps는 원, yld는 %다.",
   "seed_as_of": "2026-07-30",
   "seed_criteria": "서울 3대 권역(CBD·GBD·YBD) 오피스를 실제로 보유한 상장리츠. 보유 여부는 DART 최신 정기보고서 원문(사업·반기·분기보고서)의 '투자대상 부동산'·'보유자산 내역' 표로 확인했고, 시장 동향 서술에 이름만 등장하는 건물은 제외했다. 임대수익이 오피스에서 나오는 리츠만 담아 앵커로 쓴다.",
   "years": [
@@ -1684,6 +1694,12 @@
    "11011"
   ],
   "reits_count": 10,
+  "holdings": {
+   "direct": 3,
+   "indirect": 4,
+   "mixed": 3
+  },
+  "holding_field": "상장법인 **별도(OFS) 재무제표에 무엇이 잡히는가**로 가른다. direct=투자부동산을 직접 소유해 별도 손익에 임대료가 잡힌다, indirect=전 자산을 자리츠 지분·펀드 수익증권으로 보유해 별도 손익은 배당·이자 수익이다, mixed=둘이 섞여 있다. 임대수익 앵커의 가중치를 정하는 값이라 note의 산문이 아니라 이 필드를 봐야 한다.",
   "fin_rows": 86,
   "fin_rows_with_revenue": 68,
   "div_rows": 114,

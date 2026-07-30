@@ -1,0 +1,26 @@
+{
+ "status": "000",
+ "message": "정상",
+ "list": [
+  {"fs_div": "CFS", "sj_div": "BS", "account_nm": "자산총계",
+   "thstrm_amount": "3,131,675,302,293", "thstrm_dt": "2026.03.31 현재"},
+  {"fs_div": "CFS", "sj_div": "BS", "account_nm": "부채총계",
+   "thstrm_amount": "2,330,100,250,878", "thstrm_dt": "2026.03.31 현재"},
+  {"fs_div": "CFS", "sj_div": "BS", "account_nm": "자본총계",
+   "thstrm_amount": "801,575,051,415", "thstrm_dt": "2026.03.31 현재"},
+  {"fs_div": "CFS", "sj_div": "IS", "account_nm": "매출액",
+   "thstrm_amount": "85,330,922,743", "thstrm_dt": "2025.10.01 ~ 2026.03.31"},
+  {"fs_div": "OFS", "sj_div": "BS", "account_nm": "유동자산",
+   "thstrm_amount": "28,534,444,487", "thstrm_dt": "2026.03.31 현재"},
+  {"fs_div": "OFS", "sj_div": "BS", "account_nm": "자산총계",
+   "thstrm_amount": "1,314,610,219,598", "thstrm_dt": "2026.03.31 현재"},
+  {"fs_div": "OFS", "sj_div": "BS", "account_nm": "부채총계",
+   "thstrm_amount": "603,569,310,216", "thstrm_dt": "2026.03.31 현재"},
+  {"fs_div": "OFS", "sj_div": "BS", "account_nm": "자본총계",
+   "thstrm_amount": "711,040,909,382", "thstrm_dt": "2026.03.31 현재"},
+  {"fs_div": "OFS", "sj_div": "IS", "account_nm": "매출액",
+   "thstrm_amount": "37,238,582,035", "thstrm_dt": "2025.10.01 ~ 2026.03.31"},
+  {"fs_div": "OFS", "sj_div": "IS", "account_nm": "영업이익",
+   "thstrm_amount": "25,000,000,000", "thstrm_dt": "2025.10.01 ~ 2026.03.31"}
+ ]
+}

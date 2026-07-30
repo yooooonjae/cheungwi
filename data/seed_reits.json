@@ -1,6 +1,7 @@
 {
  "reits": {
   "0030R0": {
+   "holding": "indirect",
    "name": "대신밸류리츠",
    "office_assets": [
     {"building_id": "daishin-finance-center", "note": "대신파이낸스센터(대신343) 중구 삼일대로 343 — 자리츠(대신밸류리츠사모제1호) 지분 100%"}
@@ -9,6 +10,7 @@
    "source": "사업보고서(2026.02) 접수번호 20260507000565"
   },
   "293940": {
+   "holding": "mixed",
    "name": "신한알파리츠",
    "office_assets": [
     {"building_id": "platinum-tower", "note": "그레이츠 강남(구 BNK타워·플래티넘타워) 서초구 서초대로 398 — 2025-06 편입"},
@@ -25,6 +27,7 @@
    "source": "사업보고서(2026.03) 접수번호 20260528000669"
   },
   "334890": {
+   "holding": "indirect",
    "name": "이지스밸류리츠",
    "office_assets": [
     {"building_id": "twin-tree-tower", "note": "트윈트리타워 종로구 율곡로 6 — 이지스25호 펀드 수익증권 99.7%"},
@@ -34,6 +37,7 @@
    "source": "반기보고서(2026.05) 접수번호 20260715000520"
   },
   "338100": {
+   "holding": "indirect",
    "name": "NH프라임리츠",
    "office_assets": [
     {"building_id": "arc-place", "note": "아크플레이스 강남구 테헤란로 142 — 코람코가치투자제4의6호리츠 지분증권 150억"},
@@ -44,6 +48,7 @@
    "source": "반기보고서(2026.02) 접수번호 20260414002424"
   },
   "377190": {
+   "holding": "mixed",
    "name": "디앤디플랫폼리츠",
    "office_assets": [
     {"building_id": "susong-square", "note": "세미콜론수송(구 수송스퀘어) 종로구 율곡로2길 19 — 세미콜론수송리츠 지분증권 335억"},
@@ -53,6 +58,7 @@
    "source": "사업보고서(2026.03) 접수번호 20260602000529"
   },
   "395400": {
+   "holding": "mixed",
    "name": "SK리츠",
    "office_assets": [
     {"building_id": "sk-seorin", "note": "SK서린빌딩 종로구 종로 26 — SK㈜와 책임임대차"},
@@ -62,6 +68,7 @@
    "source": "사업보고서(2026.03) 접수번호 20260610000569"
   },
   "417310": {
+   "holding": "direct",
    "name": "코람코더원리츠",
    "office_assets": [
     {"building_id": "hana-securities-yeouido", "note": "하나증권빌딩(구 하나금융투자 사옥) 영등포구 의사당대로 82 — 직접 보유"}
@@ -70,6 +77,7 @@
    "source": "사업보고서(2026.02) 접수번호 20260521000683"
   },
   "432320": {
+   "holding": "indirect",
    "name": "KB스타리츠",
    "office_assets": [
     {"building_id": "signature-tower", "note": "시그니처타워 중구 청계천로 100 — KB스타멀티에셋제1호리츠, 연간 임대료 약 460억"},
@@ -80,6 +88,7 @@
    "source": "반기보고서(2026.04) 접수번호 20260615000262"
   },
   "448730": {
+   "holding": "direct",
    "name": "삼성FN리츠",
    "office_assets": [
     {"building_id": null, "note": "에프엔타워 대치 강남구 대치동 891(테헤란로 지구단위) 연면적 45,192㎡ — 직접 보유"},
@@ -89,6 +98,7 @@
    "source": "사업보고서(2026.04) 접수번호 20260716000794"
   },
   "451800": {
+   "holding": "direct",
    "name": "한화리츠",
    "office_assets": [
     {"building_id": "hanwha-building", "note": "한화빌딩(장교동 사옥) 중구 청계천로 86 연면적 74,375㎡ — 2024-08 편입"},
@@ -104,6 +114,7 @@
   "source": "금융감독원 DART 전자공시 원문(document.xml) — 리츠별 접수번호는 각 항목의 source 참조",
   "building_id_rule": "data/seed_buildings.json 55동에 있으면 그 id, 없으면 null + note에 건물명·소재지",
   "holding_form": "직접 보유·자리츠 지분증권·펀드 수익증권을 가리지 않고 실질 보유로 본다. 형태는 note에 적었다.",
+  "holding_field": "상장법인 **별도(OFS) 재무제표에 무엇이 잡히는가**로 가른다. direct=투자부동산을 직접 소유해 별도 손익에 임대료가 잡힌다, indirect=전 자산을 자리츠 지분·펀드 수익증권으로 보유해 별도 손익은 배당·이자 수익이다, mixed=둘이 섞여 있다. 임대수익 앵커의 가중치를 정하는 값이라 note의 산문이 아니라 이 필드를 봐야 한다.",
   "excluded": {
    "신한서부티엔디리츠(404990)": "광화문 G타워를 2024-03 편입해 CBD 오피스를 갖지만 나머지 4건이 호텔·리테일이라 오피스 앵커로는 신호가 흐려진다",
    "코람코라이프인프라리츠(357120)": "마제스타시티 타워1·DF타워는 우선주 소수지분 재간접이고 주력은 주유소·물류다",
