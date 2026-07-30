@@ -1,0 +1,73 @@
+{
+ "generated_at": "2026-07-30",
+ "data_cutoff": "2026-06",
+ "source_count": 6,
+ "sources": [
+  {
+   "key": "seed_buildings",
+   "dataset": "3대 권역 프라임 오피스 시드",
+   "institution": "직접 작성(공개 자료 대조)",
+   "source": "직접 작성(공개 자료 대조)",
+   "observed_through": "2026-07",
+   "collected_at": "2026-07-30",
+   "rows": 55,
+   "coverage": "55동(CBD 20 · GBD 21 · YBD 14) · 서울 5개 구 · 손으로 고른 표본이라 관측월은 시드 확정일이다",
+   "cache": "API 를 부르지 않는다. 사람이 고쳐 쓰는 단일 출처이고 다른 수집기가 이 지번을 기준으로 조회한다."
+  },
+  {
+   "key": "buildings",
+   "dataset": "건축물대장 표제부 + 좌표·용도지역·공시지가",
+   "institution": "국토교통부 건축HUB · VWorld",
+   "source": "국토부 건축물대장 표제부 + VWorld",
+   "observed_through": "2026-07",
+   "collected_at": "2026-07-30",
+   "rows": 55,
+   "coverage": "55동 · 대장 0/55, VWorld 55/55 · 좌표·용도지역·공시지가 병합 · 대장은 활용신청 승인 대기라 연면적·층수·준공년도가 비어 있다",
+   "cache": "재개형. 건물 단위로 캐시하되 조회 입력이 바뀌거나 반쪽 결과면 캐시를 쓰지 않는다 — 대장 권한이 열린 뒤 다시 돌리면 VWorld 는 재호출 없이 통과하고 대장만 채운다."
+  },
+  {
+   "key": "trades",
+   "dataset": "서울 5개 구 상업업무용 실거래",
+   "institution": "국토교통부 RTMS",
+   "source": "국토부 RTMS 상업업무용",
+   "observed_through": "2026-07",
+   "collected_at": "2026-07-30",
+   "rows": 14521,
+   "coverage": "서울 5개 구 · 업무용 매매 14,521건 · 2006-01~2026-07 · 셀 1,235/1,235 · 시드 매칭 4,523건(동 확정 734·후보 다수 3,789) · 지번만으로 붙였다(대장 미개통)",
+   "cache": "캐시 우선 + 진행 파일(trades_progress.json)로 중단 지점 재개. raw 캐시가 단일 진실이라 매 실행이 캐시 전체를 다시 읽어 산출을 새로 만든다."
+  },
+  {
+   "key": "rone_office",
+   "dataset": "상업용부동산 임대동향(오피스)",
+   "institution": "한국부동산원 R-ONE",
+   "source": "한국부동산원 R-ONE 상업용부동산 임대동향조사",
+   "observed_through": "2026-03",
+   "collected_at": "2026-07-30",
+   "rows": 3274,
+   "coverage": "4개 권역(3대 권역+서울) × 4계열(임대지수·임대료·공실률·수익률) 39분기 624점 + 하위 상권 23곳 2,650점 · 2016Q3~2026Q1 분기",
+   "cache": "표(STATBL_ID) 단위 캐시 우선이고 무효화가 없다 — 새 분기를 받으려면 data/raw/rone_office/ 를 지우고 다시 돌려야 한다."
+  },
+  {
+   "key": "reits",
+   "dataset": "오피스 보유 상장리츠 재무·배당",
+   "institution": "금융감독원 OpenDART",
+   "source": "OpenDART",
+   "observed_through": "2026-05",
+   "collected_at": "2026-07-30",
+   "rows": 200,
+   "coverage": "오피스 보유 상장리츠 10종(보유형태 직접 3·간접 4·혼합 3) · 재무 86행(매출액 68행)·배당 114행 · 2020~2026 정기보고서 · 시간축은 결산월이 갈려 재무상태표 기준일(basis)이다",
+   "cache": "성공 응답(status 000)만 캐시한다. '자료 없음'은 아직 제출 전일 수 있어 캐시하지 않고 다음 실행이 다시 부른다."
+  },
+  {
+   "key": "rates",
+   "dataset": "국고채 10년·CD 91일·기업대출 금리",
+   "institution": "한국은행 ECOS",
+   "source": "한국은행 ECOS",
+   "observed_through": "2026-06",
+   "collected_at": "2026-07-30",
+   "rows": 414,
+   "coverage": "국고채10년·CD91일·기업대출(신규) 3계열 · 계열당 138개월 · 2015-01~2026-06 월별",
+   "cache": "캐시가 있어도 매 실행 API 를 다시 부른다 — 월 시계열이라 최신 월이 계속 늘기 때문이다."
+  }
+ ]
+}
