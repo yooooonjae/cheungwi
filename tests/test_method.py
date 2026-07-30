@@ -54,6 +54,26 @@ def value(mod, fn, *args):
     return r["value"]
 
 
+def node_eval(body):
+    """러너로는 못 하는 것 하나 — 모듈을 부른 **뒤** 의존을 흔들어 보는 것.
+
+    파생인지 리터럴인지는 값을 바꿔 봐야 갈린다. 러너는 인자만 받으므로, 상수를
+    의존 모듈에서 읽어 오는 자리는 여기서 직접 node 를 띄워 확인한다.
+    """
+    if NODE is None:
+        raise RuntimeError("node 를 찾을 수 없다")
+    proc = subprocess.run(
+        [NODE, "-e", "const fs = require('fs');"
+         "const out = (s) => process.stdout.write(String(s));" + body],
+        cwd=str(ROOT), capture_output=True, text=True, timeout=60)
+    if proc.returncode != 0:
+        raise RuntimeError("node 실행 실패:\n" + proc.stderr)
+    return proc.stdout
+
+
+METHOD_SRC = (ROOT / "site" / "js" / "method.js").read_text(encoding="utf-8")
+
+
 MANIFEST = json.loads((ROOT / "data" / "DATA_MANIFEST.json").read_text(encoding="utf-8"))
 MARKET = json.loads((ROOT / "out" / "market.json").read_text(encoding="utf-8"))
 UNDERWRITING = json.loads((ROOT / "out" / "underwriting.json").read_text(encoding="utf-8"))
@@ -172,6 +192,35 @@ def test_the_building_adjustment_is_named_as_the_fourth_rung():
     assert "역세권" in steps[3]["note"] and "상관" in steps[3]["note"]
 
 
+def test_the_physical_gate_range_is_read_from_the_engine_not_typed_into_the_prose():
+    """게이트 경계를 지면이 따로 적으면, 경계를 옮기는 날 지면만 옛 범위를 말한다.
+
+    엔진은 `RENT_MIN_WON_M2_MO`·`RENT_MAX_WON_M2_MO` 를 "화면에 범위를 적을 때
+    여기서 읽는다"고 내보내 둔다. 그 용도대로 부르는지를, ① 파이썬 원본과 같은
+    범위가 문장에 있는지 ② 그 범위 문자열이 method.js 소스에 없는지 ③ 경계를
+    흔들면 문장이 따라 움직이는지 셋으로 붙든다.
+    """
+    from src.analysis.effective_rent import (RENT_MAX_WON_M2_MO,
+                                             RENT_MIN_WON_M2_MO)
+    span = "{:,.0f}~{:,.0f}원/㎡·월".format(RENT_MIN_WON_M2_MO, RENT_MAX_WON_M2_MO)
+    steps = value("method", "estimationSteps", MARKET, "도심")
+    assert span in steps[2]["note"], "물리 게이트 범위가 사다리에서 사라졌다"
+    assert span not in METHOD_SRC, "범위를 문장에 박아 두면 엔진과 갈라진다"
+
+    # 엔진 자체는 고치지 않는다 — 부른 뒤 내보낸 값만 덮어 문장을 흔든다.
+    moved = node_eval(
+        "const eng = require({eng});"
+        "eng.RENT_MIN_WON_M2_MO = 11111; eng.RENT_MAX_WON_M2_MO = 55555;"
+        "const m = require({met});"
+        "const mk = JSON.parse(fs.readFileSync({mkt}, 'utf8'));"
+        "out(m.estimationSteps(mk, '도심')[2].note);".format(
+            eng=json.dumps(str(ROOT / "site" / "js" / "engine.js")),
+            met=json.dumps(str(ROOT / "site" / "js" / "method.js")),
+            mkt=json.dumps(str(ROOT / "out" / "market.json"))))
+    assert "11,111~55,555원/㎡·월" in moved
+    assert span not in moved
+
+
 def test_an_unknown_region_is_an_input_error_not_a_silent_zero():
     r = js("method", "estimationSteps", MARKET, "판교")
     assert r["ok"] is False and r["error"] == "input", r
@@ -195,15 +244,43 @@ def test_only_fifty_seven_rows_reach_the_parcel_and_the_page_says_only():
     assert m["resolvedOnly"] == lad["resolved_only"]
     assert m["ambiguous"] == lad["ambiguous"]
     assert m["exact"] + m["resolvedOnly"] + m["ambiguous"] == m["total"] == lad["sum"]
-    joined = " ".join(value("method", "matchingLines", TRADES))
+    joined = " ".join(value("method", "matchingLines", TRADES, MANIFEST))
     assert "57" in joined and "필지" in joined
     assert "부분집합" in joined or "더하면" in joined, "겹침 계약이 사라졌다"
 
 
 def test_the_matching_lines_keep_the_canceled_rows_visible():
     """해제 2건 때문에 사다리의 57 과 산점의 55 가 다르다 — 그 차이를 적는다."""
-    joined = " ".join(value("method", "matchingLines", TRADES))
+    joined = " ".join(value("method", "matchingLines", TRADES, MANIFEST))
     assert "해제" in joined and "55" in joined
+
+
+def test_the_seed_size_in_the_matching_lines_follows_the_manifest():
+    """'시드 55동'은 지면의 상수가 아니라 원장이 센 수다.
+
+    시드가 늘어난 날 문장만 옛 목록을 가리키면, 그때 틀린 것은 데이터가 아니라
+    설명이다 — 그리고 설명이 틀린 것은 아무도 실행해서 알아채지 못한다.
+    """
+    seed = [s for s in MANIFEST["sources"] if s["key"] == "seed_buildings"][0]
+    joined = " ".join(value("method", "matchingLines", TRADES, MANIFEST))
+    assert "시드 %d동" % seed["rows"] in joined
+
+    grown = copy.deepcopy(MANIFEST)
+    for s in grown["sources"]:
+        if s["key"] == "seed_buildings":
+            s["rows"] = 41
+    moved = " ".join(value("method", "matchingLines", TRADES, grown))
+    assert "시드 41동" in moved
+    assert "시드 %d동" % seed["rows"] not in moved, "문장이 원장을 따라가지 않는다"
+
+
+def test_the_matching_lines_refuse_a_manifest_without_the_seed_source():
+    """시드 원천이 없으면 동수를 지어내지 않고 멈춘다."""
+    gone = copy.deepcopy(MANIFEST)
+    gone["sources"] = [s for s in gone["sources"] if s["key"] != "seed_buildings"]
+    gone["source_count"] = len(gone["sources"])
+    r = js("method", "matchingLines", TRADES, gone)
+    assert r["ok"] is False and r["error"] == "input", r
 
 
 # ================================================================== #
@@ -330,6 +407,44 @@ def test_the_title_block_dates_the_page_from_the_manifest():
     flat = " ".join(r[1] for r in rows)
     assert MANIFEST["data_cutoff"].replace("-", ".") in flat
     assert "6" in flat
+
+
+def test_the_title_block_ledger_cell_moves_when_the_ledger_opens():
+    """표제란의 「대장」 칸은 원장 행에서 세고 개통 여부로 문구가 갈린다.
+
+    "0/55 · 활용신청 승인 대기"를 글자로 박아 두면, 대장이 열려 승격이 시작된
+    날에도 표제란만 계속 기다린다.
+    """
+    cell = dict(value("method", "specRows", DATA))["대장"]
+    assert cell == "0/%d · 활용신청 승인 대기" % len(UNDERWRITING["buildings"])
+
+    opened = copy.deepcopy(DATA)
+    opened["underwriting"] = {
+        "summary": {"ledger_status": "합성"},
+        "buildings": [
+            {"pending_ledger": True, "pending_reason": "대장 대기"},
+            {"pending_ledger": False, "underwriting": {"noi": {}}},
+            {"pending_ledger": False, "underwriting": {"noi": {}}},
+            {"pending_ledger": False,
+             "underwriting_error": {"kind": "RuntimeError", "reason": "게이트"}}]}
+    moved = dict(value("method", "specRows", opened))["대장"]
+    assert moved.startswith("2/4"), moved
+    assert "활용신청 승인 대기" not in moved, "개통했는데도 지면이 계속 기다린다"
+    assert "대기 1동" in moved and "계산 정지 1동" in moved
+
+
+def test_a_missing_list_is_badged_with_a_dash_not_with_zero():
+    """없는 목록에 "0건" 배지를 달면 바로 아래 문단과 배지가 서로 다른 말을 한다."""
+    gone = copy.deepcopy(DATA)
+    del gone["underwriting"]["errors"]
+    html = value("method", "checkHtml", value("method", "checkModel", gone))
+    item = re.search(r'<li class="check is-missing">.*?</li>', html, re.S)
+    assert item, "없는 목록 갈래가 그려지지 않았다"
+    badge = re.search(r'<span class="check-n num">(.*?)</span>', item.group(0))
+    assert badge and badge.group(1) == "―", "채워지지 않은 자리를 0건으로 셌다"
+    assert "0건이 아니라" in item.group(0), "배지와 문단이 같은 말을 해야 한다"
+    assert '<span class="check-n num">0건</span>' in html, \
+        "비어 있는 목록은 그대로 0건이다"
 
 
 def test_the_page_refuses_when_its_own_arithmetic_and_the_data_disagree():

@@ -24,7 +24,10 @@
  * 다시 부른다 — 두 장이 서로 다른 그림으로 같은 사실을 말하기 시작하면 그중
  * 하나는 반드시 틀린다.
  *
- * 의존은 charts·hero(서식)·chapter1(사다리) 셋이고 로드 순서가 계약이다.
+ * 의존은 charts·hero(서식)·chapter1(사다리)·engine(물리 게이트 경계) 넷이고 로드
+ * 순서가 계약이다. 엔진은 계산하러 부르는 것이 아니라 **게이트 범위를 인용하러**
+ * 부른다 — 범위를 지면에 글자로 박아 두면 엔진이 경계를 옮기는 날 지면만 옛
+ * 범위를 말한다.
  */
 
 ;(function (root, factory) {
@@ -34,11 +37,12 @@
   var charts = isNode ? require("./charts.js") : scope.CheungwiCharts;
   var hero = isNode ? require("./hero.js") : scope.CheungwiHero;
   var ch1 = isNode ? require("./chapter1.js") : scope.CheungwiChapter1;
-  var api = factory(charts, hero, ch1);
+  var eng = isNode ? require("./engine.js") : scope.CheungwiEngine;
+  var api = factory(charts, hero, ch1, eng);
   if (isNode) module.exports = api;
   if (typeof window !== "undefined") window.CheungwiMethod = api;
   else if (root) root.CheungwiMethod = api;
-})(typeof globalThis !== "undefined" ? globalThis : this, function (charts, hero, ch1) {
+})(typeof globalThis !== "undefined" ? globalThis : this, function (charts, hero, ch1, eng) {
   "use strict";
 
   var esc = charts.esc;
@@ -180,6 +184,24 @@
   var KIND_OF = { 관측: "obs", 가정: "assume", 추정: "est" };
 
   /**
+   * 유효임대료 물리 게이트의 범위 문장.
+   *
+   * 두 경계는 엔진이 단일 출처로 들고 있고(`RENT_MIN_WON_M2_MO`·
+   * `RENT_MAX_WON_M2_MO`, 파이썬 `src/analysis/effective_rent.py` 의 미러),
+   * 엔진 스스로 "화면에 범위를 적을 때 여기서 읽는다"고 내보내 둔 값이다.
+   * 지면이 같은 수를 따로 적으면 경계를 옮기는 날 지면만 옛 범위를 말한다.
+   */
+  function gateRangeText() {
+    var lo = eng.RENT_MIN_WON_M2_MO;
+    var hi = eng.RENT_MAX_WON_M2_MO;
+    if (!(typeof lo === "number" && typeof hi === "number" && lo < hi)) {
+      throw new TypeError(
+        "엔진에서 임대료 게이트 경계를 읽지 못했다 — 범위를 지어낼 수 없다");
+    }
+    return F.won(lo) + "~" + F.won(hi) + "원/㎡·월";
+  }
+
+  /**
    * 유효임대료가 만들어지는 네 칸. 마지막 칸까지 **지면이 직접 계산**한다.
    *
    * 계산 결과가 `out/market.json` 의 값과 다르면 그림을 그리지 않고 멈춘다.
@@ -221,7 +243,7 @@
         unit: "원/㎡·월", text: F.won(computed) + " 원/㎡·월",
         note: "명목 × (12 − 렌트프리) ÷ 12. 보증금 운용수익은 여기에 넣지 " +
           "않았다 — 임대료와 시간 구조가 달라 현금흐름 쪽에서 따로 다룬다. " +
-          "결과는 10,000~60,000원/㎡·월 물리 게이트를 통과해야 한다.",
+          "결과는 " + gateRangeText() + " 물리 게이트를 통과해야 한다.",
         source: "", caveat: ""
       },
       {
@@ -278,11 +300,31 @@
     return ch1.ladderPlate(ch1.tradesModel(trades), opts);
   }
 
-  function matchingLines(trades) {
+  /**
+   * 시드가 몇 동인가. 원장의 `seed_buildings` 행 수가 단일 출처다.
+   *
+   * 매칭이 후보를 고르는 모집단이 곧 이 시드 목록이라, 이 수가 바뀌면 매칭
+   * 문장의 뜻도 바뀐다. 지면에 "55동"을 박아 두면 시드가 늘어난 날 문장만
+   * 옛 목록을 가리킨다 — 그때 틀린 것은 데이터가 아니라 설명이다.
+   */
+  function seedCount(manifest) {
+    var seed = manifestRows(manifest).filter(function (r) {
+      return r.key === "seed_buildings";
+    })[0];
+    if (!seed || !(seed.rows > 0)) {
+      throw new TypeError(
+        "원장에 시드 원천(seed_buildings)이 없다 — 시드 동수를 지어낼 수 없다");
+    }
+    return seed.rows;
+  }
+
+  function matchingLines(trades, manifest) {
     var m = matchingModel(trades);
+    var seed = seedCount(manifest);
     return [
       "필지까지 확정된 것은 " + m.exact + "행뿐이다. 나머지 " +
-        F.group(String(m.resolvedOnly)) + "행은 '시드 55동 목록 안에서 후보가 " +
+        F.group(String(m.resolvedOnly)) + "행은 '시드 " + seed +
+        "동 목록 안에서 후보가 " +
         "유일'할 뿐이고, 마스킹된 지번이라 같은 법정동의 비-시드 건물과 " +
         "구분되지 않는다 — 확정으로 읽으면 안 된다.",
       "exact 는 resolved 의 부분집합이라 원래 수를 그대로 더하면 매칭 " +
@@ -392,7 +434,10 @@
       return '<li class="check' + (c.empty && !c.missing ? " is-blank" : "") +
         (c.missing ? " is-missing" : "") + '">' +
         '<h4>' + esc(c.label) +
-        '<span class="check-n num">' + c.count + "건</span></h4>" +
+        // 없는 목록에 "0건" 배지를 달면 바로 아래 문단("0건이 아니라 채워지지
+        // 않은 자리")과 배지가 서로 다른 말을 한다. 셀 수 없는 자리는 줄표다.
+        '<span class="check-n num">' + (c.missing ? "―" : c.count + "건") +
+        "</span></h4>" +
         '<p class="check-of">' + esc(c.of) +
         '<span class="check-where">' + esc(c.where) + "</span></p>" +
         body +
@@ -473,6 +518,22 @@
   }
 
   // ── 표제란 ──────────────────────────────────────────────────────────────
+  /**
+   * 표제란의 대장 칸. 승격 수는 원장 행에서 세고, 문구는 개통 여부로 갈린다.
+   *
+   * "0/55 · 활용신청 승인 대기"를 글자로 박아 두면 대장이 열려 승격이 시작된
+   * 날에도 표제란만 계속 기다린다 — 그리고 그 어긋남은 아무도 못 본 채로
+   * 오래 산다. 한 동이라도 대기에서 벗어나면 개통으로 읽는다.
+   */
+  function ledgerSpecText(led) {
+    var head = led.underwritten + "/" + led.n;
+    if (led.pending >= led.n) return head + " · 활용신청 승인 대기";
+    var rest = [];
+    if (led.pending) rest.push("대기 " + led.pending + "동");
+    if (led.failed) rest.push("계산 정지 " + led.failed + "동");
+    return head + " 승격" + (rest.length ? " · " + rest.join(" · ") : "");
+  }
+
   function specRows(data) {
     var d = data || {};
     var man = d.manifest || {};
@@ -487,7 +548,7 @@
         observed[observed.length - 1]],
       ["원장 갱신", String(man.generated_at || "―")],
       ["매칭", "필지 확정 " + lad.exact + " / 매칭 " + F.group(String(lad.matched)) + "행"],
-      ["대장", "0/" + led.n + " · 활용신청 승인 대기"],
+      ["대장", ledgerSpecText(led)],
       ["계보", "수지 → 순환 → 시차 → 층위"]
     ];
   }
@@ -537,7 +598,7 @@
     put("method-manifest", manifestTable(data.manifest));
     put("method-manifest-lines", ul(manifestLines(data.manifest)));
     put("method-estimate", estimationHtml(data.market, "도심"));
-    put("method-matching-reading", ul(matchingLines(data.trades)));
+    put("method-matching-reading", ul(matchingLines(data.trades, data.manifest)));
     put("method-checks", checkHtml(checkModel(data)));
     put("method-ledger", ledgerHtml(ledgerModel(data.underwriting)));
     put("method-parked", parkedHtml());
