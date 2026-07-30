@@ -154,6 +154,18 @@ def test_waterline_below_zero_is_flagged_too():
     assert g["y"] == 100.0 and g["share"] == 0.0 and g["underflow"] is True
 
 
+def test_waterline_without_a_top_draws_from_zero_like_the_geometry_does():
+    """좌표는 y 없이도 나오는데 그림만 NaN 이면, 물은 조용히 사라진다."""
+    svg = value("charts", "waterline", 40.0,
+                {"x0": 0, "x1": 100, "height": 200, "total": 100})
+    assert "NaN" not in svg and "undefined" not in svg
+    assert 'data-part="water"' in svg
+    assert " L100 200 L0 200 Z" in svg, "기둥의 바닥은 y 기본값 0 + 높이 200 이다"
+    same = value("charts", "waterline", 40.0,
+                 {"x0": 0, "x1": 100, "y": 0, "height": 200, "total": 100})
+    assert svg == same, "y 를 생략한 그림과 0 을 준 그림은 같아야 한다"
+
+
 # ------------------------------------------------------------------ #
 # SVG 조각 — 외부 의존 0, 문자열만 낸다
 # ------------------------------------------------------------------ #
@@ -307,6 +319,99 @@ def test_hero_reading_puts_every_drawn_number_into_words():
     assert "50.6" in joined            # 선순위 = 수면
     assert "45.0" in joined            # 지분
     assert "Debt Yield" in joined      # 묶는 제약
+
+
+def test_the_mezzanine_is_marked_as_an_assumption_in_words_not_only_in_hatching():
+    """해칭은 낭독기에 들리지 않고 좁은 판형에서는 부속 라벨이 통째로 빠진다.
+
+    그러니 "메자닌 자리는 관측이 아니다"라는 말은 폭과 사용자를 가리지 않고
+    남는 두 곳 — 판독 글줄과 aria — 에 글자로 있어야 한다.
+    """
+    m = value("hero", "regionModel", market(), underwriting(), "도심")
+    caveat = "메자닌 자리는 관측이 아니라 LTV 한도까지 남은 자리라는 가정이다."
+
+    second = value("hero", "readingLines", m)[1]
+    assert "메자닌 자리 4.4(가정)" in second
+    assert caveat in second
+
+    for compact in (False, True):
+        svg = value("hero", "render", m, {"compact": compact})
+        aria = svg.split('aria-label="')[1].split('"')[0]
+        assert "메자닌 자리(가정)" in aria
+        assert caveat in aria
+
+
+# ------------------------------------------------------------------ #
+# 라벨의 실렌더 크기 — viewBox 안의 px 는 화면 px 이 아니다
+# ------------------------------------------------------------------ #
+def rendered_min(plate_px, compact):
+    """이 폭에서 가장 작은 라벨이 화면에 몇 px 로 찍히는지."""
+    layout = value("hero", "layoutOf", {"compact": compact})
+    k = value("hero", "plateLabelScale", plate_px, {"compact": compact})
+    return layout["minLabel"] * k * plate_px / layout["w"]
+
+
+def test_squeezed_wide_plate_lifts_its_labels_to_the_nine_px_floor():
+    """768 뷰포트 실측: 도면 실폭 662px · 배율 0.752 — 계수 없이는 7.15px 이었다."""
+    assert value("hero", "plateLabelScale", 662, {"compact": False}) == \
+        pytest.approx(1.2597, abs=1e-3)
+    assert rendered_min(662, False) == pytest.approx(9.0, abs=0.02)
+    assert 662 / 880 * 9.5 == pytest.approx(7.15, abs=0.02), "고치기 전의 크기"
+
+
+def test_compact_plate_at_a_phone_width_also_reaches_nine_px():
+    """390 뷰포트 실측: 도면 실폭 308px · 배율 0.716 — 계수 없이는 8.60px 이었다."""
+    assert rendered_min(308, True) == pytest.approx(9.0, abs=0.02)
+    assert 308 / 430 * 12 == pytest.approx(8.60, abs=0.02), "고치기 전의 크기"
+    # 375px 화면(도면 293px)도 흔하다 — 여기서도 하한이 지켜져야 한다.
+    assert rendered_min(293, True) >= 9 - 1e-6
+
+
+def test_a_wide_screen_does_not_shrink_the_drawing_that_was_approved():
+    """1440 뷰포트(실폭 1134px)는 이미 14px 이다 — 계수는 1 이고 조형은 그대로."""
+    assert value("hero", "plateLabelScale", 1134, {"compact": False}) == 1
+    assert value("hero", "plateLabelScale", 900, {"compact": True}) == 1
+
+
+def test_no_viewport_leaves_a_label_under_nine_px():
+    """실제로 나올 수 있는 모든 폭에서 하한이 지켜지는지 훑는다.
+
+    좁은 판형은 362px 화면(도면 280px)부터, 넓은 판형은 760px 화면(654px)부터다.
+    그보다 좁은 화면은 아래 테스트가 따로 붙든다 — 거기서는 하한이 아니라
+    "라벨이 잘리지 않는다"가 규칙이다.
+    """
+    for px in range(281, 480, 6):
+        assert rendered_min(px, True) >= 9 - 1e-6, "좁은 판형 %dpx" % px
+    for px in range(540, 1200, 20):
+        assert rendered_min(px, False) >= 9 - 1e-6, "넓은 판형 %dpx" % px
+
+
+def test_the_factor_stops_before_a_label_gets_cut_off():
+    """작은 글자보다 **잘린** 글자가 나쁘다 — 320px 화면에서는 계수가 멈춘다.
+
+    좁은 판형에서 가장 긴 라벨 '메자닌 자리 4.4' 는 실측 74.2 단위이고 자리는
+    430 − 342 = 88 단위다. 계수 1.186 부터 잘리기 시작하므로 천장은 그 아래다.
+    """
+    layout = value("hero", "layoutOf", {"compact": True})
+    longest = 74.2
+    room = layout["w"] - layout["labelX"]
+    assert layout["kMax"] * longest < room, "천장까지 키워도 판형 안에 있어야 한다"
+    assert value("hero", "plateLabelScale", 238, {"compact": True}) == layout["kMax"]
+    # 390px 화면(도면 308px)이 필요로 하는 계수는 천장 아래다 — 하한이 지켜진다.
+    assert value("hero", "plateLabelScale", 308, {"compact": True}) < layout["kMax"]
+
+
+def test_the_rate_chart_labels_get_the_same_floor():
+    """금리 도면의 기준선 이름은 10px 선언이라 768 에서 8.67px 이었다."""
+    k = value("hero", "ratesLabelScale", 728, False)
+    assert 10 * k * 728 / 840 == pytest.approx(9.0, abs=0.02)
+    assert value("hero", "ratesLabelScale", 840, False) == 1
+
+
+def test_label_scale_of_an_unlaid_out_plate_is_one_not_infinity():
+    """폭이 0 인 순간(그리기 전·숨은 탭)에 1/0 을 계수로 쓰면 글자가 사라진다."""
+    for bad in (0, -10, "__nan__"):
+        assert value("hero", "plateLabelScale", bad, {"compact": False}) == 1
 
 
 def test_rate_series_for_the_gauge_are_twelve_months():

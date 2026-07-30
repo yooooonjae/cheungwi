@@ -220,6 +220,8 @@
   }
 
   // ── 판형 ────────────────────────────────────────────────────────────────
+  // minLabel 은 이 판형에서 **가장 작은** 라벨의 선언 크기다(hero.css 와 짝).
+  // wide 는 .lab-sub 9.5px, compact 는 한 크기로 맞춘 12px 이다.
   var LAYOUT = {
     wide: {
       w: 880, h: 512, topY: 78, groundY: 456,
@@ -227,7 +229,7 @@
       spine: { x: 442, floorTicks: [0, 5, 10, 15, 20], valueTicks: [0, 25, 50, 75, 100] },
       column: { x: 566, width: 118 },
       labelX: 698, waterLabelX: 74, ground: { x0: 40, x1: 856, depth: 17 },
-      annotY: 494, headY: 60, verbose: true, font: 1
+      annotY: 494, headY: 60, verbose: true, font: 1, minLabel: 9.5, kMax: 1.6
     },
     compact: {
       w: 430, h: 430, topY: 58, groundY: 372,
@@ -235,7 +237,7 @@
       spine: { x: 214, floorTicks: [0, 10, 20], valueTicks: [0, 50, 100] },
       column: { x: 268, width: 64 },
       labelX: 342, waterLabelX: 0, ground: { x0: 14, x1: 416, depth: 12 },
-      annotY: 0, headY: 42, verbose: false, font: 1
+      annotY: 0, headY: 42, verbose: false, font: 1, minLabel: 12, kMax: 1.15
     }
   };
 
@@ -245,6 +247,47 @@
 
   function viewBoxWidth(opts) {
     return layoutOf(opts).w;
+  }
+
+  // ── 라벨은 판형이 아니라 화면에서 읽힌다 ────────────────────────────────
+  /**
+   * viewBox 안의 글자 크기는 **선언값이 아니라 배율의 결과**다.
+   *
+   * `width:100%` 로 놓인 도면은 실폭 ÷ viewBox 폭 만큼 통째로 커지거나 작아진다.
+   * 880 폭 판형이 662px(768 뷰포트)에 들어가면 배율이 0.752 라 9.5px 로 선언한
+   * 부속 라벨이 화면에서는 7.1px 로 찍힌다 — 판형은 멀쩡한데 글자만 못 읽는다.
+   * 판형을 셋으로 늘리는 대신 **배율의 역수를 글자에 되돌려준다**: 실렌더가
+   * 9px 아래로 내려가지 않을 만큼만 선언값을 키우는 계수 하나(`--fig-k`)를
+   * CSS 로 넘기고, 모든 라벨의 font-size 가 그 계수를 곱한다(hero.css).
+   *
+   * 줄이지는 않는다(k ≥ 1). 넓은 화면에서 도면이 커지면 글자도 함께 커지는
+   * 것이 원래 조형이고, 그쪽은 읽기에 문제가 없다.
+   *
+   * 계수에는 천장이 있다. 글자를 키우면 라벨이 판형 밖으로 밀려 **잘리기**
+   * 때문이다 — 작은 글자보다 잘린 글자가 나쁘다. 좁은 판형에서 가장 긴 라벨
+   * ("메자닌 자리 4.4")은 실측 74.2 단위이고 자리는 430 − 342 = 88 단위라
+   * 1.186 에서 잘리기 시작한다. 그래서 천장을 1.15 로 둔다(활자 대체 폭이
+   * 조금 달라져도 견딜 3% 여유). 그 천장 아래에서 하한 9px 은 폭 362px 까지
+   * 지켜지고(390px 화면이 쓰는 계수는 1.0471 이다), 그보다 좁으면 라벨은 더
+   * 크지 않는다 — 대신 그 수치들은 그림 밑 판독 글줄이 본문 크기로 싣는다.
+   */
+  var MIN_LABEL_PX = 9;
+  var K_MAX = 1.6;
+
+  function labelScale(renderedWidthPx, viewBoxW, minDeclaredPx, kMax) {
+    if (typeof renderedWidthPx !== "number" || !isFinite(renderedWidthPx) ||
+        renderedWidthPx <= 0) {
+      return 1;   // 아직 레이아웃이 없는 순간(display:none 등)은 손대지 않는다
+    }
+    var scale = renderedWidthPx / viewBoxW;
+    var k = MIN_LABEL_PX / (minDeclaredPx * scale);
+    // 자를 때는 올린다 — 내림으로 다듬으면 하한이 8.9997px 이 되어 규칙이 깨진다.
+    return Math.min(kMax || K_MAX, Math.max(1, Math.ceil(k * 1e4) / 1e4));
+  }
+
+  function plateLabelScale(renderedWidthPx, opts) {
+    var L = layoutOf(opts);
+    return labelScale(renderedWidthPx, L.w, L.minLabel, L.kMax);
   }
 
   // ── 해칭·정의 ───────────────────────────────────────────────────────────
@@ -416,12 +459,18 @@
   }
 
   // ── 한 장 ───────────────────────────────────────────────────────────────
+  // 메자닌이 가정이라는 사실을 그림은 해칭으로 말한다. 해칭은 낭독기에 들리지
+  // 않고 좁은 판형에서는 부속 라벨도 덜어 내므로, 그 한 문장은 **폭과 무관하게**
+  // 남는 두 곳 — 낭독용 aria 와 그림 밑 판독 글줄 — 에 글자로 박아 둔다.
+  var MEZZ_CAVEAT =
+    "메자닌 자리는 관측이 아니라 LTV 한도까지 남은 자리라는 가정이다.";
+
   function ariaOf(m) {
     return m.name + " 권역 단면 — " + m.tower.cells + "칸 중 " + m.tower.dark +
       "칸이 꺼져 있고(공실률 " + pctp(m.vacancyPct) + "), 가치 100 위에 선순위 " +
-      fx(m.stack.senior) + " · 메자닌 자리 " + fx(m.stack.mezzRoom) + " · 지분 " +
-      fx(m.stack.equity) + " 가 쌓여 부채의 수면이 " + fx(m.stack.waterline) +
-      " 에 그어진다.";
+      fx(m.stack.senior) + " · 메자닌 자리(가정) " + fx(m.stack.mezzRoom) +
+      " · 지분 " + fx(m.stack.equity) + " 가 쌓여 부채의 수면이 " +
+      fx(m.stack.waterline) + " 에 그어진다. " + MEZZ_CAVEAT;
   }
 
   function render(m, opts) {
@@ -481,7 +530,7 @@
         m.tower.perFloor + "칸 = " + m.tower.cells + "칸 가운데 " + m.tower.dark +
         "칸이 꺼져 있다. 공실률 " + pctp(m.vacancyPct) + " (R-ONE " + m.quarter + ").",
       "가치 100 기준 — 선순위 " + fx(s.senior) + " · 메자닌 자리 " +
-        fx(s.mezzRoom) + " · 지분 " + fx(s.equity) + ".",
+        fx(s.mezzRoom) + "(가정) · 지분 " + fx(s.equity) + ". " + MEZZ_CAVEAT,
       "부채의 수면은 " + fx(s.waterline) + " — " + m.tower.floors + "층 중 " +
         fx(m.tower.submergedFloors) + "층 높이다.",
       "묶는 제약은 " + BINDING_LABEL[s.binding] + " " +
@@ -551,6 +600,13 @@
     wide: { width: 840, height: 300, margin: { t: 18, r: 126, b: 28, l: 44 } },
     compact: { width: 380, height: 300, margin: { t: 16, r: 74, b: 24, l: 34 } }
   };
+  // 금리 도면에서 가장 작은 라벨은 기준선 이름(.chart .lab-rule 10px)이다.
+  var RATE_MIN_LABEL = 10;
+
+  function ratesLabelScale(renderedWidthPx, compact) {
+    var plate = compact ? RATE_PLATE.compact : RATE_PLATE.wide;
+    return labelScale(renderedWidthPx, plate.width, RATE_MIN_LABEL);
+  }
 
   function ratesPanel(market, models, compact) {
     var series = rateSeries(market);
@@ -653,6 +709,21 @@
       return !(wide && wide.matches);
     }
 
+    // 그려 놓고 나서 실폭을 재어 라벨 계수를 돌려준다 — 화면에서 9px 아래로
+    // 내려가는 글자가 없도록. 폭을 읽는 곳은 여기 한 곳뿐이다.
+    function fitLabels() {
+      var svg = plate.querySelector("svg.plate-svg");
+      if (svg) {
+        svg.style.setProperty("--fig-k", String(plateLabelScale(
+          svg.getBoundingClientRect().width, { compact: isCompact() })));
+      }
+      var chart = gaugeEl && gaugeEl.querySelector(".rates-plot .chart");
+      if (chart) {
+        chart.style.setProperty("--fig-k", String(ratesLabelScale(
+          chart.getBoundingClientRect().width, isCompact())));
+      }
+    }
+
     function paintPlate() {
       var m = byName[active];
       plate.innerHTML = render(m, { compact: isCompact() });
@@ -662,11 +733,13 @@
           return "<li>" + esc(s) + "</li>";
         }).join("");
       }
+      fitLabels();
     }
 
     function paintGauge() {
       if (!gaugeEl) return;
       gaugeEl.innerHTML = renderGauge(market, uw, manifest, models, isCompact());
+      fitLabels();
     }
 
     function select(name) {
@@ -694,6 +767,17 @@
     if (wide && wide.addEventListener) {
       // 판형이 바뀌면 라벨 밀도가 달라진다 — 줄여서 읽히지 않게 다시 그린다.
       wide.addEventListener("change", function () { paintPlate(); paintGauge(); });
+    }
+    if (typeof window !== "undefined" && window.addEventListener) {
+      // 폭이 달라지면 배율이 달라진다. 다시 그리지는 않는다 — 계수만 고쳐 준다.
+      var pending = false;
+      window.addEventListener("resize", function () {
+        if (pending) return;
+        pending = true;
+        var raf = window.requestAnimationFrame ||
+          function (fn) { return setTimeout(fn, 16); };
+        raf(function () { pending = false; fitLabels(); });
+      });
     }
 
     paintTabs();
@@ -738,6 +822,12 @@
     gaugeCard: gaugeCard,
     renderGauge: renderGauge,
     viewBoxWidth: viewBoxWidth,
+    layoutOf: layoutOf,
+    labelScale: labelScale,
+    plateLabelScale: plateLabelScale,
+    ratesLabelScale: ratesLabelScale,
+    MIN_LABEL_PX: MIN_LABEL_PX,
+    K_MAX: K_MAX,
     mount: mount,
     LAYOUT: LAYOUT
   };

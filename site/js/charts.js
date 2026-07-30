@@ -256,7 +256,10 @@
     opts = opts || {};
     var g = waterlineGeom(level, opts);
     var x0 = fin(opts.x0, "수면의 왼쪽"), x1 = fin(opts.x1, "수면의 오른쪽");
-    var bottom = r4(opts.y + opts.height);
+    // y 의 기본값은 `waterlineGeom` 과 같은 0 이다. 여기서만 엄격하면 같은 opts 로
+    // 좌표는 나오는데 그림은 NaN path 가 되어 물이 조용히 사라진다.
+    var boxY = opts.y === undefined ? 0 : opts.y;
+    var bottom = r4(boxY + opts.height);
     var amp = opts.amplitude === undefined ? 2.2 : opts.amplitude;
     var waves = Math.max(2, opts.waves || 8);
     var step = (x1 - x0) / waves;

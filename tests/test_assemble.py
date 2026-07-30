@@ -10,6 +10,7 @@ SITE 를 임시 사이트로 갈아 끼운다.
 """
 
 import json
+import re
 import shutil
 import subprocess
 import types
@@ -246,6 +247,20 @@ def test_hero_css_ships_and_keeps_both_themes(sandbox):
     assert "--win-lit" in css and "--win-off" in css
     assert css.count("--win-lit:") >= 4, "창의 불빛도 네 벌(기본·미디어·수동 2종)이다"
     assert "prefers-color-scheme" in css and '[data-theme="dark"]' in css
+
+
+def test_every_in_figure_label_size_goes_through_the_scale_factor(sandbox):
+    """도면 라벨의 font-size 는 hero.js 가 넘기는 `--fig-k` 를 곱해야 한다.
+
+    한 줄이라도 맨 px 로 남으면 그 라벨만 좁은 화면에서 8px 로 찍힌다 — 눈으로는
+    "작네" 로 지나가고 검사는 통과하는, 가장 오래 사는 종류의 결함이다.
+    """
+    css = (sandbox.build_dist() / "css" / "hero.css").read_text(encoding="utf-8")
+    labels = re.findall(r"\.(?:lab|is-compact \.lab|chart \.lab)[\w-]*[^{}]*"
+                        r"\{[^{}]*font-size:([^;}]+)", css)
+    assert len(labels) >= 10, "라벨 규칙이 이만큼은 있어야 한다: %d" % len(labels)
+    for size in labels:
+        assert "--fig-k" in size, "계수를 안 거치는 라벨 크기가 있다: %s" % size.strip()
 
 
 # ------------------------------------------------------------------ #

@@ -192,17 +192,35 @@
 .hatch-mezz { stroke: var(--mezz); stroke-width: .8; }
 
 /* 도면 글자 */
+/* viewBox 안의 px 는 화면 px 이 아니다 — 도면이 실폭 ÷ viewBox 폭 만큼 통째로
+   커지거나 작아지므로 선언 11px 이 768 화면에서는 8.3px 으로 찍힌다. 그 배율의
+   역수를 hero.js 가 `--fig-k` 로 넘겨 주고(실렌더 9px 하한), 모든 라벨이 그
+   계수를 곱한다. 계수가 없을 때(스크립트 이전·검사 도구)의 기본은 1 이다. */
 .plate-svg text { font-family: var(--font-body); fill: var(--ink-2); }
-.lab { font-size: 11px; }
-.lab-num { font-family: var(--font-num); font-size: 10.5px; fill: var(--ink-3); }
-.lab-unit { font-size: 10px; letter-spacing: .1em; fill: var(--ink-3); }
-.lab-head { font-size: 11.5px; letter-spacing: .1em; fill: var(--ink-3); }
-.lab-stratum { font-size: 12px; fill: var(--ink); }
-.lab-sub { font-size: 9.5px; fill: var(--ink-3); }
-.lab-foot { font-size: 10.5px; fill: var(--ink-3); }
-.lab-water { fill: var(--waterline); font-size: 10.5px; }
-.is-compact .lab { font-size: 12px; }
-.is-compact .lab-num { font-size: 11px; }
+.lab { font-size: calc(11px * var(--fig-k, 1)); }
+.lab-num {
+  font-family: var(--font-num);
+  font-size: calc(10.5px * var(--fig-k, 1));
+  fill: var(--ink-3);
+}
+.lab-unit {
+  font-size: calc(10px * var(--fig-k, 1));
+  letter-spacing: .1em;
+  fill: var(--ink-3);
+}
+.lab-head {
+  font-size: calc(11.5px * var(--fig-k, 1));
+  letter-spacing: .1em;
+  fill: var(--ink-3);
+}
+.lab-stratum { font-size: calc(12px * var(--fig-k, 1)); fill: var(--ink); }
+.lab-sub { font-size: calc(9.5px * var(--fig-k, 1)); fill: var(--ink-3); }
+.lab-foot { font-size: calc(10.5px * var(--fig-k, 1)); fill: var(--ink-3); }
+.lab-water { fill: var(--waterline); font-size: calc(10.5px * var(--fig-k, 1)); }
+/* 좁은 판형의 글자는 한 크기다. 눈금 숫자만 11px 로 두면 그 한 종류 때문에
+   계수가 커지고, 계수가 커지면 가장 긴 라벨이 판형 밖으로 밀려 잘린다. */
+.is-compact .lab { font-size: calc(12px * var(--fig-k, 1)); }
+.is-compact .lab-num { font-size: calc(12px * var(--fig-k, 1)); }
 
 /* ---------- 그림을 글로 ---------- */
 .hero-reading {
@@ -395,8 +413,8 @@
 .chart .series { fill: none; stroke-width: 2; stroke-linejoin: round; }
 .chart .series-end { stroke: none; }
 .chart .rule { stroke: var(--ink-3); stroke-width: 1; stroke-dasharray: 4 4; opacity: .8; }
-.chart .lab-rule { font-size: 10px; fill: var(--ink-3); }
-.chart .lab-series { font-size: 11px; }
+.chart .lab-rule { font-size: calc(10px * var(--fig-k, 1)); fill: var(--ink-3); }
+.chart .lab-series { font-size: calc(11px * var(--fig-k, 1)); }
 .s-treasury { stroke: var(--ink); fill: var(--ink); }
 .s-cd { stroke: var(--waterline); fill: var(--waterline); }
 .s-loan { stroke: var(--stratum-3); fill: var(--stratum-3); }
