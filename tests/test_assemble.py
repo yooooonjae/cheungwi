@@ -143,6 +143,37 @@ def test_failed_build_leaves_previous_web_intact(sandbox, monkeypatch):
     assert sorted(p.name for p in (web / "data").glob("*.js")) != [], "기존 산출도 그대로다"
 
 
+@pytest.mark.parametrize("boom", [OSError, KeyboardInterrupt])
+def test_swap_failure_restores_previous_web(sandbox, monkeypatch, boom):
+    """스왑 한복판에서 끊겨도 web/ 이 빈자리로 남지 않는다.
+
+    직전 산출을 옆으로 밀어 둔 뒤 새것을 제자리에 넣기 전에 실패하는 구간이 이
+    빌드에서 web/ 이 사라질 수 있는 유일한 창이다. rename 두 번 중 두 번째만
+    터뜨려 그 창을 정확히 겨눈다. KeyboardInterrupt 까지 보는 이유는, 사람이
+    Ctrl-C 를 누른 시점이 하필 그 창일 때도 사이트는 남아 있어야 하기 때문이다.
+    """
+    web = sandbox.build_dist()
+    (web / "index.html").write_text("SENTINEL", encoding="utf-8")
+
+    real_rename = Path.rename
+    calls = []
+
+    def rename(self, target):
+        calls.append((self.name, Path(target).name))
+        if len(calls) == 2:  # ① web→web.old ② web.tmp→web ③ 복원 web.old→web
+            raise boom("고의 실패: 스왑 중단")
+        return real_rename(self, target)
+
+    monkeypatch.setattr(Path, "rename", rename)
+    with pytest.raises(boom, match="스왑 중단"):
+        sandbox.build_dist()
+
+    assert calls[1] == ("web.tmp", "web"), "두 번째 rename 이 스왑이어야 겨냥이 맞다"
+    assert len(calls) == 3 and calls[2] == ("web.old", "web"), "복원 rename 이 돌아야 한다"
+    assert (web / "index.html").read_text(encoding="utf-8") == "SENTINEL"
+    assert not web.with_name("web.old").exists(), "밀어 둔 자리는 비어 있어야 한다"
+
+
 # ------------------------------------------------------------------ #
 # 선언과 실재 — 상수에 적힌 파일이 없으면 시끄럽게 멈춘다
 # ------------------------------------------------------------------ #

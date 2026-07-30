@@ -211,7 +211,10 @@ def build_dist() -> Path:
         WEB.rename(old)
     try:
         TMP.rename(WEB)
-    except OSError:  # 새것을 못 넣었으면 밀어 둔 직전 산출을 제자리로 되돌린다
+    except BaseException:
+        # 새것을 못 넣었으면 밀어 둔 직전 산출을 제자리로 되돌린다. OSError 만 잡으면
+        # 두 rename 사이에 Ctrl-C 가 들어왔을 때 web/ 이 사라진 채로 끝난다 —
+        # 여기서 걸러야 할 것은 예외의 종류가 아니라 "web/ 이 빈자리로 남는 상태"다.
         if retired and not WEB.exists():
             old.rename(WEB)
         raise
