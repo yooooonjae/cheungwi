@@ -1,0 +1,227 @@
+"""사이트 빌드(site/ → web/) 검사 — 산출·게이트·원자성.
+
+빌드는 저장소 루트의 web/ 을 통째로 갈아 끼우는 부작용이 있다. 그래서 테스트는
+모듈 상수 WEB·TMP 를 임시 디렉터리로 갈아 끼우고 돌린다. 반면 데이터 원천
+(out/*.json · data/DATA_MANIFEST.json)은 실물을 그대로 읽힌다 — 빌드가 실제
+산출을 싣는지가 검사 대상이기 때문에 가짜 JSON 으로 바꾸면 검사가 헛돈다.
+
+게이트 검사(미치환 플레이스홀더·조사 분리)만은 고의로 망가뜨린 템플릿이 필요해
+SITE 를 임시 사이트로 갈아 끼운다.
+"""
+
+import json
+import shutil
+import subprocess
+import types
+from pathlib import Path
+
+import pytest
+
+from src.build import assemble
+
+ROOT = Path(__file__).resolve().parents[1]
+PREFIX = "window.__DATA_MARKET = "
+
+
+@pytest.fixture
+def sandbox(tmp_path, monkeypatch):
+    """산출 경로만 임시 디렉터리로 옮긴 assemble 모듈."""
+    monkeypatch.setattr(assemble, "WEB", tmp_path / "web")
+    monkeypatch.setattr(assemble, "TMP", tmp_path / "web.tmp")
+    return assemble
+
+
+def _fake_site(tmp_path, body, js=None):
+    """고의로 망가뜨릴 수 있는 최소 사이트 소스. CSS 는 실물을 복사한다."""
+    site = tmp_path / "site"
+    (site / "css").mkdir(parents=True)
+    (site / "static").mkdir()
+    (site / "js").mkdir()
+    for name in assemble.CSS_FILES:
+        shutil.copy(ROOT / "site" / "css" / name, site / "css" / name)
+    for name, src in (js or {}).items():
+        (site / "js" / name).write_text(src, encoding="utf-8")
+    (site / "index.template.html").write_text(
+        '<!DOCTYPE html>\n<html lang="ko">\n<head>\n<meta charset="utf-8">\n'
+        "{{ROBOTS}}\n{{CSS_LINKS}}\n</head>\n<body>\n"
+        + body
+        + "\n{{DATA_SCRIPTS}}\n{{JS_SCRIPTS}}\n</body>\n</html>\n",
+        encoding="utf-8",
+    )
+    return site
+
+
+# ------------------------------------------------------------------ #
+# (a) 산출 — index.html + 데이터 5종 + CSS + static 평면 복사
+# ------------------------------------------------------------------ #
+def test_dist_produces_index_and_five_data_files(sandbox):
+    web = sandbox.build_dist()
+    assert (web / "index.html").is_file()
+    assert sorted(p.name for p in (web / "data").glob("*.js")) == [
+        "manifest.js", "market.js", "pf.js", "trades.js", "underwriting.js"]
+    for name in sandbox.CSS_FILES:
+        assert (web / "css" / name).is_file()
+    assert (web / "_headers").is_file(), "static/ 은 web/ 루트로 평면 복사돼야 한다"
+
+
+def test_index_links_every_declared_asset(sandbox):
+    html = (sandbox.build_dist() / "index.html").read_text(encoding="utf-8")
+    for name in sandbox.CSS_FILES:
+        assert 'href="css/%s"' % name in html
+    for name, _ in sandbox.DATA_MAP.values():
+        assert 'src="data/%s.js"' % name in html
+    assert "noindex" in html, "기본은 색인 차단이다"
+
+
+# ------------------------------------------------------------------ #
+# (d) window.__DATA_* 접두 정확성
+# ------------------------------------------------------------------ #
+def test_data_wrapper_prefix_is_exact(sandbox):
+    web = sandbox.build_dist()
+    src = (web / "data" / "market.js").read_text(encoding="utf-8")
+    assert src.startswith(PREFIX)
+    assert src.endswith(";\n")
+    payload = json.loads(src[len(PREFIX):-2])
+    assert "regions" in payload and "rates" in payload
+
+
+def test_every_key_wraps_its_own_file(sandbox):
+    web = sandbox.build_dist()
+    for key, (name, path) in sandbox.DATA_MAP.items():
+        src = (web / "data" / ("%s.js" % name)).read_text(encoding="utf-8")
+        head = "window.__%s = " % key
+        assert src.startswith(head)
+        assert json.loads(src[len(head):-2]) == json.loads(path.read_text(encoding="utf-8"))
+
+
+def test_data_is_escaped_for_script_context(sandbox):
+    """<·>·U+2028 은 JSON 유니코드 이스케이프로 굽는다(문법 동등, 삽입 안전)."""
+    src = (sandbox.build_dist() / "data" / "manifest.js").read_text(encoding="utf-8")
+    assert "<" not in src and ">" not in src
+    assert "\u2028" not in src and "\u2029" not in src
+
+
+# ------------------------------------------------------------------ #
+# (b) 미치환 플레이스홀더 게이트
+# ------------------------------------------------------------------ #
+def test_unreplaced_placeholder_fails(sandbox, tmp_path, monkeypatch):
+    monkeypatch.setattr(sandbox, "SITE", _fake_site(tmp_path, "<p>{{UNKNOWN_TOKEN}}</p>"))
+    with pytest.raises(RuntimeError, match="미치환"):
+        sandbox.build_dist()
+
+
+# ------------------------------------------------------------------ #
+# (c) 한국어 조사 분리 게이트
+# ------------------------------------------------------------------ #
+def test_josa_separation_fails(sandbox, tmp_path, monkeypatch):
+    body = "<p><strong>유효임대료</strong>\n가 국고채를 밑돈다.</p>"
+    monkeypatch.setattr(sandbox, "SITE", _fake_site(tmp_path, body))
+    with pytest.raises(RuntimeError, match="조사 분리"):
+        sandbox.build_dist()
+
+
+def test_josa_attached_passes(sandbox, tmp_path, monkeypatch):
+    body = "<p><strong>유효임대료</strong>가 국고채를 밑돈다.</p>"
+    monkeypatch.setattr(sandbox, "SITE", _fake_site(tmp_path, body))
+    assert (sandbox.build_dist() / "index.html").is_file()
+
+
+# ------------------------------------------------------------------ #
+# (e) 원자 스왑 — 실패한 빌드는 기존 web/ 을 건드리지 않는다
+# ------------------------------------------------------------------ #
+def test_failed_build_leaves_previous_web_intact(sandbox, monkeypatch):
+    web = sandbox.build_dist()
+    (web / "index.html").write_text("SENTINEL", encoding="utf-8")
+
+    def boom(_path):
+        raise RuntimeError("고의 실패")
+
+    monkeypatch.setattr(sandbox, "_minify_json", boom)  # 데이터 굽기 = 스왑 직전 단계
+    with pytest.raises(RuntimeError, match="고의 실패"):
+        sandbox.build_dist()
+    assert (web / "index.html").read_text(encoding="utf-8") == "SENTINEL"
+    assert sorted(p.name for p in (web / "data").glob("*.js")) != [], "기존 산출도 그대로다"
+
+
+# ------------------------------------------------------------------ #
+# 선언과 실재 — 상수에 적힌 파일이 없으면 시끄럽게 멈춘다
+# ------------------------------------------------------------------ #
+def test_declared_css_must_exist(sandbox, monkeypatch):
+    monkeypatch.setattr(sandbox, "CSS_FILES", list(sandbox.CSS_FILES) + ["없는파일.css"])
+    with pytest.raises(FileNotFoundError, match="없는파일"):
+        sandbox.build_dist()
+
+
+def test_declared_data_must_exist(sandbox, monkeypatch):
+    bogus = dict(sandbox.DATA_MAP)
+    bogus["DATA_NOWHERE"] = ("nowhere", ROOT / "out" / "nowhere.json")
+    monkeypatch.setattr(sandbox, "DATA_MAP", bogus)
+    with pytest.raises(FileNotFoundError, match="nowhere.json"):
+        sandbox.build_dist()
+
+
+# ------------------------------------------------------------------ #
+# 토큰 — 라이트·다크 두 벌, 수동 토글이 시스템 설정을 이긴다
+# ------------------------------------------------------------------ #
+def test_tokens_define_both_themes():
+    css = (ROOT / "site" / "css" / "tokens.css").read_text(encoding="utf-8")
+    for token in ("--paper", "--ink", "--stratum-1", "--stratum-2", "--stratum-3",
+                  "--senior", "--mezz", "--equity", "--waterline", "--alert"):
+        assert css.count(token + ":") >= 4, "%s 는 네 벌(기본·미디어·수동 2종) 다 있어야 한다" % token
+    assert "#f7f5f1" in css and "#14120f" in css      # 낮의 종이 · 밤의 종이
+    assert "#3d6b8e" in css and "#4f9bb8" in css      # 수면 · 야간 수면
+    # 수동 토글이 미디어쿼리 뒤에 와야 양방향으로 이긴다
+    assert css.index('[data-theme="dark"]') > css.index("prefers-color-scheme")
+    assert '[data-theme="light"]' in css
+
+
+def test_minified_css_keeps_theme_switches(sandbox):
+    css = (sandbox.build_dist() / "css" / "tokens.css").read_text(encoding="utf-8")
+    assert "prefers-color-scheme" in css
+    assert '[data-theme="dark"]' in css and '[data-theme="light"]' in css
+    assert "/*" not in css, "주석은 압축에서 빠진다"
+
+
+# ------------------------------------------------------------------ #
+# terser — 압축 실패는 침묵하지 않는다
+# ------------------------------------------------------------------ #
+def _terser_stub(returncode, stdout, stderr=""):
+    real = subprocess.run
+
+    def run(cmd, *a, **kw):
+        if cmd and cmd[0] == "npx":
+            return types.SimpleNamespace(returncode=returncode, stdout=stdout, stderr=stderr)
+        return real(cmd, *a, **kw)
+
+    return run
+
+
+def test_terser_failure_stops_the_build(sandbox, tmp_path, monkeypatch):
+    site = _fake_site(tmp_path, "<p>본문</p>", js={"app.js": "console.log(1)\n"})
+    monkeypatch.setattr(sandbox, "SITE", site)
+    monkeypatch.setattr(sandbox, "JS_FILES", ["app.js"])
+    monkeypatch.setattr(sandbox.subprocess, "run", _terser_stub(1, "", "구문 오류"))
+    with pytest.raises(RuntimeError, match="terser"):
+        sandbox.build_dist()
+
+
+def test_terser_output_is_written(sandbox, tmp_path, monkeypatch):
+    site = _fake_site(tmp_path, "<p>본문</p>", js={"app.js": "console.log(1)\n"})
+    monkeypatch.setattr(sandbox, "SITE", site)
+    monkeypatch.setattr(sandbox, "JS_FILES", ["app.js"])
+    monkeypatch.setattr(sandbox.subprocess, "run", _terser_stub(0, "console.log(1);"))
+    web = sandbox.build_dist()
+    assert (web / "js" / "app.js").read_text(encoding="utf-8") == "console.log(1);"
+    assert '<script defer src="js/app.js"></script>' in \
+        (web / "index.html").read_text(encoding="utf-8")
+
+
+# ------------------------------------------------------------------ #
+# 멱등 — 같은 날 두 번 구우면 같은 바이트
+# ------------------------------------------------------------------ #
+def test_build_is_idempotent(sandbox):
+    first = {p.relative_to(sandbox.WEB): p.read_bytes()
+             for p in sandbox.build_dist().rglob("*") if p.is_file()}
+    second = {p.relative_to(sandbox.WEB): p.read_bytes()
+              for p in sandbox.build_dist().rglob("*") if p.is_file()}
+    assert first == second

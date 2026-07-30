@@ -1,10 +1,10 @@
 # 「층위(層位)」 — 서울 오피스 언더라이팅 리서치
-# 표준 워크플로: make setup → collect → manifest → analyze → test
+# 표준 워크플로: make setup → collect → manifest → analyze → build → test
 # venv 가 있으면 그 파이썬을, 없으면 시스템 python3 를 사용한다.
 
 PY := $(shell if [ -x venv/bin/python ]; then echo venv/bin/python; else echo python3; fi)
 .DEFAULT_GOAL := help
-.PHONY: help setup collect manifest analyze test
+.PHONY: help setup collect manifest analyze build serve test
 
 help: ## 타깃 목록
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-12s %s\n", $$1, $$2}'
@@ -16,5 +16,9 @@ manifest: ## 데이터 원장 갱신
 	$(PY) src/build/manifest.py
 analyze: ## 엔진을 실데이터에 적용해 out/*.json 4종 생성 (멱등·원자적)
 	$(PY) -m src.analysis.build_out
+build: ## site/ 를 web/ 정적 산출로 굽는다 (원자적 — 실패하면 기존 web/ 그대로)
+	$(PY) src/build/assemble.py
+serve: ## web/ 을 로컬에서 서빙한다 (기본 8768, 봇 차단·noindex)
+	$(PY) serve.py
 test: ## pytest
 	$(PY) -m pytest tests/ -q

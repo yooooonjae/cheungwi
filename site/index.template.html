@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<script>/* 테마 선택 복원 — 첫 페인트 전에 끝나야 화면이 번쩍이지 않는다 */try{var t=localStorage.getItem("cheungwi-theme");if(t==="dark"||t==="light")document.documentElement.dataset.theme=t}catch(e){}</script>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="서울 3대 권역 프라임 오피스 55동을 공공 원천에서 수집해, 유효임대료에서 NOI·자산가치·Equity IRR·차환 가능성까지 한 줄기로 잇는 개인 연구.">
+{{ROBOTS}}
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="층위(層位)">
+<meta property="og:url" content="https://cheungwi.pages.dev/">
+<meta property="og:title" content="층위(層位) — 서울 오피스의 공간·자본·시간">
+<meta property="og:description" content="임대의 층이 쌓이고, 부채의 물이 차오른다 — 서울 프라임 오피스 55동의 언더라이팅.">
+<title>층위(層位) — 서울 오피스의 공간·자본·시간</title>
+{{CSS_LINKS}}
+</head>
+<body>
+<a class="skip-link" href="#main">본문으로 건너뛰기</a>
+
+<nav class="appbar" aria-label="장 이동">
+  <a class="brand" href="#prologue"><span class="seal" aria-hidden="true">層位</span>층위</a>
+  <div class="tabs">
+    <a href="#prologue">서장</a>
+    <a href="#ch1">Ⅰ 공간</a>
+    <a href="#ch2">Ⅱ 자본</a>
+    <a href="#ch3">Ⅲ 시간</a>
+    <a href="#method">방법론</a>
+  </div>
+  <button class="theme-toggle" type="button" aria-label="밝은 화면과 어두운 화면을 전환한다">☀</button>
+</nav>
+
+<main class="wrap" id="main">
+
+<!-- ============ 서장: 타워의 단면 ============ -->
+<section class="chapter" id="prologue" aria-labelledby="prologue-h">
+  <span class="chapter-mark">서장</span>
+  <h1 class="chapter-title" id="prologue-h">층위</h1>
+  <p class="chapter-lede">임대의 층이 쌓이고, 부채의 물이 차오른다.</p>
+  <div class="chapter-slot">타워 단면 히어로와 세 권역 계기판이 이 자리에 온다.</div>
+</section>
+
+<!-- ============ Ⅰ장: 공간의 층위 ============ -->
+<section class="chapter" id="ch1" aria-labelledby="ch1-h">
+  <span class="chapter-mark">제일장</span>
+  <h2 class="chapter-title" id="ch1-h">공간의 층위</h2>
+  <p class="chapter-lede">층이 쌓여 면적이 되고, 면적이 임대료를 만난 자리에서 NOI가 생긴다.</p>
+  <div class="chapter-slot">시드 오피스 카드 그리드와 실거래 산점이 이 자리에 온다.</div>
+</section>
+
+<!-- ============ Ⅱ장: 자본의 층위 ============ -->
+<section class="chapter" id="ch2" aria-labelledby="ch2-h">
+  <span class="chapter-mark">제이장</span>
+  <h2 class="chapter-title" id="ch2-h">자본의 층위</h2>
+  <p class="chapter-lede">선순위·메자닌·에쿼티가 같은 높이로 쌓이고, 그 어딘가에 부채의 수면이 그어진다.</p>
+  <div class="chapter-slot">단면 계측기와 금리·공실·Exit Cap 슬라이더가 이 자리에 온다.</div>
+</section>
+
+<!-- ============ Ⅲ장: 시간의 층위 ============ -->
+<section class="chapter" id="ch3" aria-labelledby="ch3-h">
+  <span class="chapter-mark">제삼장</span>
+  <h2 class="chapter-title" id="ch3-h">시간의 층위</h2>
+  <p class="chapter-lede">토지와 공사와 이자가 달마다 퇴적되는 동안, 사업은 서기도 하고 서지 못하기도 한다.</p>
+  <div class="chapter-slot">개발 PF 현금흐름 단면과 스트레스 표, 실험실이 이 자리에 온다.</div>
+</section>
+
+<!-- ============ 방법론 ============ -->
+<section class="chapter" id="method" aria-labelledby="method-h">
+  <span class="chapter-mark">방법론</span>
+  <h2 class="chapter-title" id="method-h">잘 맞는 척하지 않는다</h2>
+  <p class="chapter-lede">어디까지가 관측이고 어디부터가 추정인지, 무엇이 아직 비어 있는지를 먼저 적는다.</p>
+  <div class="chapter-slot">데이터 원장과 추정 방법·매칭 한계·게이트 위반이 이 자리에 온다.</div>
+</section>
+
+</main>
+
+<footer class="colophon">
+  <p class="stamp">{{BUILD_STAMP}}</p>
+  <p>데이터 기준월 {{DATA_CUTOFF}} · 빌드 {{BUILT_AT}} · 서울 3대 권역 프라임 오피스 개인 연구</p>
+</footer>
+
+<script>/* 테마 토글 — 뷰어의 선택이 시스템 설정을 이긴다 */
+(function () {
+  var btn = document.querySelector(".theme-toggle");
+  if (!btn) return;
+  function current() {
+    return document.documentElement.dataset.theme ||
+      (matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light");
+  }
+  function paint() { btn.textContent = current() === "dark" ? "☾" : "☀"; }
+  btn.addEventListener("click", function () {
+    var next = current() === "dark" ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem("cheungwi-theme", next); } catch (e) {}
+    paint();
+  });
+  paint();
+})();
+</script>
+{{DATA_SCRIPTS}}
+{{JS_SCRIPTS}}
+</body>
+</html>

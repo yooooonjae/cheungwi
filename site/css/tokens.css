@@ -1,0 +1,153 @@
+/* ============================================================
+   「층위(層位)」 디자인 토큰 — 지층 단면의 색
+
+   낮은 발굴 현장의 종이다. 밤은 그 종이를 뒤집은 것이 아니라 조명을 켠
+   야간 단면이다 — 배경이 흙처럼 어두워지고 수면만 형광으로 남는다.
+
+   색은 세 갈래로만 쓴다.
+     지층(stratum) — 퇴적된 물리 층위. 배경·격자·중립 면.
+     자본(senior·mezz·equity) — 자본 스택. 이 세 색은 다른 뜻으로 재사용하지 않는다.
+     수면(waterline) — 부채의 물. 오르내리는 단 하나의 선.
+   경고(alert)는 음수 스프레드처럼 "밑돈다"는 사실에만 쓴다.
+   ============================================================ */
+:root {
+  /* 지면 */
+  --paper: #f7f5f1;
+  --surface: #fffdf9;
+  --surface-2: #efebe3;
+  --ink: #1c1a17;
+  --ink-2: #4a453d;
+  --ink-3: #6f6759;
+  --hairline: #ddd6c9;
+  --hairline-2: #c6bcaa;
+
+  /* 지층 3계조 — 퇴적암 */
+  --stratum-1: #d8cfc0;
+  --stratum-2: #b5a68e;
+  --stratum-3: #8d7b60;
+
+  /* 자본 스택 */
+  --senior: #2f4858;
+  --mezz: #6f89a3;
+  --equity: #c98a4b;
+
+  /* 수면 — 부채의 물 */
+  --waterline: #3d6b8e;
+  --waterline-wash: #dce8f1;
+
+  /* 의미색 — 계열색으로 돌려쓰지 않는다 */
+  --alert: #b3442e;
+  --alert-wash: #f6e2dd;
+  --pos: #3f6b4a;
+
+  /* 타이포 — 전부 시스템 폰트다. 웹폰트를 부르지 않는다(외부 요청 0) */
+  --font-title: "Noto Serif KR", "AppleMyungjo", "Nanum Myeongjo", Georgia, "Times New Roman", serif;
+  --font-body: "Apple SD Gothic Neo", "Pretendard", "Noto Sans KR", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --font-num: "SF Mono", "Menlo", "Consolas", monospace;
+
+  /* 타입 스케일 (1.25 단계) */
+  --t-hero: clamp(40px, 7vw, 76px);
+  --t-h1: clamp(28px, 4vw, 42px);
+  --t-h2: 25px;
+  --t-h3: 19px;
+  --t-body: 16px;
+  --t-small: 14px;
+  --t-caption: 12.5px;
+  --lh-body: 1.75;
+
+  /* 간격 리듬 */
+  --sp-1: 6px;
+  --sp-2: 12px;
+  --sp-3: 20px;
+  --sp-4: 32px;
+  --sp-5: 52px;
+  --sp-6: 84px;
+  --sp-7: 136px;
+
+  /* 구조 — 시리즈 공통 셸 1240 */
+  --col-read: 1240px;
+  --col-text: 760px;
+  --radius: 10px;
+  --radius-sm: 6px;
+  --shadow-1: 0 1px 2px rgba(40, 34, 24, .05), 0 3px 8px rgba(40, 34, 24, .05);
+  --shadow-2: 0 1px 2px rgba(40, 34, 24, .06), 0 6px 18px rgba(40, 34, 24, .07);
+  --shadow: 0 1px 2px rgba(40, 34, 24, .06), 0 10px 32px rgba(40, 34, 24, .08), 0 28px 72px rgba(40, 34, 24, .05);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --paper: #14120f;
+    --surface: #1c1915;
+    --surface-2: #26221c;
+    --ink: #e8e2d6;
+    --ink-2: #b8b0a1;
+    --ink-3: #8a8272;
+    --hairline: #322c24;
+    --hairline-2: #4a4235;
+    --stratum-1: #332d24;
+    --stratum-2: #4a4133;
+    --stratum-3: #6b5c44;
+    --senior: #4a6b80;
+    --mezz: #8aa6c0;
+    --equity: #e0a463;
+    --waterline: #4f9bb8;
+    --waterline-wash: #1a2a33;
+    --alert: #e0705a;
+    --alert-wash: #33201b;
+    --pos: #6fa87d;
+    --shadow-1: 0 1px 2px rgba(0, 0, 0, .32), 0 3px 8px rgba(0, 0, 0, .26);
+    --shadow-2: 0 1px 2px rgba(0, 0, 0, .36), 0 6px 18px rgba(0, 0, 0, .34);
+    --shadow: 0 1px 2px rgba(0, 0, 0, .34), 0 10px 32px rgba(0, 0, 0, .36), 0 28px 72px rgba(0, 0, 0, .28);
+  }
+}
+
+/* 뷰어의 선택은 시스템 설정을 양방향으로 이긴다 — 그래서 미디어쿼리 뒤에 온다 */
+:root[data-theme="dark"] {
+  --paper: #14120f;
+  --surface: #1c1915;
+  --surface-2: #26221c;
+  --ink: #e8e2d6;
+  --ink-2: #b8b0a1;
+  --ink-3: #8a8272;
+  --hairline: #322c24;
+  --hairline-2: #4a4235;
+  --stratum-1: #332d24;
+  --stratum-2: #4a4133;
+  --stratum-3: #6b5c44;
+  --senior: #4a6b80;
+  --mezz: #8aa6c0;
+  --equity: #e0a463;
+  --waterline: #4f9bb8;
+  --waterline-wash: #1a2a33;
+  --alert: #e0705a;
+  --alert-wash: #33201b;
+  --pos: #6fa87d;
+  --shadow-1: 0 1px 2px rgba(0, 0, 0, .32), 0 3px 8px rgba(0, 0, 0, .26);
+  --shadow-2: 0 1px 2px rgba(0, 0, 0, .36), 0 6px 18px rgba(0, 0, 0, .34);
+  --shadow: 0 1px 2px rgba(0, 0, 0, .34), 0 10px 32px rgba(0, 0, 0, .36), 0 28px 72px rgba(0, 0, 0, .28);
+}
+
+:root[data-theme="light"] {
+  --paper: #f7f5f1;
+  --surface: #fffdf9;
+  --surface-2: #efebe3;
+  --ink: #1c1a17;
+  --ink-2: #4a453d;
+  --ink-3: #6f6759;
+  --hairline: #ddd6c9;
+  --hairline-2: #c6bcaa;
+  --stratum-1: #d8cfc0;
+  --stratum-2: #b5a68e;
+  --stratum-3: #8d7b60;
+  --senior: #2f4858;
+  --mezz: #6f89a3;
+  --equity: #c98a4b;
+  --waterline: #3d6b8e;
+  --waterline-wash: #dce8f1;
+  --alert: #b3442e;
+  --alert-wash: #f6e2dd;
+  --pos: #3f6b4a;
+  --shadow-1: 0 1px 2px rgba(40, 34, 24, .05), 0 3px 8px rgba(40, 34, 24, .05);
+  --shadow-2: 0 1px 2px rgba(40, 34, 24, .06), 0 6px 18px rgba(40, 34, 24, .07);
+  --shadow: 0 1px 2px rgba(40, 34, 24, .06), 0 10px 32px rgba(40, 34, 24, .08), 0 28px 72px rgba(40, 34, 24, .05);
+}
