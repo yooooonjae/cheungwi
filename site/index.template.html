@@ -77,7 +77,45 @@
   <span class="chapter-mark">제일장</span>
   <h2 class="chapter-title" id="ch1-h">공간의 층위</h2>
   <p class="chapter-lede">층이 쌓여 면적이 되고, 면적이 임대료를 만난 자리에서 NOI가 생긴다.</p>
-  <div class="chapter-slot">시드 오피스 카드 그리드와 실거래 산점이 이 자리에 온다.</div>
+
+  <div class="ch-head">
+    <h3 id="ch1-ledger-h">원장 쉰다섯 동</h3>
+    <p class="stamp">데이터 기준월 {{DATA_CUTOFF}}</p>
+  </div>
+  <p class="ch-note">건축물대장이 아직 열리지 않아 연면적과 사용승인일을 모른다. 빈 자리를 권역 평균으로 메우는 대신 카드마다 <b>대장 개통 대기</b> 도장을 찍었다 — 추정과 부재를 같은 색으로 칠하면 대장이 없다는 사실이 산출물에서 사라진다. 활용신청이 승인되는 날, 같은 카드가 연면적·층수·NOI·추정가치를 달고 다시 그려진다.</p>
+
+  <div class="ledger-bar">
+    <div class="r-tabs" id="ch1-filter" role="tablist" aria-label="권역으로 원장을 거른다"></div>
+    <p class="ledger-count" id="ch1-count"></p>
+  </div>
+  <div class="card-grid" id="ch1-cards" role="tabpanel" tabindex="0">
+    <p class="plate-wait">원장은 브라우저에서 그린다. 자바스크립트가 꺼져 있으면 이 자리는 빈다.</p>
+  </div>
+  <ul class="ch-reading is-two" id="ch1-ledger-reading"></ul>
+
+  <div class="ch-head">
+    <h3 id="ch1-trades-h">거래가 남긴 자리</h3>
+    <p class="stamp">국토부 실거래 200601~202607</p>
+  </div>
+  <figure class="ch-fig-wrap" aria-labelledby="ch1-trades-h">
+    <figcaption class="ch-figcap">실선은 권역 표본의 연도 중위 평당가이고, 속 빈 원은 필지까지 확정되어 <b>건물에 붙는</b> 거래 한 건 한 건이다. 선과 원은 같은 축 위에 있지만 같은 것을 재지 않는다 — 앞은 시군구 표본의 중위값이고 뒤는 개별 계약이다.</figcaption>
+    <div class="plot-host" id="ch1-trades-plot"></div>
+    <ul class="trades-legend">
+      <li class="reg-cbd"><span class="swatch"></span>도심</li>
+      <li class="reg-gbd"><span class="swatch"></span>강남</li>
+      <li class="reg-ybd"><span class="swatch"></span>여의도마포</li>
+      <li><span class="ring"></span>건물에 귀속된 거래</li>
+    </ul>
+    <ul class="ch-reading" id="ch1-trades-reading"></ul>
+  </figure>
+
+  <div class="ladder">
+    <div class="ladder-host" id="ch1-ladder-plate"></div>
+    <div>
+      <h3 class="ch-figcap"><b>어느 거래가 어느 건물의 것인가</b></h3>
+      <ul class="ch-reading" id="ch1-ladder-reading"></ul>
+    </div>
+  </div>
 </section>
 
 <!-- ============ Ⅱ장: 자본의 층위 ============ -->
@@ -85,7 +123,37 @@
   <span class="chapter-mark">제이장</span>
   <h2 class="chapter-title" id="ch2-h">자본의 층위</h2>
   <p class="chapter-lede">선순위·메자닌·에쿼티가 같은 높이로 쌓이고, 그 어딘가에 부채의 수면이 그어진다.</p>
-  <div class="chapter-slot">단면 계측기와 금리·공실·Exit Cap 슬라이더가 이 자리에 온다.</div>
+  <p class="ch-note">서장의 단면이 여기서 계측기가 된다. 공실 손잡이를 당기면 창이 꺼지고, NOI가 내려가고, 가치가 내려가고, 취득 시점에 정해진 대출 위로 수면이 차오른다. <b>대출은 움직이지 않는다</b> — 손잡이마다 다시 빌린다고 보면 대출이 늘 조건에 맞춰 줄어들어 지분은 영영 잠기지 않기 때문이다. 현실의 순서는 반대다.</p>
+
+  <div class="r-tabs" id="ch2-subject" role="tablist" aria-label="계측 대상을 고른다"></div>
+
+  <div class="rig">
+    <div class="rig-main">
+      <figure class="rig-plate">
+        <div id="ch2-plate">
+          <p class="plate-wait">계측기는 브라우저에서 돈다. 자바스크립트가 꺼져 있으면 이 자리는 빈다.</p>
+        </div>
+        <figcaption>
+          <ul class="ch-reading" id="ch2-reading"></ul>
+        </figcaption>
+      </figure>
+      <div id="ch2-banners"></div>
+    </div>
+    <div class="rig-side">
+      <div class="rig-knobs">
+        <h4>조작</h4>
+        <div id="ch2-knobs"></div>
+        <button type="button" class="rig-reset" id="ch2-reset">기준으로 되돌린다</button>
+      </div>
+      <div class="rig-readings">
+        <h4>판독값</h4>
+        <div id="ch2-readings"></div>
+      </div>
+    </div>
+  </div>
+
+  <p class="rig-live" id="ch2-live" role="status" aria-live="polite"></p>
+  <dl class="titleblock" id="ch2-spec"></dl>
 </section>
 
 <!-- ============ Ⅲ장: 시간의 층위 ============ -->

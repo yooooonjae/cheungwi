@@ -22,6 +22,8 @@ const path = require("path");
 const MODULES = {
   charts: require(path.join(__dirname, "..", "site", "js", "charts.js")),
   hero: require(path.join(__dirname, "..", "site", "js", "hero.js")),
+  chapter1: require(path.join(__dirname, "..", "site", "js", "chapter1.js")),
+  chapter2: require(path.join(__dirname, "..", "site", "js", "chapter2.js")),
 };
 
 function kindOf(err) {

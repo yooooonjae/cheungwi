@@ -297,10 +297,16 @@
    * 색을 속성으로 박지 않고 CSS 로 넘긴다(`hero.css` 의 `.hatch-* line`) —
    * 다크 모드에서 다시 그리지 않아도 색이 따라온다.
    */
-  function defs() {
+  /**
+   * `prefix` 는 한 문서에 판이 둘 이상 실릴 때를 위한 것이다. 같은 id 를 두 번
+   * 정의하면 `url(#...)` 은 먼저 나온 쪽으로만 붙고 문서는 중복 id 를 갖는다 —
+   * Ⅱ장의 계측기가 같은 해칭을 쓰면서 자기 이름표를 달 수 있게 한다.
+   */
+  function defs(prefix) {
+    var p = prefix || "";
     function hatch(id, size, cls) {
       return tag("pattern", {
-        id: id, width: size, height: size,
+        id: p + id, width: size, height: size,
         patternUnits: "userSpaceOnUse", patternTransform: "rotate(45)"
       }, tag("line", { x1: 0, y1: 0, x2: 0, y2: size, class: cls }));
     }
@@ -450,11 +456,12 @@
   }
 
   // ── 지반 ────────────────────────────────────────────────────────────────
-  function groundPart(L) {
+  function groundPart(L, prefix) {
     var G = L.ground;
     return tag("g", { class: "ground-g" },
       tag("rect", { x: G.x0, y: L.groundY, width: G.x1 - G.x0, height: G.depth,
-                    fill: "url(#cw-hatch-ground)", class: "ground-hatch" }) +
+                    fill: "url(#" + (prefix || "") + "cw-hatch-ground)",
+                    class: "ground-hatch" }) +
       tag("line", { x1: G.x0, x2: G.x1, y1: L.groundY, y2: L.groundY, class: "ground" }));
   }
 
@@ -829,6 +836,15 @@
     MIN_LABEL_PX: MIN_LABEL_PX,
     K_MAX: K_MAX,
     mount: mount,
-    LAYOUT: LAYOUT
+    LAYOUT: LAYOUT,
+    // 판의 부속 — Ⅱ장의 계측기가 같은 타워·지반·해칭을 빌려 쓴다. 서장이 판형의
+    // 원본이고 뒤 장이 그것을 계측기로 바꾼다는 말을, 코드가 같은 모양으로 한다.
+    WIDE_QUERY: WIDE_QUERY,
+    // 서식도 한 벌이어야 한다 — 천단위 구분이나 소수 자릿수가 장마다 갈리면
+    // 같은 수가 화면 두 곳에서 다른 얼굴로 나온다.
+    fmt: { group: group, won: won, fx: fx, pct: pct, pctp: pctp, bp: bp, ymDot: ymDot },
+    defs: defs,
+    towerPart: towerPart,
+    groundPart: groundPart
   };
 });

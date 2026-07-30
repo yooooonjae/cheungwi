@@ -1,0 +1,603 @@
+/* ============================================================
+   「층위(層位)」 Ⅰ장·Ⅱ장 — 원장의 카드와 자본의 계측기
+
+   서장과 같은 종이 위에 있다. 판형의 은유는 그대로 **단면도**이고, 색은 전부
+   tokens.css 가 준다. 이 파일이 새로 만드는 색은 없다 — 창의 불빛 두 가지만
+   hero.css 와 같은 값으로 다시 선언한다(계측기는 `.hero` 밖에 서기 때문이다).
+
+   ── 도면 활자 높이는 하나다 ──
+   장의 인-피겨 라벨은 크기가 한 종류다(넓은 판 11px · 좁은 판 12px). 제도 규범이
+   한 도면에 한 활자 높이를 쓰는 것과 같고, 실무적으로는 `--fig-k` 의 하한 계산이
+   정확해진다 — 최소 선언값이 유일해지기 때문이다. 위계는 크기가 아니라 색과
+   자간이 맡는다.
+   ============================================================ */
+
+/* ---------- 인-피겨 활자 ---------- */
+/* viewBox 안의 px 는 화면 px 이 아니다. 배율의 역수 `--fig-k` 를 각 장의 mount 가
+   실측해 넘기고(실렌더 9px 하한), 모든 라벨이 그 계수를 곱한다. 규칙이 둘뿐인
+   것은 이 장의 활자 높이가 하나이기 때문이다. */
+.ch-fig text { font-family: var(--font-body); fill: var(--ink-2); }
+.ch-fig text { font-size: calc(11px * var(--fig-k, 1)); }
+.ch-fig.is-compact text { font-size: calc(12px * var(--fig-k, 1)); }
+.ch-fig .lab-num { font-family: var(--font-num); fill: var(--ink-3); }
+.ch-fig .grid { stroke: var(--hairline); stroke-width: 1; }
+
+.ch-head {
+  display: flex;
+  align-items: baseline;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  margin-top: var(--sp-6);
+  padding-bottom: var(--sp-2);
+  border-bottom: 2px solid var(--ink);
+}
+.ch-head h3 { font-family: var(--font-title); font-size: var(--t-h2); margin: 0; }
+.ch-head .stamp {
+  margin: 0;
+  font-family: var(--font-num);
+  font-size: var(--t-caption);
+  color: var(--ink-3);
+}
+.ch-note {
+  margin: var(--sp-3) 0 0;
+  max-width: var(--col-text);
+  font-size: var(--t-small);
+  line-height: 1.7;
+  color: var(--ink-2);
+}
+.fail {
+  padding: var(--sp-3);
+  border: 1px dashed var(--alert);
+  color: var(--alert);
+  font-size: var(--t-small);
+}
+
+/* 그림을 글로 — 서장의 판독 글줄과 같은 규약이다 */
+.ch-reading {
+  margin: var(--sp-3) 0 0;
+  padding: 0;
+  list-style: none;
+  border-top: 1px solid var(--hairline);
+}
+.ch-reading li {
+  break-inside: avoid;
+  padding: var(--sp-2) 0 0;
+  font-size: var(--t-small);
+  line-height: 1.6;
+  color: var(--ink-2);
+  text-indent: -14px;
+  padding-left: 14px;
+}
+.ch-reading li::before { content: "―"; color: var(--stratum-3); padding-right: 4px; }
+.ch-reading.is-two { columns: 2; column-gap: var(--sp-5); column-rule: 1px solid var(--hairline); }
+
+/* ============================================================
+   Ⅰ장 — 원장 55동
+   카드 한 장은 도면 시트의 표제란 한 칸을 축소한 것이다. 쉰다섯 장이 같은
+   도장을 달고 늘어선 반복 자체가 이 장의 논증이다.
+   ============================================================ */
+.ledger-bar {
+  display: flex;
+  align-items: center;
+  gap: var(--sp-3);
+  flex-wrap: wrap;
+  margin-top: var(--sp-4);
+}
+.ledger-bar .r-tabs { flex: 1; margin-top: 0; }
+.ledger-bar .r-n {
+  font-family: var(--font-num);
+  font-size: var(--t-caption);
+  color: var(--ink-3);
+  padding-left: 3px;
+}
+.r-tab.on .r-n { color: var(--ink-2); }
+.ledger-count {
+  font-family: var(--font-num);
+  font-size: var(--t-caption);
+  color: var(--ink-3);
+  white-space: nowrap;
+}
+
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(230px, 1fr));
+  gap: 1px;
+  margin-top: var(--sp-3);
+  background: var(--hairline);
+  border: 1px solid var(--hairline-2);
+}
+.b-card {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  min-height: 178px;
+  padding: var(--sp-3) var(--sp-3) var(--sp-2);
+  background: var(--surface);
+  overflow: hidden;
+}
+.b-card.is-pending { border-top: 2px solid var(--hairline-2); }
+.b-card.is-underwritten { border-top: 2px solid var(--senior); }
+.b-card.is-failed { border-top: 2px solid var(--alert); }
+
+.card-head { position: relative; padding-right: 30px; }
+.card-no {
+  position: absolute;
+  top: -2px;
+  right: 0;
+  font-family: var(--font-num);
+  font-size: 11px;
+  letter-spacing: .06em;
+  color: var(--ink-3);
+}
+.card-head h4 {
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -.01em;
+}
+.card-where {
+  margin: 3px 0 0;
+  font-size: var(--t-caption);
+  color: var(--ink-3);
+}
+
+.card-sheet {
+  margin: var(--sp-2) 0 0;
+  border-top: 1px solid var(--hairline);
+}
+.card-sheet > div {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  padding: 5px 0;
+  border-bottom: 1px solid var(--hairline);
+  font-size: var(--t-caption);
+}
+.card-sheet dt { color: var(--ink-3); letter-spacing: .06em; }
+.card-sheet dd { margin: 0; color: var(--ink-2); text-align: right; }
+.card-sheet .num { font-family: var(--font-num); color: var(--ink); }
+.card-sheet .unit { padding-left: 4px; color: var(--ink-3); }
+
+.card-blocked {
+  margin: var(--sp-2) 0 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--ink-3);
+}
+.card-blocked b { font-family: var(--font-num); color: var(--ink-2); }
+.card-error {
+  margin: var(--sp-2) 0 0;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: var(--alert);
+}
+.card-error b { font-family: var(--font-num); font-weight: 600; }
+
+/* 카드의 바닥 — 주의 표시는 왼쪽, 도장은 오른쪽. 둘이 서로를 밀지 않는다. */
+.card-foot {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  margin-top: auto;
+  padding-top: var(--sp-2);
+}
+
+/* 스탬프 — 고무도장은 반듯하게 찍히지 않는다. 그 기울기가 "아직"을 말한다. */
+.stamp-mark {
+  flex: 0 0 auto;
+  transform: rotate(-5deg) translateY(-2px);
+  padding: 3px 7px;
+  border: 1.5px solid var(--stratum-3);
+  outline: 1px solid var(--stratum-3);
+  outline-offset: 2px;
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: .08em;
+  line-height: 1.2;
+  color: var(--stratum-3);
+  opacity: .85;
+  white-space: nowrap;
+  pointer-events: none;
+}
+.stamp-mark.is-fail {
+  border-color: var(--alert);
+  outline-color: var(--alert);
+  color: var(--alert);
+}
+
+.card-rows { margin: var(--sp-2) 0 0; }
+.card-row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  padding: 4px 0;
+  border-bottom: 1px solid var(--hairline);
+  font-size: var(--t-caption);
+}
+.card-row dt { color: var(--ink-3); }
+.card-row dd { margin: 0; }
+.card-row .num { font-family: var(--font-num); font-size: 14px; color: var(--ink); }
+.card-row .unit { padding-left: 4px; color: var(--ink-3); }
+
+/* 카드 한 장에 실린 작은 단면 — 가치를 눕히고 대출만큼 물을 채운다 */
+.card-water {
+  position: relative;
+  height: 7px;
+  margin-top: var(--sp-2);
+  background: var(--surface-2);
+  border: 1px solid var(--hairline);
+}
+.card-water-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: var(--ltv, 0%);
+  background: var(--waterline);
+  opacity: .55;
+  border-right: 1.5px solid var(--waterline);
+}
+.card-ltv {
+  margin: 5px 0 0;
+  font-size: var(--t-caption);
+  color: var(--ink-3);
+}
+.card-ltv .num { font-family: var(--font-num); color: var(--ink); padding: 0 4px; }
+.card-ltv .unit { color: var(--ink-3); }
+
+.card-flags {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.3;
+  color: var(--ink-3);
+}
+
+/* ---------- 거래 산점 ---------- */
+.ch-fig-wrap { margin: var(--sp-5) 0 0; }
+.ch-fig-wrap > figcaption,
+.ch-figcap {
+  margin: 0 0 var(--sp-2);
+  font-size: var(--t-small);
+  color: var(--ink-2);
+}
+.plot-host .ch-fig { display: block; width: 100%; max-width: 880px; height: auto; }
+.plot-host .ch-fig.is-compact { max-width: 460px; }
+
+.ch-fig .series { fill: none; stroke-width: 2; stroke-linejoin: round; }
+.reg-cbd { stroke: var(--ink); fill: var(--ink); }
+.reg-gbd { stroke: var(--waterline); fill: var(--waterline); }
+.reg-ybd { stroke: var(--stratum-3); fill: var(--stratum-3); }
+/* 귀속된 거래는 색이 아니라 **형태**로 다르다 — 속 빈 원. 서장의 "실선은 계산,
+   해칭은 가정"과 같은 규칙의 연장이고, 색 예산도 지킨다. */
+.dot-exact {
+  fill: none;
+  stroke: var(--ink);
+  stroke-width: 1.2;
+  vector-effect: non-scaling-stroke;
+}
+.exact-band { fill: var(--stratum-1); opacity: .38; }
+.ch-fig .lab-band { fill: var(--ink-3); letter-spacing: .02em; }
+.ch-fig .lab-series { letter-spacing: .02em; }
+
+.trades-legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2) var(--sp-4);
+  margin: var(--sp-3) 0 0;
+  padding: 0;
+  list-style: none;
+  font-size: var(--t-small);
+  color: var(--ink-2);
+}
+.trades-legend .swatch {
+  display: inline-block;
+  width: 16px;
+  height: 3px;
+  margin-right: 7px;
+  vertical-align: middle;
+  background: currentColor;
+}
+.trades-legend .ring {
+  display: inline-block;
+  width: 9px;
+  height: 9px;
+  margin-right: 7px;
+  vertical-align: middle;
+  border: 1.5px solid var(--ink);
+  border-radius: 50%;
+}
+.trades-legend .reg-cbd { color: var(--ink); }
+.trades-legend .reg-gbd { color: var(--waterline); }
+.trades-legend .reg-ybd { color: var(--stratum-3); }
+
+/* ---------- 배타 사다리 ---------- */
+.ladder {
+  display: grid;
+  grid-template-columns: minmax(0, 300px) minmax(0, 1fr);
+  gap: var(--sp-5);
+  align-items: start;
+  margin: var(--sp-5) 0 0;
+  padding-top: var(--sp-3);
+  border-top: 1px solid var(--hairline);
+}
+.ladder-host .ch-fig { display: block; width: 100%; height: auto; }
+.rung-exact { fill: var(--stratum-3); }
+.rung-resolved { fill: var(--stratum-2); }
+.rung-ambiguous { fill: var(--stratum-1); }
+.hatch-void { stroke: var(--ink-3); stroke-width: .8; }
+.void-hatch { opacity: .55; }
+.leader-exact { stroke: var(--stratum-3); }
+.leader-resolved { stroke: var(--stratum-2); }
+.leader-ambiguous { stroke: var(--ink-3); }
+.ch-fig .lab-rung { fill: var(--ink); letter-spacing: .01em; }
+.ch-fig .lab-void { fill: var(--ink-3); letter-spacing: .04em; }
+
+/* ============================================================
+   Ⅱ장 — 계측기
+   ============================================================ */
+.rig {
+  --win-lit: #f3e3c2;
+  --win-off: #7c6c54;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: var(--sp-4);
+  align-items: start;
+  margin-top: var(--sp-4);
+}
+@media (prefers-color-scheme: dark) {
+  .rig { --win-lit: #e3b268; --win-off: #0d0b08; }
+}
+:root[data-theme="dark"] .rig { --win-lit: #e3b268; --win-off: #0d0b08; }
+:root[data-theme="light"] .rig { --win-lit: #f3e3c2; --win-off: #7c6c54; }
+
+.rig-main { display: flex; flex-direction: column; gap: var(--sp-3); min-width: 0; }
+.rig-plate {
+  margin: 0;
+  padding: var(--sp-3);
+  background:
+    linear-gradient(rgba(141, 123, 96, .07) 1px, transparent 1px) 0 0 / 100% 28px,
+    linear-gradient(90deg, rgba(141, 123, 96, .07) 1px, transparent 1px) 0 0 / 28px 100%,
+    var(--surface);
+  border: 1px solid var(--hairline-2);
+}
+@media (prefers-color-scheme: dark) {
+  .rig-plate {
+    background:
+      linear-gradient(rgba(232, 226, 214, .045) 1px, transparent 1px) 0 0 / 100% 28px,
+      linear-gradient(90deg, rgba(232, 226, 214, .045) 1px, transparent 1px) 0 0 / 28px 100%,
+      var(--surface);
+  }
+}
+:root[data-theme="dark"] .rig-plate {
+  background:
+    linear-gradient(rgba(232, 226, 214, .045) 1px, transparent 1px) 0 0 / 100% 28px,
+    linear-gradient(90deg, rgba(232, 226, 214, .045) 1px, transparent 1px) 0 0 / 28px 100%,
+    var(--surface);
+}
+.gauge-plate { display: block; width: 100%; height: auto; }
+
+/* 이 판은 손을 따라 다시 그려진다 — 등장 애니메이션이 매 프레임 다시 돌면
+   그림이 깜빡인다. 움직임은 애니메이션이 아니라 **읽는 사람의 손**이 만든다. */
+.gauge-plate .strata,
+.gauge-plate .water,
+.gauge-plate .win,
+.gauge-plate .win.off { animation: none; }
+
+.refi-limit {
+  stroke: var(--ink-2);
+  stroke-width: 1.2;
+  stroke-dasharray: 7 4;
+}
+.refi-limit.is-alert { stroke: var(--alert); stroke-width: 1.6; }
+.exit-rule {
+  stroke: var(--stratum-3);
+  stroke-width: 1.2;
+  stroke-dasharray: 2 3;
+}
+.break-mark { fill: none; stroke: var(--ink-2); stroke-width: 1.2; }
+.base-rule { stroke: var(--ink-2); stroke-width: 1; }
+.over-debt { fill: var(--alert); opacity: .22; }
+.gauge-plate.is-drowned .water-line { stroke: var(--alert); }
+.ch-fig .lab-rule2 { fill: var(--ink-3); }
+.ch-fig .lab-over { fill: var(--alert); font-weight: 600; }
+
+/* ---------- 조작반 ---------- */
+.rig-side { display: flex; flex-direction: column; gap: var(--sp-3); }
+.rig-knobs {
+  padding: var(--sp-3);
+  background: var(--surface);
+  border: 1px solid var(--hairline-2);
+}
+.knob {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: baseline;
+  padding: var(--sp-2) 0;
+}
+.knob + .knob { border-top: 1px solid var(--hairline); }
+.knob-label {
+  grid-column: 1;
+  font-size: var(--t-small);
+  font-weight: 600;
+  color: var(--ink);
+  cursor: pointer;
+}
+.knob-of {
+  display: block;
+  font-size: 11.5px;
+  font-weight: 400;
+  color: var(--ink-3);
+  letter-spacing: .01em;
+}
+.knob-out {
+  grid-column: 2;
+  text-align: right;
+  padding-left: var(--sp-2);
+  font-family: var(--font-num);
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+}
+
+/* 손잡이 — 눈금자 위를 미끄러지는 지시 표식. 원이 아니라 네모인 이유는
+   이 페이지의 다른 표식들과 같은 제도 어휘를 쓰기 위해서다. */
+.knob-range {
+  -webkit-appearance: none;
+  appearance: none;
+  grid-column: 1 / -1;
+  display: block;
+  width: 100%;
+  height: 44px;                 /* 터치 타깃 — 보이는 트랙은 그 안에 있다 */
+  margin: 2px 0 0;
+  background: none;
+  cursor: pointer;
+}
+.knob-range:focus { outline: none; }
+.knob-range:focus-visible { outline: 2px solid var(--waterline); outline-offset: 2px; }
+.knob-range::-webkit-slider-runnable-track {
+  height: 3px;
+  background:
+    linear-gradient(var(--hairline-2), var(--hairline-2)) 0 0 / 100% 100%;
+  border-radius: 0;
+}
+.knob-range::-moz-range-track { height: 3px; background: var(--hairline-2); }
+.knob-range::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 14px;
+  height: 22px;
+  margin-top: -9.5px;
+  background: var(--surface);
+  border: 2px solid var(--ink);
+  border-radius: 2px;
+}
+.knob-range::-moz-range-thumb {
+  width: 12px;
+  height: 20px;
+  background: var(--surface);
+  border: 2px solid var(--ink);
+  border-radius: 2px;
+}
+/* 기준 자리 표식 — "어디가 기준인가"를 트랙 아래 삼각으로 찍는다 */
+.knob-scale {
+  grid-column: 1 / -1;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  margin: -6px 0 0;
+  font-family: var(--font-num);
+  font-size: 11px;
+  color: var(--ink-3);
+}
+.knob-scale::before {
+  content: "";
+  position: absolute;
+  top: -5px;
+  left: var(--rest, 50%);
+  width: 0;
+  height: 0;
+  margin-left: -4px;
+  border-left: 4px solid transparent;
+  border-right: 4px solid transparent;
+  border-bottom: 5px solid var(--stratum-3);
+}
+.knob-delta {
+  display: block;
+  font-size: 11px;
+  font-weight: 400;
+  color: var(--ink-3);
+  letter-spacing: .02em;
+}
+.knob-rest { color: var(--stratum-3); letter-spacing: .02em; }
+.rig-reset {
+  min-height: 44px;
+  width: 100%;
+  margin-top: var(--sp-2);
+  background: none;
+  border: 1px solid var(--hairline-2);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-body);
+  font-size: var(--t-small);
+  letter-spacing: .04em;
+  color: var(--ink-2);
+  cursor: pointer;
+}
+.rig-reset:hover { border-color: var(--ink-3); color: var(--ink); }
+
+/* ---------- 판독값 ---------- */
+.rig-rows { margin: 0; }
+.rig-rows .g-row { align-items: start; padding: 8px 0; }
+.rig-rows dt { flex: 1 1 auto; display: block; }
+.rig-rows .row-note {
+  display: block;
+  font-size: 11px;
+  line-height: 1.45;
+  color: var(--ink-3);
+  max-width: 26ch;
+}
+.rig-rows dd b { font-size: 17px; }
+.rig-readings {
+  padding: var(--sp-3);
+  background: var(--surface);
+  border: 1px solid var(--hairline-2);
+}
+.rig-knobs h4,
+.rig-readings h4 {
+  margin: 0 0 var(--sp-2);
+  font-family: var(--font-title);
+  font-size: var(--t-h3);
+}
+/* 낭독기에만 있는 문장. 1px 상자에 clip-path 만 걸면 브라우저에 따라 반 픽셀이
+   새어 나와 화면 구석에 글자 조각이 찍힌다 — 관용적인 여섯 줄을 다 적는다. */
+.rig-live {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  clip-path: inset(50%);
+  white-space: nowrap;
+}
+
+.rig-banner {
+  margin: var(--sp-2) 0 0;
+  padding: var(--sp-2) var(--sp-3);
+  border-left: 3px solid var(--hairline-2);
+  background: var(--surface);
+  font-size: var(--t-small);
+  line-height: 1.6;
+  color: var(--ink-2);
+}
+.rig-banner b { display: block; color: var(--ink); font-weight: 600; }
+.rig-banner.is-note { border-left-color: var(--stratum-3); }
+.rig-banner.is-alert,
+.rig-banner.is-gate,
+.rig-banner.is-input,
+.rig-banner.is-implausible {
+  border-left-color: var(--alert);
+  background: var(--alert-wash);
+  color: var(--ink);
+}
+.rig-banner.is-alert b,
+.rig-banner.is-gate b,
+.rig-banner.is-input b,
+.rig-banner.is-implausible b { color: var(--alert); }
+
+/* ---------- 좁은 화면 ---------- */
+@media (max-width: 1019px) {
+  .rig { grid-template-columns: 1fr; }
+  .rig-rows .row-note { max-width: none; }
+}
+@media (max-width: 759px) {
+  .ladder { grid-template-columns: 1fr; gap: var(--sp-3); }
+  .ch-reading.is-two { columns: 1; }
+  .card-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
+  .knob-rest { display: none; }   /* 세 칸이 겹친다 — 삼각 표식만 남긴다 */
+}

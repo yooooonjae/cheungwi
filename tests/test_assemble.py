@@ -234,7 +234,7 @@ def test_prologue_has_the_mounts_the_hero_writes_into(sandbox):
 
 def test_scripts_load_in_dependency_order(sandbox):
     """hero 는 로드 시점에 엔진과 조형을 이미 있는 것으로 읽는다."""
-    assert sandbox.JS_FILES == ["engine.js", "charts.js", "hero.js"]
+    assert sandbox.JS_FILES[:3] == ["engine.js", "charts.js", "hero.js"]
     html = (sandbox.build_dist() / "index.html").read_text(encoding="utf-8")
     order = [html.index('src="js/%s"' % f) for f in sandbox.JS_FILES]
     assert order == sorted(order)
@@ -261,6 +261,55 @@ def test_every_in_figure_label_size_goes_through_the_scale_factor(sandbox):
     assert len(labels) >= 10, "라벨 규칙이 이만큼은 있어야 한다: %d" % len(labels)
     for size in labels:
         assert "--fig-k" in size, "계수를 안 거치는 라벨 크기가 있다: %s" % size.strip()
+
+
+# ------------------------------------------------------------------ #
+# Ⅰ장·Ⅱ장 — 마운트와 활자 규약
+# ------------------------------------------------------------------ #
+def test_the_chapters_have_the_mounts_their_scripts_write_into(sandbox):
+    html = (sandbox.build_dist() / "index.html").read_text(encoding="utf-8")
+    for mount in ('id="ch1-filter"', 'id="ch1-cards"', 'id="ch1-ledger-reading"',
+                  'id="ch1-trades-plot"', 'id="ch1-ladder-plate"',
+                  'id="ch2-plate"', 'id="ch2-knobs"', 'id="ch2-readings"',
+                  'id="ch2-banners"', 'id="ch2-spec"'):
+        assert mount in html, "%s 가 없으면 그 장은 조용히 비어 있는다" % mount
+    # 슬라이더의 결과는 눈으로만 읽히지 않는다
+    assert 'id="ch2-live"' in html and 'aria-live="polite"' in html
+    assert "대장 개통 대기" in html, "정직성 표기는 스크립트가 아니라 지면에도 있다"
+
+
+def test_chapter_scripts_load_after_the_shapes_they_borrow(sandbox):
+    """장은 charts·engine 에 더해 hero(판형 부속·서식)까지 읽는다."""
+    assert sandbox.JS_FILES == ["engine.js", "charts.js", "hero.js",
+                                "chapter1.js", "chapter2.js"]
+    html = (sandbox.build_dist() / "index.html").read_text(encoding="utf-8")
+    order = [html.index('src="js/%s"' % f) for f in sandbox.JS_FILES]
+    assert order == sorted(order)
+
+
+def test_chapters_css_ships_and_keeps_both_themes(sandbox):
+    css = (sandbox.build_dist() / "css" / "chapters.css").read_text(encoding="utf-8")
+    # 계측기는 `.hero` 밖에 서므로 창의 불빛을 스스로 선언해야 한다
+    assert css.count("--win-lit:") >= 4
+    assert "prefers-color-scheme" in css and '[data-theme="dark"]' in css
+    assert '[data-theme="light"]' in css
+
+
+def test_chapter_figures_have_exactly_one_lettering_height_per_plate(sandbox):
+    """장 도면의 활자 높이는 판형마다 하나다 — `--fig-k` 의 하한이 그 위에 선다.
+
+    크기가 둘 이상이면 최소 선언값이 무엇인지가 CSS 와 JS 두 곳에서 갈리고,
+    계수는 계속 1 인 채로 가장 작은 라벨만 조용히 8px 로 찍힌다.
+    """
+    css = (sandbox.build_dist() / "css" / "chapters.css").read_text(encoding="utf-8")
+    sizes = re.findall(r"\.ch-fig[\w.-]* text\{[^{}]*font-size:([^;}]+)", css)
+    assert len(sizes) == 2, "판형 둘, 규칙 둘이어야 한다: %s" % sizes
+    for size in sizes:
+        assert "--fig-k" in size, "계수를 안 거치는 라벨 크기가 있다: %s" % size.strip()
+    assert any("11px" in s for s in sizes) and any("12px" in s for s in sizes)
+    # 낱개 라벨 클래스가 제 크기를 따로 선언하면 위의 "하나"가 깨진다
+    stray = re.findall(r"\.lab[\w-]*[^{}]*\{[^{}]*font-size:([^;}]+)", css)
+    assert not stray, "장 도면의 라벨이 제 크기를 따로 선언했다: %s" % stray
 
 
 # ------------------------------------------------------------------ #
