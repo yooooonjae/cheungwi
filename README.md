@@ -1,9 +1,23 @@
 # 층위(層位) — 서울 오피스의 공간·자본·시간
 
+[![CI](https://github.com/yooooonjae/cheungwi/actions/workflows/ci.yml/badge.svg)](https://github.com/yooooonjae/cheungwi/actions/workflows/ci.yml)
+[**cheungwi.pages.dev**](https://cheungwi.pages.dev)
+
 서울 3대 권역(CBD·GBD·YBD) 프라임 오피스 55동을 공공 원천에서 수집해, 유효임대료에서
 NOI·자산가치·Equity IRR·차환 가능성까지 한 줄기로 잇는 개인 연구 포트폴리오다.
+**임대의 층이 쌓이고, 부채의 물이 차오른다** — 서장의 한 줄이 이 저장소의 주제다.
 
-시리즈 계보: 수지(收支) → 순환(循環) → 시차(視差·時差) → **층위(層位)**.
+## 시리즈 계보
+
+네 저장소는 같은 자산을 서로 다른 축에서 본다. 앞의 셋이 만든 규약(단일 HTML 셸·데이터 원장·
+패리티 검사)을 그대로 물려받고, 층위는 거기에 **시간축**을 얹었다.
+
+| 저장소 | 축 | 보는 것 |
+|---|---|---|
+| 수지(收支) · [yoonjae.pages.dev](https://yoonjae.pages.dev) | 사업 | 개발 사업의 수지 — 짓는 값과 파는 값 |
+| 순환(循環) · [sunhwan.pages.dev](https://sunhwan.pages.dev) | 주기 | 공급→분양→운영→자본의 한 바퀴 |
+| 시차(視差·時差) · [sicha.pages.dev](https://sicha.pages.dev) | 관측 | 같은 값을 보는 각도차와 전달 시차 |
+| **층위(層位)** · [cheungwi.pages.dev](https://cheungwi.pages.dev) | 단면 | 공간·자본·시간이 한 기둥에 쌓인 단면 |
 
 ## 시작하기
 
@@ -17,6 +31,45 @@ make build                  # site/ 소스를 web/ 정적 산출로 굽는다
 make serve                  # web/ 을 로컬에서 본다 (기본 8768)
 make refresh                # 위 전부 + 검증 + 배포를 한 번에 (매일 도는 것은 이것뿐이다)
 ```
+
+| 타깃 | 하는 일 |
+|---|---|
+| `make setup` | venv 생성 + 의존성 설치(pytest 하나) |
+| `make collect` | 수집기 5종 실행(재개형 — 쿼터가 끊기면 다음 실행이 이어받는다) |
+| `make manifest` | 수집 산출을 훑어 `data/DATA_MANIFEST.json` 갱신 |
+| `make analyze` | 엔진을 실데이터에 적용해 `out/*.json` 4종 생성(멱등·원자적) |
+| `make build` | `site/` → `web/` 정적 산출(원자적 — 실패하면 기존 `web/` 그대로) |
+| `make serve` | `web/` 로컬 서빙(기본 8768 · 봇 차단·noindex) |
+| `make test` | pytest 전체 |
+| `make check` | **CI 동등 검증** — 바이트컴파일·스크립트 문법·전체 스위트·빌드 게이트 |
+| `make responsive` | 다섯 뷰포트 실측 + 다크 스크린샷(헤드리스 크롬) |
+| `make og` | OG 카드 재생성(`src/build/og_card.html` → `site/static/og.png` 1200×630) |
+| `make refresh` | 수집→분석→원장→빌드→검증→배포. **매일 도는 것은 이것뿐이다** |
+| `make dryrun` | 수집·배포 없이 뒷단만(분석→원장→빌드→검증) |
+
+## 아키텍처
+
+```
+data/raw/{source}/     API 원본 응답 캐시(재실행을 증분화한다)
+   │  src/collect/     수집기 5종 — 표준 라이브러리만, 재개형, 마지막 줄이 마커
+   ▼
+data/*.json            원천별 산출 + DATA_MANIFEST.json(관측월·수집일·coverage·cache)
+   │  src/analysis/    순수 함수 8모듈(파일·네트워크를 건드리지 않는다)
+   │  └ build_out.py   ← 순수 함수를 실데이터에 붙이는 유일한 자리
+   ▼
+out/*.json             market · underwriting · trades_analysis · pf_case
+   │  src/build/       assemble.py — 템플릿 치환 → 두 게이트 → 원자 스왑
+   ▼
+web/                   index.html + css/ + js/ + data/*.js (외부 요청 0)
+   │  src/pipeline/    refresh.py — 무효화→수집→분석→원장→빌드→검증→배포
+   ▼
+cheungwi.pages.dev
+```
+
+엔진은 두 벌이다. 파이썬(`src/analysis/`)이 산출을 만들고, 자바스크립트 미러
+(`site/js/engine.js`)가 실험실의 손잡이를 화면에서 다시 계산한다. 둘이 갈라지면 화면과 산출이
+다른 말을 하므로, 패리티 검사가 200조 이상의 표본으로 값과 **오류 갈래**까지 맞춘다
+(`tests/test_parity.py` · node 프로세스를 실제로 왕복시킨다).
 
 수집기는 파이썬 표준 라이브러리만 쓴다(pytest는 테스트 전용). 저장 형식은 JSON 단일이고,
 API 원본 응답은 `data/raw/{source}/`에 전량 캐시해 재실행을 증분화한다. 실거래 캐시
@@ -108,3 +161,38 @@ make refresh ARGS="--only trades"         # 한 수집기 + 이후 단계 전부
 | 리츠 | corpCode zip 은 하루 한 번만 받는다(수 MB 전체 재다운로드가 DART 쿼터를 태운다) |
 | 금리 | 원래 매 실행 재호출한다(월 시계열이라 최신 월이 계속 는다) |
 | 건물 | 대장 XML·VWorld 캐시는 그대로 둔다(승인 전이라 받을 것이 없다) |
+
+## 검사
+
+`make check` 가 CI 와 같은 넷을 돈다 — 파이썬 전 소스 바이트컴파일, 사이트 스크립트 문법
+(`node --check` 를 **파일마다**: 다중 인자를 주면 첫 파일만 본다), pytest 전체, 그리고 빌드
+게이트(미치환 플레이스홀더·한국어 조사 분리·선언과 실재의 불일치). GitHub Actions 는 push·PR
+마다 같은 순서로 돈다(`.github/workflows/ci.yml`).
+
+**CI 는 배포하지 않는다.** 배포는 검증까지 통과한 로컬 `refresh` 만 한다 — 초록 체크가 곧
+배포가 되면 "검증된 것만 나간다"는 순서가 뒤집힌다. 수집기도 부르지 않는다(키가 없고, 쿼터를
+태울 이유도 없다).
+
+**산출물 부재는 skip 이 아니라 실패다.** 이 스위트의 상당수는 `out/`·원장의 실물을 읽어
+검증하므로, 산출물이 없는 러너에서 순수 함수 검사만 통과한 초록은 "검사했다"가 아니라
+"검사하지 않았다"는 뜻이 된다. 그래서 산출물 4종·원장·OG 카드는 저장소에 커밋해 두고
+(checkout 만으로 실측이 된다), CI 는 `CHEUNGWI_REQUIRE_ARTIFACTS=1` 로 가드를 켠다 — 하나라도
+없으면 세션은 첫 검사 전에 부재 목록을 들고 멈춘다(`conftest.py`).
+
+`make responsive` 는 크롬을 띄우므로 `make check` 에 묶지 않았다(헤드리스 잡은 직렬로
+세워야 한다). 릴리스 전에 따로 돌린다.
+
+## OG 카드
+
+`src/build/og_card.html` 이 카드의 원본이다 — 서장의 도면을 그대로 줄인 미니어처(20층 × 6칸의
+창 중 여덟이 꺼져 있고, 자본 스택을 부채의 수면이 절반 높이에서 가로지른다)에 「층위 層位」와
+한 줄이 붙는다. 색은 `tokens.css` 의 야간 값을 그대로 옮겨 적었고, 외부 자원은 하나도 부르지
+않는다(`file://` 로 찍히므로 네트워크 자원은 빈칸이 된다).
+
+```bash
+make og      # 크롬 헤드리스로 1200×630 을 굽고 크기를 검증한다 → site/static/og.png
+```
+
+굽고 나면 **커밋한다**. 빌드가 `site/static/` 을 `web/` 루트로 평면 복사하고, `index` 의
+`og:image` 가 그 자리를 절대 URL 로 가리킨다 — 메타는 있는데 파일이 없는 404 미리보기를
+막으려고, 검사가 메타가 가리키는 경로에 실제 파일이 있는지까지 본다.
