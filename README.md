@@ -33,7 +33,7 @@ API 원본 응답은 `data/raw/{source}/`에 전량 캐시해 재실행을 증�
 
 ## 분석 산출
 
-`src/analysis/`의 일곱 모듈(유효임대료·NOI·cap rate·가치·인수금융·차환·개발 PF)은 파일도
+`src/analysis/`의 여덟 모듈(금융코어·유효임대료·NOI·cap rate·가치·인수금융·차환·개발 PF)은 파일도
 네트워크도 건드리지 않는 순수 함수이고, 그것을 실데이터에 붙이는 자리는 `build_out.py`
 하나뿐이다. `make analyze`가 네 산출을 만든다.
 
