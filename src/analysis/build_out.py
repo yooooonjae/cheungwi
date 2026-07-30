@@ -1128,7 +1128,9 @@ def _land_rationale_sentence(land_prices: list, breakeven) -> str:
         return (f"{_LAND_NOTE_PREFACE}, 두 수 가운데 하나가 비어 있어 {_LAND_NOTE_VALUE} "
                 f"그 원가를 덮는지 여기서는 말할 수 없다. {_LAND_NOTE_CLOSE}")
     if kind == "stands":
-        body = "그 상단의 원가까지 덮는다"
+        # 중위가 손익분기 아래라는 뜻이지 **상단**까지 덮는다는 뜻이 아니다 —
+        # 최고가 필지는 그대로 손익분기 위에 남아 있을 수 있다.
+        body = "그 원가를 중위까지 덮는다"
     elif kind == "partial":
         body = "그 원가의 아래쪽 끝만 덮는다"
     else:

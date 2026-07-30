@@ -393,6 +393,64 @@ def test_the_values_outside_the_axis_are_labelled_with_a_break_not_dropped():
         assert g["x0"] - 1e-6 <= p["x"] <= g["x1"] + 1e-6
 
 
+SEED_PRICES = {"n": 3, "min": 16_940_000, "median": 70_590_000, "max": 95_640_000}
+
+
+def test_the_land_verdict_kind_splits_the_same_four_ways_as_python():
+    """갈래는 파이썬 쌍둥이(`build_out._land_verdict_kind`)와 같은 네 개다."""
+    assert value("chapter3", "landVerdictKind", SEED_PRICES, 10_000_000) == "fails"
+    assert value("chapter3", "landVerdictKind", SEED_PRICES, 17_029_258) == "partial"
+    assert value("chapter3", "landVerdictKind", SEED_PRICES, 80_000_000) == "stands"
+    assert value("chapter3", "landVerdictKind", SEED_PRICES, None) == "incomparable"
+    assert value("chapter3", "landVerdictKind",
+                 {"n": 0, "min": None, "median": None}, 10_000_000) == "incomparable"
+
+
+def _land_model_at(breakeven):
+    pf = copy.deepcopy(PF)
+    pf["land_price_context"]["breakeven_land_price_won_m2"] = breakeven
+    return value("chapter3", "landModel", pf)
+
+
+def test_the_land_argument_moves_with_the_verdict():
+    """논거도 판정과 같은 갈래에서 나온다.
+
+    "완성 자산이 토지 원가를 덮지 못한다"는 시드 전부가 손익분기 위일 때만 참이다.
+    한 문장으로 박아 두면, 손익분기가 올라와 각주(`ctx.note`)가 "아래쪽 끝만
+    덮는다"로 갈린 날 **같은 목록 안에서** 두 줄이 서로 다른 말을 한다.
+    """
+    fails = _land_model_at(10_000_000)
+    assert fails["kind"] == "fails"
+    assert value("chapter3", "landRationale", fails).endswith("토지 원가를 덮지 못한다.")
+
+    partial = _land_model_at(17_029_258)
+    assert partial["kind"] == "partial"
+    arg = value("chapter3", "landRationale", partial)
+    assert "아래쪽 끝만 덮는다" in arg and "덮지 못한다" not in arg
+
+    stands = _land_model_at(80_000_000)
+    assert stands["kind"] == "stands"
+    arg = value("chapter3", "landRationale", stands)
+    assert "중위까지 덮는다" in arg and "덮지 못한다" not in arg
+    # 함수만 갈리고 화면은 옛 문장이면 소용없다 — 글줄에 그대로 실려 나가야 한다
+    assert arg in value("chapter3", "landLines", stands)
+
+    assert "말할 수 없다" in value("chapter3", "landRationale", {"kind": "incomparable"})
+
+
+def test_the_land_headline_never_contradicts_the_argument_below_it():
+    """중위가 손익분기 아래인 날 판정 한 줄이 "대부분 서지 않는다"라 하면 안 된다."""
+    stands = value("chapter3", "verdictHtml", _land_model_at(80_000_000))
+    assert "중위 필지로도 이 사업이 선다" in stands
+    assert "서지 않는다" not in stands
+    partial = value("chapter3", "verdictHtml", _land_model_at(17_029_258))
+    assert "가장 싼 필지라면 이 사업이 선다" in partial
+    fails = value("chapter3", "verdictHtml", _land_model_at(10_000_000))
+    assert "프라임 필지에서는 이 사업이 서지 않는다" in fails
+    gone = value("chapter3", "verdictHtml", {"kind": "incomparable"})
+    assert "견줄 수 없다" in gone
+
+
 # ================================================================== #
 # ⑤ 실험실 — 세 갈래와 체인
 # ================================================================== #

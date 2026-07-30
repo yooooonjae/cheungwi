@@ -727,6 +727,28 @@
    * 프라임 필지에서는 이 사업이 서지 않는다 — 그 판정은 문장이 아니라 계산이다.
    * 시드의 공시지가가 손익분기 아래로 내려가면 판정도 뒤집힌다.
    */
+  function finite(v) {
+    return typeof v === "number" && isFinite(v);
+  }
+
+  /**
+   * 판정 갈래 — 파이썬 쌍둥이(`build_out._land_verdict_kind`)와 같은 네 갈래다.
+   *
+   * 각주(`ctx.note`)는 이 네 갈래로 갈려서 오는데, 지면의 논거만 한 문장으로
+   * 박혀 있으면 손익분기가 올라온 날 **같은 목록 안에서** 앞뒤가 맞부딪힌다 —
+   * 각주는 "아래쪽 끝만 덮는다"라 하고 그 위 글줄은 "덮지 못한다"라 한다.
+   * 그래서 갈래를 여기서 한 번만 정하고 문장들이 그것을 받아 쓴다.
+   */
+  function landVerdictKind(seed, breakeven) {
+    if (!seed || !finite(breakeven) || !(seed.n > 0) ||
+        !finite(seed.min) || !finite(seed.median)) {
+      return "incomparable";
+    }
+    if (seed.median <= breakeven) return "stands";
+    if (seed.min <= breakeven) return "partial";
+    return "fails";
+  }
+
   function landModel(pf) {
     var ctx = pf && pf.land_price_context;
     if (!ctx || !ctx.seed_land_price_won_m2) {
@@ -749,7 +771,10 @@
       seedMin: seed.min, seedMedian: seed.median, seedMax: seed.max,
       n: seed.n, source: seed.source,
       axisMax: axisMax,
+      // `stands` 는 **최저 필지** 기준이다(파이썬의 갈래 이름 "stands" 는 중위
+      // 기준이라 뜻이 다르다). 중위까지 서는지는 `kind` 가 말한다.
       stands: seed.min <= breakeven,
+      kind: landVerdictKind(seed, breakeven),
       gapToMin: seed.min / breakeven - 1,
       gapToMedian: seed.median / breakeven,
       marks: [
@@ -783,6 +808,26 @@
     };
   }
 
+  /**
+   * 중위 필지의 논거 한 줄. 갈래마다 다른 말이 나가야 한다 — 이 자리에
+   * "덮지 못한다"를 박아 두면 손익분기가 중위를 넘어선 날 그 줄만 옛 판정을
+   * 되풀이한다. 낱말은 파이썬 쌍둥이(`_land_rationale_sentence`)와 맞춘다.
+   */
+  function landRationale(m) {
+    if (m.kind === "incomparable") {
+      return "손익분기 토지단가와 시드 공시지가 가운데 하나가 비어 있어, " +
+        "중위 필지의 원가를 덮는지는 여기서 말할 수 없다.";
+    }
+    var gap = "중위 필지로 사면 토지비가 손익분기의 " + F.fx(m.gapToMedian, 1) + "배다 — ";
+    if (m.kind === "stands") {
+      return gap + "완성된 자산의 가치가 그 원가를 중위까지 덮는다.";
+    }
+    if (m.kind === "partial") {
+      return gap + "완성된 자산의 가치가 그 원가의 아래쪽 끝만 덮는다.";
+    }
+    return gap + "완성된 자산의 가치가 토지 원가를 덮지 못한다.";
+  }
+
   function landLines(m) {
     return [
       "이 사업이 서려면 토지를 ㎡당 " + F.group(Math.round(m.breakeven).toFixed(0)) +
@@ -794,8 +839,7 @@
           ? "최저 필지라면 사업이 선다."
           : "가장 싼 필지조차 손익분기를 " + F.fx(m.gapToMin * 100) +
             "% 넘는다. 프라임 필지에서는 이 사업이 서지 않는다."),
-      "중위 필지로 사면 토지비만 손익분기의 " + F.fx(m.gapToMedian, 1) +
-        "배다 — 완성된 자산의 가치가 토지 원가를 덮지 못한다.",
+      landRationale(m),
       "이 사업이 쓴 토지단가 ㎡당 " + F.group(m.assumed.toFixed(0)) +
         "원은 실측이 아니라 **가정**이다(강남권 이면부 중형 개발부지). " +
         "시드는 3대 권역의 프라임 대로변 표본이라 그 공시지가를 신규 개발부지의 " +
@@ -890,6 +934,10 @@
    * 시드가 손익분기 밑으로 내려가면 이 문장도 반대로 뒤집힌다.
    */
   function verdictHtml(m) {
+    if (m.kind === "incomparable") {
+      return "<b>시드 공시지가와 손익분기 토지단가를 견줄 수 없다.</b> " +
+        "둘 가운데 하나가 비어 있어 이 자리에 판정을 적지 않는다.";
+    }
     if (!m.stands) {
       return "<b>프라임 필지에서는 이 사업이 서지 않는다.</b> 손익분기 토지단가는 ㎡당 " +
         esc(F.group(Math.round(m.breakeven).toFixed(0))) + "원인데, 시드 " + m.n +
@@ -897,6 +945,13 @@
         esc(F.group(m.seedMin.toFixed(0))) + "원으로 그것을 " +
         esc(F.fx(m.gapToMin * 100)) + "% 넘는다. 중위 필지라면 " +
         esc(F.fx(m.gapToMedian, 1)) + "배다.";
+    }
+    if (m.kind === "stands") {
+      return "<b>중위 필지로도 이 사업이 선다.</b> 손익분기 토지단가 ㎡당 " +
+        esc(F.group(Math.round(m.breakeven).toFixed(0))) + "원이 시드 중위 " +
+        esc(F.group(m.seedMedian.toFixed(0))) + "원 위에 있다 — 중위 필지의 " +
+        "토지비가 손익분기의 " + esc(F.fx(m.gapToMedian, 1)) +
+        "배라 표본의 절반이 사업이 서는 구간에 있다.";
     }
     return "<b>가장 싼 필지라면 이 사업이 선다.</b> 손익분기 토지단가 ㎡당 " +
       esc(F.group(Math.round(m.breakeven).toFixed(0))) + "원이 시드 최저 " +
@@ -1027,8 +1082,10 @@
     ladderGeom: ladderGeom,
     ladderLines: ladderLines,
     renderLadder: renderLadder,
+    landVerdictKind: landVerdictKind,
     landModel: landModel,
     landGeom: landGeom,
+    landRationale: landRationale,
     landLines: landLines,
     renderLand: renderLand,
     verdictHtml: verdictHtml,

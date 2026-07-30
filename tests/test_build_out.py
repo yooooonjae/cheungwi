@@ -577,6 +577,9 @@ def test_the_land_note_argument_moves_with_the_verdict(built):
     prices = [16_940_000, 70_590_000, 95_640_000]
     stands = _land_rationale_sentence(prices, 80_000_000)
     assert "덮는다" in stands and "덮지 못한다" not in stands
+    # 중위가 손익분기 아래라는 뜻이지 상단까지 덮는다는 뜻이 아니다 — 최고가 필지는
+    # 그대로 손익분기 위에 남아 있다(95,640,000 > 80,000,000).
+    assert "중위까지 덮는다" in stands and "상단의 원가까지" not in stands
     partial = _land_rationale_sentence(prices, 17_029_258)
     assert "아래쪽 끝만 덮는다" in partial
     assert "덮지 못한다" in _land_rationale_sentence(prices, 10_000_000)
