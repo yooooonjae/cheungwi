@@ -1457,7 +1457,7 @@
   },
   "ledger_status": "건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1",
   "complete": false,
-  "collected_at": "2026-07-30",
+  "collected_at": "2026-07-31",
   "source": "국토부 건축물대장 표제부 + VWorld",
   "endpoints_used": [
    "https://apis.data.go.kr/1613000/BldRgstHubService/getBrTitleInfo",

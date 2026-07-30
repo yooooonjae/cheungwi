@@ -157,9 +157,22 @@ def corp_index(tickers: list[str], rebuild: bool = False) -> dict:
     시드 종목이 하나라도 없으면 조용히 건너뛰지 않고 멈춘다 — 상장폐지·종목코드 변경을
     '수집 안 됨'으로 뭉개면 앵커가 소리 없이 비기 때문이다.
     rebuild=True 면 네트워크를 쓰지 않고 지난 실행이 남긴 매핑 사본만 읽는다.
+
+    **같은 날 이미 받았으면 다시 받지 않는다.** corpCode.xml 은 상장법인 전체가 든 수 MB짜리
+    zip 이라 매 실행 재다운로드는 DART 쿼터를 그냥 태운다. 하루 안에 상장코드가 바뀌는 일은
+    실무상 없고, 날이 바뀌거나 사본에 없는 종목이 들어오면 그때 다시 받는다.
     """
+    path = RAW_DIR / "corp_code_map.json"
+    if not rebuild and path.exists():
+        try:
+            doc = json.loads(path.read_text(encoding="utf-8"))
+        except (json.JSONDecodeError, OSError):
+            doc = {}
+        cached = doc.get("map") or {}
+        if (doc.get("fetched_at") == datetime.date.today().isoformat()
+                and all(t in cached for t in tickers)):
+            return {t: cached[t] for t in tickers}
     if rebuild:
-        path = RAW_DIR / "corp_code_map.json"
         if not path.exists():
             raise RuntimeError(f"--rebuild 인데 {path} 가 없다. 먼저 네트워크로 한 번 수집하라.")
         cached = json.loads(path.read_text(encoding="utf-8"))["map"]

@@ -1,7 +1,7 @@
 {
  "schema": "cheungwi/trades_analysis/1",
  "as_of": {
-  "trades_collected_at": "2026-07-30",
+  "trades_collected_at": "2026-07-31",
   "months": "200601~202607",
   "seed_as_of": "2026-07-30"
  },
@@ -11,8 +11,8 @@
   "amount_won": "원"
  },
  "filters": {
-  "rows_total": 14521,
-  "rows_used": 14117,
+  "rows_total": 14522,
+  "rows_used": 14118,
   "canceled_excluded": 404,
   "use": "업무(수집 단계에서 이미 업무용만 담겨 있다)",
   "note": "해제(canceled=true) 거래는 데이터층이 지우지 않고 플래그로 보존한다 — 취소된 계약도 그 시점의 호가 정보이기 때문이다. 가격 집계에서 빼는 판단은 분석 단계의 몫이고, 여기서 뺐다."
@@ -388,7 +388,7 @@
    "sgg_cd": [
     "11560"
    ],
-   "n": 2420,
+   "n": 2421,
    "by_year": [
     {
      "year": 2006,
@@ -552,11 +552,11 @@
     },
     {
      "year": 2026,
-     "n": 59,
-     "median_won_per_m2": 8455882,
-     "median_won_per_pyeong": 27953328.925619837,
-     "p25_won_per_pyeong": 20716489.256198347,
-     "p75_won_per_pyeong": 32215685.950413223
+     "n": 60,
+     "median_won_per_m2": 8435457.5,
+     "median_won_per_pyeong": 27885809.917355374,
+     "p25_won_per_pyeong": 20541190.08264463,
+     "p75_won_per_pyeong": 32150500.826446284
     }
    ]
   }

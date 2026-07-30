@@ -1071,6 +1071,27 @@ def _breakeven_land_price(hard_won: float, loan_rate: float, stabilized_noi: flo
     return (lo + hi) / 2
 
 
+def _land_verdict_sentence(land_prices: list, breakeven) -> str:
+    """시드 공시지가와 손익분기 토지단가의 대소를 그날의 수로 판정한 한 문장.
+
+    **판정을 상수 문장으로 두지 않는다.** 손익분기 토지단가는 임대료·매각 cap·금리를 따라
+    움직이므로 갱신 한 번에 최저 필지와의 대소가 뒤집힌다(2026Q2 갱신에서 실제로 시드 한
+    곳이 손익분기 아래로 들어왔다). 문장을 박아 두면 화면의 판정(계산에서 나온다)과 이
+    각주가 서로 다른 말을 한다.
+    """
+    below = [p for p in land_prices if breakeven is not None and p <= breakeven]
+    med = _median(land_prices)
+    if not land_prices or breakeven is None:
+        return "**시드 공시지가와 손익분기 토지단가를 견줄 수 없다**(둘 중 하나가 비어 있다)."
+    if med is not None and med <= breakeven:
+        return (f"**시드 중위 필지로도 이 사업이 선다** — 손익분기 토지단가가 시드 "
+                f"{len(land_prices)}필지 공시지가의 중위값을 넘어섰다.")
+    if below:
+        return (f"**시드 {len(land_prices)}필지 가운데 {len(below)}곳만 손익분기 토지단가 "
+                f"아래에 있다** — 중위 필지로는 이 사업이 서지 않는다.")
+    return "**시드 55동의 개별공시지가로는 이 사업이 서지 않는다.**"
+
+
 def build_pf_case(market: dict, buildings: dict, seed: dict) -> dict:
     """대표 가상 사업지 한 건의 월별 스케줄과 스트레스 15행."""
     region = market["regions"][PF_REGION]
@@ -1178,8 +1199,12 @@ def build_pf_case(market: dict, buildings: dict, seed: dict) -> dict:
                 "max": land_prices[-1] if land_prices else None,
                 "source": "VWorld 개별공시지가(시드 건물의 대표 필지)",
             },
+            # 판정을 문장에 박아 두지 않는다. 손익분기 토지단가는 임대료·금리를 따라 움직여서
+            # 갱신 한 번에 최저 필지와의 대소가 뒤집힌다(2026Q2 갱신에서 실제로 한 곳이
+            # 손익분기 아래로 들어왔다). 박아 두면 화면의 판정 문장과 이 각주가 서로 어긋난다.
             "note": (
-                "**시드 55동의 개별공시지가로는 이 사업이 서지 않는다.** 시드는 3대 권역의 "
+                _land_verdict_sentence(land_prices, breakeven)
+                + " 시드는 3대 권역의 "
                 "프라임 타워 표본이라 그 필지의 공시지가가 강남권 토지 원가의 상단이고, "
                 "이 엔진의 가치(권역 평균 임대료 × R-ONE 소득수익률)로 환산한 완성 자산이 "
                 "그 원가를 덮지 못한다. 손익분기 토지 단가를 함께 실어 그 거리를 그대로 "

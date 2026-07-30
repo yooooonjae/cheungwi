@@ -194,6 +194,22 @@ def _fetch_table(statbl_id: str) -> list:
     return rows
 
 
+def refresh_latest_cache() -> list:
+    """각 계열의 **마지막(최신) 표** 캐시만 지운다. 지운 STATBL_ID 목록을 돌려준다.
+
+    이 수집기는 표 단위 캐시 우선이라 무효화가 없으면 새 분기를 영원히 받지 못한다. 그렇다고
+    캐시를 통째로 지우면 13년치 기간표 전부를 매일 다시 받는다 — 새 분기가 붙는 곳은 각
+    계열의 마지막 표 하나뿐이므로 거기만 지운다(지수는 표가 하나라 그 하나가 최신 표다).
+    """
+    removed = []
+    for _, ids, _name in TABLES:
+        cache = RAW_DIR / f"{ids[-1]}.json"
+        if cache.exists():
+            cache.unlink()
+            removed.append(ids[-1])
+    return removed
+
+
 def _check_items(series: str, statbl_id: str, rows: list):
     """표의 ITM 구성 점검. 단일항목 계열에 항목이 섞이면 stitch가 값을 뒤섞으므로 즉시 실패시킨다."""
     items = {r.get("ITM_NM") for r in rows}
@@ -292,6 +308,9 @@ def main() -> None:
     # 이 수집기도 부분 저장 경로가 없다 — 페이지네이션 절단이면 캐시조차 남기지 않고 예외로
     # 멈춘다. 저장에 도달했으면 완주다. 마커를 main() 에 둔 건 테스트가 부르기 위해서다.
     print("R-ONE 오피스 권역 지표 수집:")
+    if "--refresh-latest" in sys.argv[1:]:
+        removed = refresh_latest_cache()
+        print(f"  최신 표 캐시 무효화: {removed or '지울 캐시 없음'}")
     r = collect()
     for name in REGION_ORDER:
         entry = r["parsed"]["regions"].get(name)

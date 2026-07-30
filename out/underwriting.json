@@ -1,10 +1,10 @@
 {
  "schema": "cheungwi/underwriting/1",
  "as_of": {
-  "buildings_collected_at": "2026-07-30",
+  "buildings_collected_at": "2026-07-31",
   "seed_as_of": "2026-07-30",
-  "rone_latest_quarter": "2026Q1",
-  "age_reference_date": "2026-03-31",
+  "rone_latest_quarter": "2026Q2",
+  "age_reference_date": "2026-06-30",
   "rates_latest_month": "2026-06"
  },
  "assumptions": {
@@ -35,23 +35,23 @@
    "도심": {
     "n": 20,
     "pending_ledger": 20,
-    "effective_rent_won_m2_mo": 26114.083333333332,
-    "vacancy": 0.063692,
-    "cap_income_based": 0.040485
+    "effective_rent_won_m2_mo": 26234.416666666668,
+    "vacancy": 0.068066,
+    "cap_income_based": 0.040188999999999996
    },
    "강남": {
     "n": 21,
     "pending_ledger": 21,
-    "effective_rent_won_m2_mo": 23780.662500000002,
-    "vacancy": 0.049196,
-    "cap_income_based": 0.030452
+    "effective_rent_won_m2_mo": 23904.650000000005,
+    "vacancy": 0.048948,
+    "cap_income_based": 0.029908
    },
    "여의도마포": {
     "n": 14,
     "pending_ledger": 14,
-    "effective_rent_won_m2_mo": 16056.662499999999,
-    "vacancy": 0.044482999999999995,
-    "cap_income_based": 0.037492
+    "effective_rent_won_m2_mo": 16136.699999999997,
+    "vacancy": 0.043883,
+    "cap_income_based": 0.03726
    }
   },
   "ledger_status": "건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
@@ -67,17 +67,17 @@
    "jibun": "84",
    "address_road": "서울 중구 세종대로 136",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 31336.9,
-    "effective_rent_won_m2_mo": 26114.083333333332,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 31481.3,
+    "effective_rent_won_m2_mo": 26234.416666666668,
     "rent_free_mo": 2.0,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.063692,
-    "cap_income_based": 0.040485
+    "vacancy": 0.068066,
+    "cap_income_based": 0.040188999999999996
    },
    "land": {
     "land_price_won_m2": 61960000,
@@ -115,17 +115,17 @@
    "jibun": "70",
    "address_road": "서울 종로구 종로 33",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 31336.9,
-    "effective_rent_won_m2_mo": 26114.083333333332,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 31481.3,
+    "effective_rent_won_m2_mo": 26234.416666666668,
     "rent_free_mo": 2.0,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.063692,
-    "cap_income_based": 0.040485
+    "vacancy": 0.068066,
+    "cap_income_based": 0.040188999999999996
    },
    "land": {
     "land_price_won_m2": 61200000,
@@ -162,17 +162,17 @@
    "jibun": "246",
    "address_road": "서울 종로구 종로3길 17",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 31336.9,
-    "effective_rent_won_m2_mo": 26114.083333333332,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 31481.3,
+    "effective_rent_won_m2_mo": 26234.416666666668,
     "rent_free_mo": 2.0,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.063692,
-    "cap_income_based": 0.040485
+    "vacancy": 0.068066,
+    "cap_income_based": 0.040188999999999996
    },
    "land": {
     "land_price_won_m2": 56390000,
@@ -209,17 +209,17 @@
    "jibun": "17",
    "address_road": "서울 종로구 우정국로 26",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 31336.9,
-    "effective_rent_won_m2_mo": 26114.083333333332,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 31481.3,
+    "effective_rent_won_m2_mo": 26234.416666666668,
     "rent_free_mo": 2.0,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.063692,
-    "cap_income_based": 0.040485
+    "vacancy": 0.068066,
+    "cap_income_based": 0.040188999999999996
    },
    "land": {
     "land_price_won_m2": 37800000,
@@ -256,17 +256,17 @@
    "jibun": "6",
    "address_road": "서울 종로구 종로 51",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 31336.9,
-    "effective_rent_won_m2_mo": 26114.083333333332,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 31481.3,
+    "effective_rent_won_m2_mo": 26234.416666666668,
     "rent_free_mo": 2.0,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.063692,
-    "cap_income_based": 0.040485
+    "vacancy": 0.068066,
+    "cap_income_based": 0.040188999999999996
    },
    "land": {
     "land_price_won_m2": 68890000,
@@ -304,17 +304,17 @@
    "jibun": "99",
    "address_road": "서울 종로구 종로 26",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 31336.9,
-    "effective_rent_won_m2_mo": 26114.083333333332,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 31481.3,
+    "effective_rent_won_m2_mo": 26234.416666666668,
     "rent_free_mo": 2.0,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.063692,
-    "cap_income_based": 0.040485
+    "vacancy": 0.068066,
+    "cap_income_based": 0.040188999999999996
    },
    "land": {
     "land_price_won_m2": 60860000,
@@ -351,17 +351,17 @@
    "jibun": "14",
    "address_road": "서울 종로구 율곡로 6",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 31336.9,
-    "effective_rent_won_m2_mo": 26114.083333333332,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 31481.3,
+    "effective_rent_won_m2_mo": 26234.416666666668,
     "rent_free_mo": 2.0,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.063692,
-    "cap_income_based": 0.040485
+    "vacancy": 0.068066,
+    "cap_income_based": 0.040188999999999996
    },
    "land": {
     "land_price_won_m2": 30690000,
@@ -398,17 +398,17 @@
    "jibun": "115",
    "address_road": "서울 종로구 새문안로 76",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 31336.9,
-    "effective_rent_won_m2_mo": 26114.083333333332,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 31481.3,
+    "effective_rent_won_m2_mo": 26234.416666666668,
     "rent_free_mo": 2.0,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.063692,
-    "cap_income_based": 0.040485
+    "vacancy": 0.068066,
+    "cap_income_based": 0.040188999999999996
    },
    "land": {
     "land_price_won_m2": 42660000,
@@ -445,17 +445,17 @@
    "jibun": "83-1",
    "address_road": "서울 종로구 율곡로2길 19",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 31336.9,
-    "effective_rent_won_m2_mo": 26114.083333333332,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 31481.3,
+    "effective_rent_won_m2_mo": 26234.416666666668,
     "rent_free_mo": 2.0,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.063692,
-    "cap_income_based": 0.040485
+    "vacancy": 0.068066,
+    "cap_income_based": 0.040188999999999996
    },
    "land": {
     "land_price_won_m2": 19970000,
@@ -493,17 +493,17 @@
    "jibun": "67",
    "address_road": "서울 중구 을지로5길 26",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 31336.9,
-    "effective_rent_won_m2_mo": 26114.083333333332,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 31481.3,
+    "effective_rent_won_m2_mo": 26234.416666666668,
     "rent_free_mo": 2.0,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.063692,
-    "cap_income_based": 0.040485
+    "vacancy": 0.068066,
+    "cap_income_based": 0.040188999999999996
    },
    "land": {
     "land_price_won_m2": 50510000,
@@ -540,17 +540,17 @@
    "jibun": "66",
    "address_road": "서울 중구 을지로5길 19",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 31336.9,
-    "effective_rent_won_m2_mo": 26114.083333333332,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 31481.3,
+    "effective_rent_won_m2_mo": 26234.416666666668,
     "rent_free_mo": 2.0,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.063692,
-    "cap_income_based": 0.040485
+    "vacancy": 0.068066,
+    "cap_income_based": 0.040188999999999996
    },
    "land": {
     "land_price_won_m2": 50510000,
@@ -587,17 +587,17 @@
    "jibun": "323",
    "address_road": "서울 중구 을지로 170",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 31336.9,
-    "effective_rent_won_m2_mo": 26114.083333333332,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 31481.3,
+    "effective_rent_won_m2_mo": 26234.416666666668,
     "rent_free_mo": 2.0,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.063692,
-    "cap_income_based": 0.040485
+    "vacancy": 0.068066,
+    "cap_income_based": 0.040188999999999996
    },
    "land": {
     "land_price_won_m2": 33160000,
@@ -634,17 +634,17 @@
    "jibun": "99",
    "address_road": "서울 중구 청계천로 100",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 31336.9,
-    "effective_rent_won_m2_mo": 26114.083333333332,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 31481.3,
+    "effective_rent_won_m2_mo": 26234.416666666668,
     "rent_free_mo": 2.0,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.063692,
-    "cap_income_based": 0.040485
+    "vacancy": 0.068066,
+    "cap_income_based": 0.040188999999999996
    },
    "land": {
     "land_price_won_m2": 53630000,
@@ -681,17 +681,17 @@
    "jibun": "88",
    "address_road": "서울 중구 퇴계로 100",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 31336.9,
-    "effective_rent_won_m2_mo": 26114.083333333332,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 31481.3,
+    "effective_rent_won_m2_mo": 26234.416666666668,
     "rent_free_mo": 2.0,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.063692,
-    "cap_income_based": 0.040485
+    "vacancy": 0.068066,
+    "cap_income_based": 0.040188999999999996
    },
    "land": {
     "land_price_won_m2": 41660000,
@@ -728,17 +728,17 @@
    "jibun": "87",
    "address_road": "서울 중구 을지로 29",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 31336.9,
-    "effective_rent_won_m2_mo": 26114.083333333332,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 31481.3,
+    "effective_rent_won_m2_mo": 26234.416666666668,
     "rent_free_mo": 2.0,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.063692,
-    "cap_income_based": 0.040485
+    "vacancy": 0.068066,
+    "cap_income_based": 0.040188999999999996
    },
    "land": {
     "land_price_won_m2": 67120000,
@@ -775,17 +775,17 @@
    "jibun": "203",
    "address_road": "서울 중구 을지로 100",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 31336.9,
-    "effective_rent_won_m2_mo": 26114.083333333332,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 31481.3,
+    "effective_rent_won_m2_mo": 26234.416666666668,
     "rent_free_mo": 2.0,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.063692,
-    "cap_income_based": 0.040485
+    "vacancy": 0.068066,
+    "cap_income_based": 0.040188999999999996
    },
    "land": {
     "land_price_won_m2": 60890000,
@@ -822,17 +822,17 @@
    "jibun": "541",
    "address_road": "서울 중구 한강대로 416",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 31336.9,
-    "effective_rent_won_m2_mo": 26114.083333333332,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 31481.3,
+    "effective_rent_won_m2_mo": 26234.416666666668,
     "rent_free_mo": 2.0,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.063692,
-    "cap_income_based": 0.040485
+    "vacancy": 0.068066,
+    "cap_income_based": 0.040188999999999996
    },
    "land": {
     "land_price_won_m2": 52980000,
@@ -869,17 +869,17 @@
    "jibun": "1",
    "address_road": "서울 중구 청계천로 86",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 31336.9,
-    "effective_rent_won_m2_mo": 26114.083333333332,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 31481.3,
+    "effective_rent_won_m2_mo": 26234.416666666668,
     "rent_free_mo": 2.0,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.063692,
-    "cap_income_based": 0.040485
+    "vacancy": 0.068066,
+    "cap_income_based": 0.040188999999999996
    },
    "land": {
     "land_price_won_m2": 53090000,
@@ -916,17 +916,17 @@
    "jibun": "250",
    "address_road": "서울 중구 세종대로 67",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 31336.9,
-    "effective_rent_won_m2_mo": 26114.083333333332,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 31481.3,
+    "effective_rent_won_m2_mo": 26234.416666666668,
     "rent_free_mo": 2.0,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.063692,
-    "cap_income_based": 0.040485
+    "vacancy": 0.068066,
+    "cap_income_based": 0.040188999999999996
    },
    "land": {
     "land_price_won_m2": 48380000,
@@ -963,17 +963,17 @@
    "jibun": "114",
    "address_road": "서울 중구 삼일대로 343",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 31336.9,
-    "effective_rent_won_m2_mo": 26114.083333333332,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 31481.3,
+    "effective_rent_won_m2_mo": 26234.416666666668,
     "rent_free_mo": 2.0,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.063692,
-    "cap_income_based": 0.040485
+    "vacancy": 0.068066,
+    "cap_income_based": 0.040188999999999996
    },
    "land": {
     "land_price_won_m2": 49730000,
@@ -1010,17 +1010,17 @@
    "jibun": "737",
    "address_road": "서울 강남구 테헤란로 152",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 27177.9,
-    "effective_rent_won_m2_mo": 23780.662500000002,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 27319.600000000002,
+    "effective_rent_won_m2_mo": 23904.650000000005,
     "rent_free_mo": 1.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.049196,
-    "cap_income_based": 0.030452
+    "vacancy": 0.048948,
+    "cap_income_based": 0.029908
    },
    "land": {
     "land_price_won_m2": 67300000,
@@ -1057,17 +1057,17 @@
    "jibun": "159-8",
    "address_road": "서울 강남구 테헤란로 521",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 27177.9,
-    "effective_rent_won_m2_mo": 23780.662500000002,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 27319.600000000002,
+    "effective_rent_won_m2_mo": 23904.650000000005,
     "rent_free_mo": 1.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.049196,
-    "cap_income_based": 0.030452
+    "vacancy": 0.048948,
+    "cap_income_based": 0.029908
    },
    "land": {
     "land_price_won_m2": 70590000,
@@ -1104,17 +1104,17 @@
    "jibun": "159-1",
    "address_road": "서울 강남구 영동대로 511",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 27177.9,
-    "effective_rent_won_m2_mo": 23780.662500000002,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 27319.600000000002,
+    "effective_rent_won_m2_mo": 23904.650000000005,
     "rent_free_mo": 1.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.049196,
-    "cap_income_based": 0.030452
+    "vacancy": 0.048948,
+    "cap_income_based": 0.029908
    },
    "land": {
     "land_price_won_m2": 45660000,
@@ -1151,17 +1151,17 @@
    "jibun": "159",
    "address_road": "서울 강남구 영동대로 517",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 27177.9,
-    "effective_rent_won_m2_mo": 23780.662500000002,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 27319.600000000002,
+    "effective_rent_won_m2_mo": 23904.650000000005,
     "rent_free_mo": 1.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.049196,
-    "cap_income_based": 0.030452
+    "vacancy": 0.048948,
+    "cap_income_based": 0.029908
    },
    "land": {
     "land_price_won_m2": 45660000,
@@ -1198,17 +1198,17 @@
    "jibun": "676",
    "address_road": "서울 강남구 테헤란로 231",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 27177.9,
-    "effective_rent_won_m2_mo": 23780.662500000002,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 27319.600000000002,
+    "effective_rent_won_m2_mo": 23904.650000000005,
     "rent_free_mo": 1.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.049196,
-    "cap_income_based": 0.030452
+    "vacancy": 0.048948,
+    "cap_income_based": 0.029908
    },
    "land": {
     "land_price_won_m2": 58620000,
@@ -1245,17 +1245,17 @@
    "jibun": "648-9",
    "address_road": "서울 강남구 테헤란로 129",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 27177.9,
-    "effective_rent_won_m2_mo": 23780.662500000002,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 27319.600000000002,
+    "effective_rent_won_m2_mo": 23904.650000000005,
     "rent_free_mo": 1.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.049196,
-    "cap_income_based": 0.030452
+    "vacancy": 0.048948,
+    "cap_income_based": 0.029908
    },
    "land": {
     "land_price_won_m2": 66390000,
@@ -1292,17 +1292,17 @@
    "jibun": "736-1",
    "address_road": "서울 강남구 테헤란로 142",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 27177.9,
-    "effective_rent_won_m2_mo": 23780.662500000002,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 27319.600000000002,
+    "effective_rent_won_m2_mo": 23904.650000000005,
     "rent_free_mo": 1.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.049196,
-    "cap_income_based": 0.030452
+    "vacancy": 0.048948,
+    "cap_income_based": 0.029908
    },
    "land": {
     "land_price_won_m2": 64440000,
@@ -1339,17 +1339,17 @@
    "jibun": "892",
    "address_road": "서울 강남구 테헤란로 440",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 27177.9,
-    "effective_rent_won_m2_mo": 23780.662500000002,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 27319.600000000002,
+    "effective_rent_won_m2_mo": 23904.650000000005,
     "rent_free_mo": 1.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.049196,
-    "cap_income_based": 0.030452
+    "vacancy": 0.048948,
+    "cap_income_based": 0.029908
    },
    "land": {
     "land_price_won_m2": 70790000,
@@ -1386,17 +1386,17 @@
    "jibun": "679",
    "address_road": "서울 강남구 논현로 508",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 27177.9,
-    "effective_rent_won_m2_mo": 23780.662500000002,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 27319.600000000002,
+    "effective_rent_won_m2_mo": 23904.650000000005,
     "rent_free_mo": 1.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.049196,
-    "cap_income_based": 0.030452
+    "vacancy": 0.048948,
+    "cap_income_based": 0.029908
    },
    "land": {
     "land_price_won_m2": 63830000,
@@ -1434,17 +1434,17 @@
    "jibun": "946-1",
    "address_road": "서울 강남구 테헤란로 534",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 27177.9,
-    "effective_rent_won_m2_mo": 23780.662500000002,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 27319.600000000002,
+    "effective_rent_won_m2_mo": 23904.650000000005,
     "rent_free_mo": 1.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.049196,
-    "cap_income_based": 0.030452
+    "vacancy": 0.048948,
+    "cap_income_based": 0.029908
    },
    "land": {
     "land_price_won_m2": 75020000,
@@ -1482,17 +1482,17 @@
    "jibun": "891-10",
    "address_road": "서울 강남구 테헤란로 432",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 27177.9,
-    "effective_rent_won_m2_mo": 23780.662500000002,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 27319.600000000002,
+    "effective_rent_won_m2_mo": 23904.650000000005,
     "rent_free_mo": 1.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.049196,
-    "cap_income_based": 0.030452
+    "vacancy": 0.048948,
+    "cap_income_based": 0.029908
    },
    "land": {
     "land_price_won_m2": 72240000,
@@ -1530,17 +1530,17 @@
    "jibun": "944-31",
    "address_road": "서울 강남구 테헤란로 518",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 27177.9,
-    "effective_rent_won_m2_mo": 23780.662500000002,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 27319.600000000002,
+    "effective_rent_won_m2_mo": 23904.650000000005,
     "rent_free_mo": 1.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.049196,
-    "cap_income_based": 0.030452
+    "vacancy": 0.048948,
+    "cap_income_based": 0.029908
    },
    "land": {
     "land_price_won_m2": 73880000,
@@ -1577,17 +1577,17 @@
    "jibun": "707-27",
    "address_road": "서울 강남구 테헤란로 326",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 27177.9,
-    "effective_rent_won_m2_mo": 23780.662500000002,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 27319.600000000002,
+    "effective_rent_won_m2_mo": 23904.650000000005,
     "rent_free_mo": 1.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.049196,
-    "cap_income_based": 0.030452
+    "vacancy": 0.048948,
+    "cap_income_based": 0.029908
    },
    "land": {
     "land_price_won_m2": 70410000,
@@ -1624,17 +1624,17 @@
    "jibun": "1320-10",
    "address_road": "서울 서초구 서초대로74길 11",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 27177.9,
-    "effective_rent_won_m2_mo": 23780.662500000002,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 27319.600000000002,
+    "effective_rent_won_m2_mo": 23904.650000000005,
     "rent_free_mo": 1.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.049196,
-    "cap_income_based": 0.030452
+    "vacancy": 0.048948,
+    "cap_income_based": 0.029908
    },
    "land": {
     "land_price_won_m2": 95640000,
@@ -1671,17 +1671,17 @@
    "jibun": "1321-15",
    "address_road": "서울 서초구 서초대로74길 4",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 27177.9,
-    "effective_rent_won_m2_mo": 23780.662500000002,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 27319.600000000002,
+    "effective_rent_won_m2_mo": 23904.650000000005,
     "rent_free_mo": 1.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.049196,
-    "cap_income_based": 0.030452
+    "vacancy": 0.048948,
+    "cap_income_based": 0.029908
    },
    "land": {
     "land_price_won_m2": 92860000,
@@ -1718,17 +1718,17 @@
    "jibun": "1321-20",
    "address_road": "서울 서초구 서초대로74길 14",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 27177.9,
-    "effective_rent_won_m2_mo": 23780.662500000002,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 27319.600000000002,
+    "effective_rent_won_m2_mo": 23904.650000000005,
     "rent_free_mo": 1.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.049196,
-    "cap_income_based": 0.030452
+    "vacancy": 0.048948,
+    "cap_income_based": 0.029908
    },
    "land": {
     "land_price_won_m2": 79850000,
@@ -1765,17 +1765,17 @@
    "jibun": "1321-11",
    "address_road": "서울 서초구 서초대로 398",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 27177.9,
-    "effective_rent_won_m2_mo": 23780.662500000002,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 27319.600000000002,
+    "effective_rent_won_m2_mo": 23904.650000000005,
     "rent_free_mo": 1.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.049196,
-    "cap_income_based": 0.030452
+    "vacancy": 0.048948,
+    "cap_income_based": 0.029908
    },
    "land": {
     "land_price_won_m2": 71250000,
@@ -1812,17 +1812,17 @@
    "jibun": "1303-22",
    "address_road": "서울 서초구 강남대로 465",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 27177.9,
-    "effective_rent_won_m2_mo": 23780.662500000002,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 27319.600000000002,
+    "effective_rent_won_m2_mo": 23904.650000000005,
     "rent_free_mo": 1.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.049196,
-    "cap_income_based": 0.030452
+    "vacancy": 0.048948,
+    "cap_income_based": 0.029908
    },
    "land": {
     "land_price_won_m2": 90500000,
@@ -1859,17 +1859,17 @@
    "jibun": "1498-5",
    "address_road": "서울 서초구 서초대로38길 12",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 27177.9,
-    "effective_rent_won_m2_mo": 23780.662500000002,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 27319.600000000002,
+    "effective_rent_won_m2_mo": 23904.650000000005,
     "rent_free_mo": 1.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.049196,
-    "cap_income_based": 0.030452
+    "vacancy": 0.048948,
+    "cap_income_based": 0.029908
    },
    "land": {
     "land_price_won_m2": 16940000,
@@ -1906,17 +1906,17 @@
    "jibun": "1498-5",
    "address_road": "서울 서초구 서초대로38길 12",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 27177.9,
-    "effective_rent_won_m2_mo": 23780.662500000002,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 27319.600000000002,
+    "effective_rent_won_m2_mo": 23904.650000000005,
     "rent_free_mo": 1.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.049196,
-    "cap_income_based": 0.030452
+    "vacancy": 0.048948,
+    "cap_income_based": 0.029908
    },
    "land": {
     "land_price_won_m2": 16940000,
@@ -1953,17 +1953,17 @@
    "jibun": "1317-23",
    "address_road": "서울 서초구 서초대로 411",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 27177.9,
-    "effective_rent_won_m2_mo": 23780.662500000002,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 27319.600000000002,
+    "effective_rent_won_m2_mo": 23904.650000000005,
     "rent_free_mo": 1.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.049196,
-    "cap_income_based": 0.030452
+    "vacancy": 0.048948,
+    "cap_income_based": 0.029908
    },
    "land": {
     "land_price_won_m2": 74110000,
@@ -2001,17 +2001,17 @@
    "jibun": "22",
    "address_road": "서울 영등포구 여의대로 108",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 20282.1,
-    "effective_rent_won_m2_mo": 16056.662499999999,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 20383.199999999997,
+    "effective_rent_won_m2_mo": 16136.699999999997,
     "rent_free_mo": 2.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.044482999999999995,
-    "cap_income_based": 0.037492
+    "vacancy": 0.043883,
+    "cap_income_based": 0.03726
    },
    "land": {
     "land_price_won_m2": 32090000,
@@ -2048,17 +2048,17 @@
    "jibun": "22",
    "address_road": "서울 영등포구 여의대로 108",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 20282.1,
-    "effective_rent_won_m2_mo": 16056.662499999999,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 20383.199999999997,
+    "effective_rent_won_m2_mo": 16136.699999999997,
     "rent_free_mo": 2.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.044482999999999995,
-    "cap_income_based": 0.037492
+    "vacancy": 0.043883,
+    "cap_income_based": 0.03726
    },
    "land": {
     "land_price_won_m2": 32090000,
@@ -2095,17 +2095,17 @@
    "jibun": "23",
    "address_road": "서울 영등포구 국제금융로 10",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 20282.1,
-    "effective_rent_won_m2_mo": 16056.662499999999,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 20383.199999999997,
+    "effective_rent_won_m2_mo": 16136.699999999997,
     "rent_free_mo": 2.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.044482999999999995,
-    "cap_income_based": 0.037492
+    "vacancy": 0.043883,
+    "cap_income_based": 0.03726
    },
    "land": {
     "land_price_won_m2": 32090000,
@@ -2142,17 +2142,17 @@
    "jibun": "23",
    "address_road": "서울 영등포구 국제금융로 10",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 20282.1,
-    "effective_rent_won_m2_mo": 16056.662499999999,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 20383.199999999997,
+    "effective_rent_won_m2_mo": 16136.699999999997,
     "rent_free_mo": 2.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.044482999999999995,
-    "cap_income_based": 0.037492
+    "vacancy": 0.043883,
+    "cap_income_based": 0.03726
    },
    "land": {
     "land_price_won_m2": 32090000,
@@ -2189,17 +2189,17 @@
    "jibun": "23",
    "address_road": "서울 영등포구 국제금융로 10",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 20282.1,
-    "effective_rent_won_m2_mo": 16056.662499999999,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 20383.199999999997,
+    "effective_rent_won_m2_mo": 16136.699999999997,
     "rent_free_mo": 2.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.044482999999999995,
-    "cap_income_based": 0.037492
+    "vacancy": 0.043883,
+    "cap_income_based": 0.03726
    },
    "land": {
     "land_price_won_m2": 32090000,
@@ -2236,17 +2236,17 @@
    "jibun": "28-1",
    "address_road": "서울 영등포구 여의대로 24",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 20282.1,
-    "effective_rent_won_m2_mo": 16056.662499999999,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 20383.199999999997,
+    "effective_rent_won_m2_mo": 16136.699999999997,
     "rent_free_mo": 2.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.044482999999999995,
-    "cap_income_based": 0.037492
+    "vacancy": 0.043883,
+    "cap_income_based": 0.03726
    },
    "land": {
     "land_price_won_m2": 29793000,
@@ -2283,17 +2283,17 @@
    "jibun": "60",
    "address_road": "서울 영등포구 63로 50",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 20282.1,
-    "effective_rent_won_m2_mo": 16056.662499999999,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 20383.199999999997,
+    "effective_rent_won_m2_mo": 16136.699999999997,
     "rent_free_mo": 2.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.044482999999999995,
-    "cap_income_based": 0.037492
+    "vacancy": 0.043883,
+    "cap_income_based": 0.03726
    },
    "land": {
     "land_price_won_m2": 21960000,
@@ -2330,17 +2330,17 @@
    "jibun": "20",
    "address_road": "서울 영등포구 여의대로 128",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 20282.1,
-    "effective_rent_won_m2_mo": 16056.662499999999,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 20383.199999999997,
+    "effective_rent_won_m2_mo": 16136.699999999997,
     "rent_free_mo": 2.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.044482999999999995,
-    "cap_income_based": 0.037492
+    "vacancy": 0.043883,
+    "cap_income_based": 0.03726
    },
    "land": {
     "land_price_won_m2": 32090000,
@@ -2377,17 +2377,17 @@
    "jibun": "27-2",
    "address_road": "서울 영등포구 의사당대로 96",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 20282.1,
-    "effective_rent_won_m2_mo": 16056.662499999999,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 20383.199999999997,
+    "effective_rent_won_m2_mo": 16136.699999999997,
     "rent_free_mo": 2.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.044482999999999995,
-    "cap_income_based": 0.037492
+    "vacancy": 0.043883,
+    "cap_income_based": 0.03726
    },
    "land": {
     "land_price_won_m2": 32403000,
@@ -2424,17 +2424,17 @@
    "jibun": "33",
    "address_road": "서울 영등포구 여의나루로 76",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 20282.1,
-    "effective_rent_won_m2_mo": 16056.662499999999,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 20383.199999999997,
+    "effective_rent_won_m2_mo": 16136.699999999997,
     "rent_free_mo": 2.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.044482999999999995,
-    "cap_income_based": 0.037492
+    "vacancy": 0.043883,
+    "cap_income_based": 0.03726
    },
    "land": {
     "land_price_won_m2": 27950000,
@@ -2471,17 +2471,17 @@
    "jibun": "23-8",
    "address_road": "서울 영등포구 국제금융로2길 32",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 20282.1,
-    "effective_rent_won_m2_mo": 16056.662499999999,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 20383.199999999997,
+    "effective_rent_won_m2_mo": 16136.699999999997,
     "rent_free_mo": 2.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.044482999999999995,
-    "cap_income_based": 0.037492
+    "vacancy": 0.043883,
+    "cap_income_based": 0.03726
    },
    "land": {
     "land_price_won_m2": 25980000,
@@ -2518,17 +2518,17 @@
    "jibun": "27-3",
    "address_road": "서울 영등포구 의사당대로 82",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 20282.1,
-    "effective_rent_won_m2_mo": 16056.662499999999,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 20383.199999999997,
+    "effective_rent_won_m2_mo": 16136.699999999997,
     "rent_free_mo": 2.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.044482999999999995,
-    "cap_income_based": 0.037492
+    "vacancy": 0.043883,
+    "cap_income_based": 0.03726
    },
    "land": {
     "land_price_won_m2": 28649000,
@@ -2565,17 +2565,17 @@
    "jibun": "27-1",
    "address_road": "서울 영등포구 의사당대로 88",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 20282.1,
-    "effective_rent_won_m2_mo": 16056.662499999999,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 20383.199999999997,
+    "effective_rent_won_m2_mo": 16136.699999999997,
     "rent_free_mo": 2.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.044482999999999995,
-    "cap_income_based": 0.037492
+    "vacancy": 0.043883,
+    "cap_income_based": 0.03726
    },
    "land": {
     "land_price_won_m2": 28650000,
@@ -2612,17 +2612,17 @@
    "jibun": "525",
    "address_road": "서울 영등포구 국제금융로 39",
    "region_figures": {
-    "latest_quarter": "2026Q1",
-    "nominal_rent_won_m2_mo": 20282.1,
-    "effective_rent_won_m2_mo": 16056.662499999999,
+    "latest_quarter": "2026Q2",
+    "nominal_rent_won_m2_mo": 20383.199999999997,
+    "effective_rent_won_m2_mo": 16136.699999999997,
     "rent_free_mo": 2.5,
     "rent_free_meta": {
      "unit": "개월/년",
      "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
      "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
     },
-    "vacancy": 0.044482999999999995,
-    "cap_income_based": 0.037492
+    "vacancy": 0.043883,
+    "cap_income_based": 0.03726
    },
    "land": {
     "land_price_won_m2": 27950000,

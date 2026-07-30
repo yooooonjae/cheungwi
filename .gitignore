@@ -19,3 +19,9 @@ data/raw/trades/
 # 부분 수집이 완성본을 덮어쓰지 않으려고 비켜 쓴 산출. 로컬에서 보라고 남기는 것이지 커밋 대상이 아니다.
 data/trades.partial.json
 data/reits.partial.json
+
+# wrangler 가 배포할 때 저장소 안에 만드는 로컬 상태 디렉터리(계정·빌드 캐시). 배포 산출이 아니다.
+.wrangler/
+
+# 파이프라인 실행 기록. 매 실행마다 로그 한 장 + 마지막 실행 상태 한 장이 쌓인다(로컬 관찰용).
+logs/

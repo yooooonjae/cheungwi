@@ -18,6 +18,8 @@ from pathlib import Path
 
 import pytest
 
+from src.analysis.acquisition import max_loan
+
 ROOT = Path(__file__).resolve().parents[1]
 RUNNER = str(Path(__file__).resolve().parent / "charts_runner.js")
 NODE = shutil.which("node")
@@ -220,25 +222,44 @@ def test_text_is_escaped_so_a_label_cannot_close_a_tag():
 # 서장 모델 — 실데이터에서 단면 한 장이 나온다
 # ------------------------------------------------------------------ #
 def test_region_model_carries_the_three_numbers_of_the_gauge():
-    m = value("hero", "regionModel", market(), underwriting(), "도심")
+    """게이지의 세 수는 시장 산출의 그 자리에서 그대로 온다.
+
+    값을 상수로 박아 두지 않는다 — R-ONE 은 분기마다 갱신되고 파이프라인이 매일 돌기
+    때문에, 박아 두면 데이터가 옳게 움직인 날 테스트가 깨진다. 여기서 지켜야 할 것은
+    '어느 자리를 읽는가'(단위·필드)이지 그 날의 수치가 아니다.
+    """
+    mk = market()
+    src = mk["regions"]["도심"]
+    m = value("hero", "regionModel", mk, underwriting(), "도심")
     assert m["name"] == "도심" and m["buildings"] == 20
-    assert m["vacancy"] == pytest.approx(0.063692)
-    assert m["cap"] == pytest.approx(0.040485)
-    assert m["spreadBp"] == pytest.approx(-13.25)
-    assert m["rent"]["effective"] == pytest.approx(26114.083333333332)
-    assert m["rent"]["rentFreeMo"] == 2.0
+    assert m["vacancy"] == pytest.approx(src["vacancy"])
+    assert m["vacancy"] == pytest.approx(src["vacancy_pct"] / 100)   # 소수와 %를 뒤섞지 않는다
+    assert m["cap"] == pytest.approx(src["cap"]["cap_income_based"])
+    assert m["spreadBp"] == pytest.approx(src["spread_vs_treasury10y_bp"])
+    assert m["rent"]["effective"] == pytest.approx(src["effective_rent_won_m2_mo"])
+    assert m["rent"]["effective"] < m["rent"]["nominal"], "렌트프리를 뺀 값이 명목보다 작다"
+    assert m["rent"]["rentFreeMo"] == src["rent_free_mo"]
     assert m["rent"]["source"], "렌트프리 가정의 출처가 모델에 실려야 한다"
 
 
 def test_region_model_stack_is_the_engine_triple_constraint():
-    """자본 지층은 그림을 위해 지어낸 숫자가 아니라 엔진의 삼중 제약이다."""
-    m = value("hero", "regionModel", market(), underwriting(), "도심")
+    """자본 지층은 그림을 위해 지어낸 숫자가 아니라 엔진의 삼중 제약이다.
+
+    기대값은 파이썬 엔진을 같은 입력으로 불러 만든다 — 상수를 박으면 cap 이 움직인 날
+    깨지고, 그림이 제 손으로 만든 수를 그려도 잡지 못한다.
+    """
+    mk, uw = market(), underwriting()
+    a = uw["assumptions"]
+    cap = mk["regions"]["도심"]["cap"]["cap_income_based"]
+    expect = max_loan(cap * 100, 100, a["ltv_max"], a["dscr_min"],
+                      a["debt_yield_min"], a["loan_rate"], io=True)
+    m = value("hero", "regionModel", mk, uw, "도심")
     s = m["stack"]
-    assert s["senior"] == pytest.approx(50.60625)
-    assert s["binding"] == "debt_yield"
-    assert s["ltvCap"] == pytest.approx(55.0)
-    assert s["mezzRoom"] == pytest.approx(55.0 - 50.60625)
-    assert s["equity"] == pytest.approx(45.0)
+    assert s["senior"] == pytest.approx(expect["loan_won"])
+    assert s["binding"] == expect["binding"]
+    assert s["ltvCap"] == pytest.approx(a["ltv_max"] * 100)
+    assert s["mezzRoom"] == pytest.approx(s["ltvCap"] - s["senior"])
+    assert s["equity"] == pytest.approx(100 - s["ltvCap"])
     assert s["senior"] + s["mezzRoom"] + s["equity"] == pytest.approx(100.0)
     assert s["waterline"] == pytest.approx(s["senior"]), "수면은 선순위 실선까지다"
 
@@ -314,10 +335,11 @@ def test_hero_reading_puts_every_drawn_number_into_words():
     m = value("hero", "regionModel", market(), underwriting(), "도심")
     lines = value("hero", "readingLines", m)
     joined = " ".join(lines)
-    assert "120칸" in joined and "8칸" in joined
-    assert "6.37" in joined            # 공실률
-    assert "50.6" in joined            # 선순위 = 수면
-    assert "45.0" in joined            # 지분
+    assert "120칸" in joined and "%d칸" % m["tower"]["dark"] in joined
+    # 글줄이 그림과 같은 수를 말하는지만 본다 — 수 자체는 분기마다 움직인다
+    assert "%.2f" % m["vacancyPct"] in joined                 # 공실률
+    assert "%.1f" % m["stack"]["senior"] in joined            # 선순위 = 수면
+    assert "%.1f" % m["stack"]["equity"] in joined            # 지분
     assert "Debt Yield" in joined      # 묶는 제약
 
 
@@ -331,7 +353,7 @@ def test_the_mezzanine_is_marked_as_an_assumption_in_words_not_only_in_hatching(
     caveat = "메자닌 자리는 관측이 아니라 LTV 한도까지 남은 자리라는 가정이다."
 
     second = value("hero", "readingLines", m)[1]
-    assert "메자닌 자리 4.4(가정)" in second
+    assert "메자닌 자리 %.1f(가정)" % m["stack"]["mezzRoom"] in second
     assert caveat in second
 
     for compact in (False, True):

@@ -1,11 +1,11 @@
 {
  "schema": "cheungwi/market/1",
  "as_of": {
-  "rone_collected_at": "2026-07-30",
-  "rone_latest_quarter": "2026Q1",
-  "rates_collected_at": "2026-07-30",
+  "rone_collected_at": "2026-07-31",
+  "rone_latest_quarter": "2026Q2",
+  "rates_collected_at": "2026-07-31",
   "rates_latest_month": "2026-06",
-  "reits_collected_at": "2026-07-30"
+  "reits_collected_at": "2026-07-31"
  },
  "units": {
   "rent": "원/㎡·월(임대면적 기준). R-ONE 원값은 천원/㎡·월이라 ×1000 했다.",
@@ -27,25 +27,25 @@
    "seed_region_codes": [
     "CBD"
    ],
-   "latest_quarter": "2026Q1",
-   "rent_level_raw_thousand_won_m2_mo": 31.3369,
-   "nominal_rent_won_m2_mo": 31336.9,
+   "latest_quarter": "2026Q2",
+   "rent_level_raw_thousand_won_m2_mo": 31.4813,
+   "nominal_rent_won_m2_mo": 31481.3,
    "rent_free_mo": 2.0,
    "rent_free_meta": {
     "unit": "개월/년",
     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
    },
-   "effective_rent_won_m2_mo": 26114.083333333332,
-   "vacancy_pct": 6.3692,
-   "vacancy": 0.063692,
+   "effective_rent_won_m2_mo": 26234.416666666668,
+   "vacancy_pct": 6.8066,
+   "vacancy": 0.068066,
    "cap": {
-    "cap_income_based": 0.040485,
+    "cap_income_based": 0.040188999999999996,
     "quarters_used": [
-     1.0789,
      0.8543,
      1.049,
-     1.0663
+     1.0663,
+     1.0493
     ],
     "quarters_used_unit": "%(R-ONE 분기 소득수익률 원값 — 소수가 아니다)",
     "caveats": [
@@ -54,16 +54,9 @@
      "소득수익률은 R-ONE 표본의 평가 기준 순영업소득/자산가치이고, 이 엔진이 쓰는 NOI 정의(전용률·공실·미회수 opex 가정)와 산출 방식이 다르다. 벤치마크와 실거래 역산(implied)의 괴리를 평균으로 뭉개지 말고 그대로 공개하라."
     ]
    },
-   "spread_vs_treasury10y_bp": -13.249999999999998,
-   "spread_note": "cap 벤치마크 0.040485 − 국고채10년 0.041810(2026-06). 부호를 자르지 않는다 — 음수는 권역 소득수익률이 무위험 장기금리를 밑돈다는 뜻이고, 그 자체가 관측이다.",
+   "spread_vs_treasury10y_bp": -16.210000000000043,
+   "spread_note": "cap 벤치마크 0.040189 − 국고채10년 0.041810(2026-06). 부호를 자르지 않는다 — 음수는 권역 소득수익률이 무위험 장기금리를 밑돈다는 뜻이고, 그 자체가 관측이다.",
    "trend_quarters": [
-    {
-     "yq": "2023Q2",
-     "nominal_rent_won_m2_mo": 28607.9,
-     "effective_rent_won_m2_mo": 23839.916666666668,
-     "vacancy_pct": 9.1795,
-     "income_yield_pct": 1.0665
-    },
     {
      "yq": "2023Q3",
      "nominal_rent_won_m2_mo": 28655.899999999998,
@@ -140,6 +133,13 @@
      "effective_rent_won_m2_mo": 26114.083333333332,
      "vacancy_pct": 6.3692,
      "income_yield_pct": 1.0663
+    },
+    {
+     "yq": "2026Q2",
+     "nominal_rent_won_m2_mo": 31481.3,
+     "effective_rent_won_m2_mo": 26234.416666666668,
+     "vacancy_pct": 6.8066,
+     "income_yield_pct": 1.0493
     }
    ]
   },
@@ -148,25 +148,25 @@
    "seed_region_codes": [
     "GBD"
    ],
-   "latest_quarter": "2026Q1",
-   "rent_level_raw_thousand_won_m2_mo": 27.1779,
-   "nominal_rent_won_m2_mo": 27177.9,
+   "latest_quarter": "2026Q2",
+   "rent_level_raw_thousand_won_m2_mo": 27.3196,
+   "nominal_rent_won_m2_mo": 27319.600000000002,
    "rent_free_mo": 1.5,
    "rent_free_meta": {
     "unit": "개월/년",
     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
    },
-   "effective_rent_won_m2_mo": 23780.662500000002,
-   "vacancy_pct": 4.9196,
-   "vacancy": 0.049196,
+   "effective_rent_won_m2_mo": 23904.650000000005,
+   "vacancy_pct": 4.8948,
+   "vacancy": 0.048948,
    "cap": {
-    "cap_income_based": 0.030452,
+    "cap_income_based": 0.029908,
     "quarters_used": [
-     0.847,
      0.5852,
      0.8082,
-     0.8048
+     0.8048,
+     0.7926
     ],
     "quarters_used_unit": "%(R-ONE 분기 소득수익률 원값 — 소수가 아니다)",
     "caveats": [
@@ -175,16 +175,9 @@
      "소득수익률은 R-ONE 표본의 평가 기준 순영업소득/자산가치이고, 이 엔진이 쓰는 NOI 정의(전용률·공실·미회수 opex 가정)와 산출 방식이 다르다. 벤치마크와 실거래 역산(implied)의 괴리를 평균으로 뭉개지 말고 그대로 공개하라."
     ]
    },
-   "spread_vs_treasury10y_bp": -113.58,
-   "spread_note": "cap 벤치마크 0.030452 − 국고채10년 0.041810(2026-06). 부호를 자르지 않는다 — 음수는 권역 소득수익률이 무위험 장기금리를 밑돈다는 뜻이고, 그 자체가 관측이다.",
+   "spread_vs_treasury10y_bp": -119.02,
+   "spread_note": "cap 벤치마크 0.029908 − 국고채10년 0.041810(2026-06). 부호를 자르지 않는다 — 음수는 권역 소득수익률이 무위험 장기금리를 밑돈다는 뜻이고, 그 자체가 관측이다.",
    "trend_quarters": [
-    {
-     "yq": "2023Q2",
-     "nominal_rent_won_m2_mo": 23694.0,
-     "effective_rent_won_m2_mo": 20732.25,
-     "vacancy_pct": 4.276,
-     "income_yield_pct": 0.882
-    },
     {
      "yq": "2023Q3",
      "nominal_rent_won_m2_mo": 23946.4,
@@ -261,6 +254,13 @@
      "effective_rent_won_m2_mo": 23780.662500000002,
      "vacancy_pct": 4.9196,
      "income_yield_pct": 0.8048
+    },
+    {
+     "yq": "2026Q2",
+     "nominal_rent_won_m2_mo": 27319.600000000002,
+     "effective_rent_won_m2_mo": 23904.650000000005,
+     "vacancy_pct": 4.8948,
+     "income_yield_pct": 0.7926
     }
    ]
   },
@@ -269,25 +269,25 @@
    "seed_region_codes": [
     "YBD"
    ],
-   "latest_quarter": "2026Q1",
-   "rent_level_raw_thousand_won_m2_mo": 20.2821,
-   "nominal_rent_won_m2_mo": 20282.1,
+   "latest_quarter": "2026Q2",
+   "rent_level_raw_thousand_won_m2_mo": 20.3832,
+   "nominal_rent_won_m2_mo": 20383.199999999997,
    "rent_free_mo": 2.5,
    "rent_free_meta": {
     "unit": "개월/년",
     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
    },
-   "effective_rent_won_m2_mo": 16056.662499999999,
-   "vacancy_pct": 4.4483,
-   "vacancy": 0.044482999999999995,
+   "effective_rent_won_m2_mo": 16136.699999999997,
+   "vacancy_pct": 4.3883,
+   "vacancy": 0.043883,
    "cap": {
-    "cap_income_based": 0.037492,
+    "cap_income_based": 0.03726,
     "quarters_used": [
-     1.0118,
      0.7799,
      0.9649,
-     0.9926
+     0.9926,
+     0.9886
     ],
     "quarters_used_unit": "%(R-ONE 분기 소득수익률 원값 — 소수가 아니다)",
     "caveats": [
@@ -296,16 +296,9 @@
      "소득수익률은 R-ONE 표본의 평가 기준 순영업소득/자산가치이고, 이 엔진이 쓰는 NOI 정의(전용률·공실·미회수 opex 가정)와 산출 방식이 다르다. 벤치마크와 실거래 역산(implied)의 괴리를 평균으로 뭉개지 말고 그대로 공개하라."
     ]
    },
-   "spread_vs_treasury10y_bp": -43.18000000000002,
-   "spread_note": "cap 벤치마크 0.037492 − 국고채10년 0.041810(2026-06). 부호를 자르지 않는다 — 음수는 권역 소득수익률이 무위험 장기금리를 밑돈다는 뜻이고, 그 자체가 관측이다.",
+   "spread_vs_treasury10y_bp": -45.499999999999986,
+   "spread_note": "cap 벤치마크 0.037260 − 국고채10년 0.041810(2026-06). 부호를 자르지 않는다 — 음수는 권역 소득수익률이 무위험 장기금리를 밑돈다는 뜻이고, 그 자체가 관측이다.",
    "trend_quarters": [
-    {
-     "yq": "2023Q2",
-     "nominal_rent_won_m2_mo": 18678.4,
-     "effective_rent_won_m2_mo": 14787.066666666668,
-     "vacancy_pct": 4.8683,
-     "income_yield_pct": 1.0579
-    },
     {
      "yq": "2023Q3",
      "nominal_rent_won_m2_mo": 18710.0,
@@ -382,21 +375,28 @@
      "effective_rent_won_m2_mo": 16056.662499999999,
      "vacancy_pct": 4.4483,
      "income_yield_pct": 0.9926
+    },
+    {
+     "yq": "2026Q2",
+     "nominal_rent_won_m2_mo": 20383.199999999997,
+     "effective_rent_won_m2_mo": 16136.699999999997,
+     "vacancy_pct": 4.3883,
+     "income_yield_pct": 0.9886
     }
    ]
   }
  },
  "seoul_reference": {
-  "latest_quarter": "2026Q1",
-  "nominal_rent_won_m2_mo": 24948.8,
-  "vacancy_pct": 5.1866,
+  "latest_quarter": "2026Q2",
+  "nominal_rent_won_m2_mo": 25068.8,
+  "vacancy_pct": 5.4438,
   "cap": {
-   "cap_income_based": 0.036098,
+   "cap_income_based": 0.035789,
    "quarters_used": [
-    0.9745,
     0.7377,
     0.9413,
-    0.9563
+    0.9563,
+    0.9436
    ],
    "quarters_used_unit": "%(R-ONE 분기 소득수익률 원값 — 소수가 아니다)",
    "caveats": [
@@ -411,24 +411,24 @@
  "sub_regions": {
   "서울>강남>강남대로": {
    "parent_region": "강남",
-   "latest_quarter": "2026Q1",
-   "rent_level_raw_thousand_won_m2_mo": 32.0683,
-   "nominal_rent_won_m2_mo": 32068.3,
+   "latest_quarter": "2026Q2",
+   "rent_level_raw_thousand_won_m2_mo": 32.2556,
+   "nominal_rent_won_m2_mo": 32255.600000000002,
    "rent_free_mo": 1.5,
    "rent_free_meta": {
     "unit": "개월/년",
     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
    },
-   "effective_rent_won_m2_mo": 28059.762499999997,
-   "vacancy_pct": 4.0728,
+   "effective_rent_won_m2_mo": 28223.650000000005,
+   "vacancy_pct": 4.1518,
    "cap": {
-    "cap_income_based": 0.031207,
+    "cap_income_based": 0.030961,
     "quarters_used": [
-     0.8329,
      0.6275,
      0.8332,
-     0.8271
+     0.8271,
+     0.8083
     ],
     "quarters_used_unit": "%(R-ONE 분기 소득수익률 원값 — 소수가 아니다)",
     "caveats": [
@@ -441,24 +441,24 @@
   },
   "서울>강남>교대역": {
    "parent_region": "강남",
-   "latest_quarter": "2026Q1",
-   "rent_level_raw_thousand_won_m2_mo": 22.149,
-   "nominal_rent_won_m2_mo": 22149.0,
+   "latest_quarter": "2026Q2",
+   "rent_level_raw_thousand_won_m2_mo": 22.2591,
+   "nominal_rent_won_m2_mo": 22259.1,
    "rent_free_mo": 1.5,
    "rent_free_meta": {
     "unit": "개월/년",
     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
    },
-   "effective_rent_won_m2_mo": 19380.375,
-   "vacancy_pct": 6.3576,
+   "effective_rent_won_m2_mo": 19476.712499999998,
+   "vacancy_pct": 7.5078,
    "cap": {
-    "cap_income_based": 0.023638,
+    "cap_income_based": 0.023056,
     "quarters_used": [
-     0.6722,
      0.4124,
      0.6478,
-     0.6314
+     0.6314,
+     0.614
     ],
     "quarters_used_unit": "%(R-ONE 분기 소득수익률 원값 — 소수가 아니다)",
     "caveats": [
@@ -471,24 +471,24 @@
   },
   "서울>강남>남부터미널": {
    "parent_region": "강남",
-   "latest_quarter": "2026Q1",
-   "rent_level_raw_thousand_won_m2_mo": 16.4068,
-   "nominal_rent_won_m2_mo": 16406.8,
+   "latest_quarter": "2026Q2",
+   "rent_level_raw_thousand_won_m2_mo": 16.4599,
+   "nominal_rent_won_m2_mo": 16459.9,
    "rent_free_mo": 1.5,
    "rent_free_meta": {
     "unit": "개월/년",
     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
    },
-   "effective_rent_won_m2_mo": 14355.949999999999,
-   "vacancy_pct": 10.9645,
+   "effective_rent_won_m2_mo": 14402.4125,
+   "vacancy_pct": 10.5899,
    "cap": {
-    "cap_income_based": 0.028831,
+    "cap_income_based": 0.028154,
     "quarters_used": [
-     0.8087,
      0.5463,
      0.7686,
-     0.7595
+     0.7595,
+     0.741
     ],
     "quarters_used_unit": "%(R-ONE 분기 소득수익률 원값 — 소수가 아니다)",
     "caveats": [
@@ -501,24 +501,24 @@
   },
   "서울>강남>논현역": {
    "parent_region": "강남",
-   "latest_quarter": "2026Q1",
-   "rent_level_raw_thousand_won_m2_mo": 26.5549,
-   "nominal_rent_won_m2_mo": 26554.9,
+   "latest_quarter": "2026Q2",
+   "rent_level_raw_thousand_won_m2_mo": 26.6357,
+   "nominal_rent_won_m2_mo": 26635.7,
    "rent_free_mo": 1.5,
    "rent_free_meta": {
     "unit": "개월/년",
     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
    },
-   "effective_rent_won_m2_mo": 23235.537500000002,
+   "effective_rent_won_m2_mo": 23306.237500000003,
    "vacancy_pct": 8.1183,
    "cap": {
-    "cap_income_based": 0.026332,
+    "cap_income_based": 0.02588,
     "quarters_used": [
-     0.744,
      0.4606,
      0.7163,
-     0.7123
+     0.7123,
+     0.6988
     ],
     "quarters_used_unit": "%(R-ONE 분기 소득수익률 원값 — 소수가 아니다)",
     "caveats": [
@@ -531,24 +531,24 @@
   },
   "서울>강남>도산대로": {
    "parent_region": "강남",
-   "latest_quarter": "2026Q1",
-   "rent_level_raw_thousand_won_m2_mo": 24.7674,
-   "nominal_rent_won_m2_mo": 24767.399999999998,
+   "latest_quarter": "2026Q2",
+   "rent_level_raw_thousand_won_m2_mo": 24.9156,
+   "nominal_rent_won_m2_mo": 24915.600000000002,
    "rent_free_mo": 1.5,
    "rent_free_meta": {
     "unit": "개월/년",
     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
    },
-   "effective_rent_won_m2_mo": 21671.475,
+   "effective_rent_won_m2_mo": 21801.15,
    "vacancy_pct": 5.1301,
    "cap": {
-    "cap_income_based": 0.023992,
+    "cap_income_based": 0.023589000000000002,
     "quarters_used": [
-     0.6696,
      0.4498,
      0.642,
-     0.6378
+     0.6378,
+     0.6293
     ],
     "quarters_used_unit": "%(R-ONE 분기 소득수익률 원값 — 소수가 아니다)",
     "caveats": [
@@ -591,24 +591,24 @@
   },
   "서울>강남>신사역": {
    "parent_region": "강남",
-   "latest_quarter": "2026Q1",
-   "rent_level_raw_thousand_won_m2_mo": 21.5722,
-   "nominal_rent_won_m2_mo": 21572.199999999997,
+   "latest_quarter": "2026Q2",
+   "rent_level_raw_thousand_won_m2_mo": 21.5995,
+   "nominal_rent_won_m2_mo": 21599.5,
    "rent_free_mo": 1.5,
    "rent_free_meta": {
     "unit": "개월/년",
     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
    },
-   "effective_rent_won_m2_mo": 18875.675,
-   "vacancy_pct": 2.1722,
+   "effective_rent_won_m2_mo": 18899.5625,
+   "vacancy_pct": 3.313,
    "cap": {
-    "cap_income_based": 0.024851,
+    "cap_income_based": 0.024537999999999997,
     "quarters_used": [
-     0.6959,
      0.4278,
      0.6778,
-     0.6836
+     0.6836,
+     0.6646
     ],
     "quarters_used_unit": "%(R-ONE 분기 소득수익률 원값 — 소수가 아니다)",
     "caveats": [
@@ -621,24 +621,24 @@
   },
   "서울>강남>테헤란로": {
    "parent_region": "강남",
-   "latest_quarter": "2026Q1",
-   "rent_level_raw_thousand_won_m2_mo": 27.543,
-   "nominal_rent_won_m2_mo": 27543.0,
+   "latest_quarter": "2026Q2",
+   "rent_level_raw_thousand_won_m2_mo": 27.6912,
+   "nominal_rent_won_m2_mo": 27691.199999999997,
    "rent_free_mo": 1.5,
    "rent_free_meta": {
     "unit": "개월/년",
     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
    },
-   "effective_rent_won_m2_mo": 24100.125,
-   "vacancy_pct": 4.8245,
+   "effective_rent_won_m2_mo": 24229.8,
+   "vacancy_pct": 4.5567,
    "cap": {
-    "cap_income_based": 0.032142,
+    "cap_income_based": 0.031519,
     "quarters_used": [
-     0.8977,
      0.6241,
      0.8473,
-     0.8451
+     0.8451,
+     0.8354
     ],
     "quarters_used_unit": "%(R-ONE 분기 소득수익률 원값 — 소수가 아니다)",
     "caveats": [
@@ -651,24 +651,24 @@
   },
   "서울>도심>광화문": {
    "parent_region": "도심",
-   "latest_quarter": "2026Q1",
-   "rent_level_raw_thousand_won_m2_mo": 42.5117,
-   "nominal_rent_won_m2_mo": 42511.7,
+   "latest_quarter": "2026Q2",
+   "rent_level_raw_thousand_won_m2_mo": 42.6738,
+   "nominal_rent_won_m2_mo": 42673.8,
    "rent_free_mo": 2.0,
    "rent_free_meta": {
     "unit": "개월/년",
     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
    },
-   "effective_rent_won_m2_mo": 35426.416666666664,
-   "vacancy_pct": 2.5884,
+   "effective_rent_won_m2_mo": 35561.5,
+   "vacancy_pct": 3.0682,
    "cap": {
-    "cap_income_based": 0.054131,
+    "cap_income_based": 0.05372,
     "quarters_used": [
-     1.429,
      1.1803,
      1.3875,
-     1.4163
+     1.4163,
+     1.3879
     ],
     "quarters_used_unit": "%(R-ONE 분기 소득수익률 원값 — 소수가 아니다)",
     "caveats": [
@@ -681,24 +681,24 @@
   },
   "서울>도심>남대문": {
    "parent_region": "도심",
-   "latest_quarter": "2026Q1",
-   "rent_level_raw_thousand_won_m2_mo": 35.1424,
-   "nominal_rent_won_m2_mo": 35142.4,
+   "latest_quarter": "2026Q2",
+   "rent_level_raw_thousand_won_m2_mo": 35.4574,
+   "nominal_rent_won_m2_mo": 35457.4,
    "rent_free_mo": 2.0,
    "rent_free_meta": {
     "unit": "개월/년",
     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
    },
-   "effective_rent_won_m2_mo": 29285.333333333332,
-   "vacancy_pct": 13.2548,
+   "effective_rent_won_m2_mo": 29547.833333333332,
+   "vacancy_pct": 14.324,
    "cap": {
-    "cap_income_based": 0.031078,
+    "cap_income_based": 0.030792,
     "quarters_used": [
-     0.835,
      0.6361,
      0.813,
-     0.8237
+     0.8237,
+     0.8064
     ],
     "quarters_used_unit": "%(R-ONE 분기 소득수익률 원값 — 소수가 아니다)",
     "caveats": [
@@ -711,24 +711,24 @@
   },
   "서울>도심>동대문": {
    "parent_region": "도심",
-   "latest_quarter": "2026Q1",
-   "rent_level_raw_thousand_won_m2_mo": 13.9665,
-   "nominal_rent_won_m2_mo": 13966.5,
+   "latest_quarter": "2026Q2",
+   "rent_level_raw_thousand_won_m2_mo": 13.988,
+   "nominal_rent_won_m2_mo": 13988.0,
    "rent_free_mo": 2.0,
    "rent_free_meta": {
     "unit": "개월/년",
     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
    },
-   "effective_rent_won_m2_mo": 11638.75,
-   "vacancy_pct": 14.7901,
+   "effective_rent_won_m2_mo": 11656.666666666666,
+   "vacancy_pct": 14.3379,
    "cap": {
-    "cap_income_based": 0.032285,
+    "cap_income_based": 0.032131,
     "quarters_used": [
-     0.8793,
      0.6431,
      0.8428,
-     0.8633
+     0.8633,
+     0.8639
     ],
     "quarters_used_unit": "%(R-ONE 분기 소득수익률 원값 — 소수가 아니다)",
     "caveats": [
@@ -741,24 +741,24 @@
   },
   "서울>도심>명동": {
    "parent_region": "도심",
-   "latest_quarter": "2026Q1",
-   "rent_level_raw_thousand_won_m2_mo": 22.0327,
-   "nominal_rent_won_m2_mo": 22032.699999999997,
+   "latest_quarter": "2026Q2",
+   "rent_level_raw_thousand_won_m2_mo": 22.3225,
+   "nominal_rent_won_m2_mo": 22322.5,
    "rent_free_mo": 2.0,
    "rent_free_meta": {
     "unit": "개월/년",
     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
    },
-   "effective_rent_won_m2_mo": 18360.583333333332,
-   "vacancy_pct": 8.3777,
+   "effective_rent_won_m2_mo": 18602.083333333332,
+   "vacancy_pct": 8.5649,
    "cap": {
-    "cap_income_based": 0.032641,
+    "cap_income_based": 0.032337,
     "quarters_used": [
-     0.8862,
      0.6473,
      0.8649,
-     0.8657
+     0.8657,
+     0.8558
     ],
     "quarters_used_unit": "%(R-ONE 분기 소득수익률 원값 — 소수가 아니다)",
     "caveats": [
@@ -801,24 +801,24 @@
   },
   "서울>도심>시청": {
    "parent_region": "도심",
-   "latest_quarter": "2026Q1",
-   "rent_level_raw_thousand_won_m2_mo": 25.4,
-   "nominal_rent_won_m2_mo": 25400.0,
+   "latest_quarter": "2026Q2",
+   "rent_level_raw_thousand_won_m2_mo": 25.4609,
+   "nominal_rent_won_m2_mo": 25460.899999999998,
    "rent_free_mo": 2.0,
    "rent_free_meta": {
     "unit": "개월/년",
     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
    },
-   "effective_rent_won_m2_mo": 21166.666666666668,
-   "vacancy_pct": 3.1781,
+   "effective_rent_won_m2_mo": 21217.416666666664,
+   "vacancy_pct": 3.5592,
    "cap": {
-    "cap_income_based": 0.043805,
+    "cap_income_based": 0.043606,
     "quarters_used": [
-     1.1611,
      0.9292,
      1.1349,
-     1.1553
+     1.1553,
+     1.1412
     ],
     "quarters_used_unit": "%(R-ONE 분기 소득수익률 원값 — 소수가 아니다)",
     "caveats": [
@@ -831,24 +831,24 @@
   },
   "서울>도심>을지로": {
    "parent_region": "도심",
-   "latest_quarter": "2026Q1",
-   "rent_level_raw_thousand_won_m2_mo": 34.4239,
-   "nominal_rent_won_m2_mo": 34423.9,
+   "latest_quarter": "2026Q2",
+   "rent_level_raw_thousand_won_m2_mo": 34.4563,
+   "nominal_rent_won_m2_mo": 34456.299999999996,
    "rent_free_mo": 2.0,
    "rent_free_meta": {
     "unit": "개월/년",
     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
    },
-   "effective_rent_won_m2_mo": 28686.583333333332,
-   "vacancy_pct": 5.2385,
+   "effective_rent_won_m2_mo": 28713.58333333333,
+   "vacancy_pct": 5.801,
    "cap": {
-    "cap_income_based": 0.037555,
+    "cap_income_based": 0.037293,
     "quarters_used": [
-     0.9982,
      0.7969,
      0.9717,
-     0.9887
+     0.9887,
+     0.972
     ],
     "quarters_used_unit": "%(R-ONE 분기 소득수익률 원값 — 소수가 아니다)",
     "caveats": [
@@ -861,24 +861,24 @@
   },
   "서울>도심>종로": {
    "parent_region": "도심",
-   "latest_quarter": "2026Q1",
-   "rent_level_raw_thousand_won_m2_mo": 21.3122,
-   "nominal_rent_won_m2_mo": 21312.2,
+   "latest_quarter": "2026Q2",
+   "rent_level_raw_thousand_won_m2_mo": 21.4475,
+   "nominal_rent_won_m2_mo": 21447.5,
    "rent_free_mo": 2.0,
    "rent_free_meta": {
     "unit": "개월/년",
     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
    },
-   "effective_rent_won_m2_mo": 17760.166666666668,
-   "vacancy_pct": 2.8168,
+   "effective_rent_won_m2_mo": 17872.916666666668,
+   "vacancy_pct": 2.2305,
    "cap": {
-    "cap_income_based": 0.046137,
+    "cap_income_based": 0.045710999999999995,
     "quarters_used": [
-     1.231,
      0.9976,
      1.1878,
-     1.1973
+     1.1973,
+     1.1884
     ],
     "quarters_used_unit": "%(R-ONE 분기 소득수익률 원값 — 소수가 아니다)",
     "caveats": [
@@ -891,24 +891,24 @@
   },
   "서울>도심>충무로": {
    "parent_region": "도심",
-   "latest_quarter": "2026Q1",
-   "rent_level_raw_thousand_won_m2_mo": 14.3752,
-   "nominal_rent_won_m2_mo": 14375.199999999999,
+   "latest_quarter": "2026Q2",
+   "rent_level_raw_thousand_won_m2_mo": 14.3825,
+   "nominal_rent_won_m2_mo": 14382.5,
    "rent_free_mo": 2.0,
    "rent_free_meta": {
     "unit": "개월/년",
     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
    },
-   "effective_rent_won_m2_mo": 11979.333333333334,
-   "vacancy_pct": 7.8321,
+   "effective_rent_won_m2_mo": 11985.416666666666,
+   "vacancy_pct": 7.787,
    "cap": {
-    "cap_income_based": 0.035176,
+    "cap_income_based": 0.034910000000000004,
     "quarters_used": [
-     0.9533,
      0.7102,
      0.9116,
-     0.9425
+     0.9425,
+     0.9267
     ],
     "quarters_used_unit": "%(R-ONE 분기 소득수익률 원값 — 소수가 아니다)",
     "caveats": [
@@ -921,24 +921,24 @@
   },
   "서울>여의도마포>공덕역": {
    "parent_region": "여의도마포",
-   "latest_quarter": "2026Q1",
-   "rent_level_raw_thousand_won_m2_mo": 16.0946,
-   "nominal_rent_won_m2_mo": 16094.6,
+   "latest_quarter": "2026Q2",
+   "rent_level_raw_thousand_won_m2_mo": 16.1043,
+   "nominal_rent_won_m2_mo": 16104.3,
    "rent_free_mo": 2.5,
    "rent_free_meta": {
     "unit": "개월/년",
     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
    },
-   "effective_rent_won_m2_mo": 12741.558333333334,
-   "vacancy_pct": 2.5538,
+   "effective_rent_won_m2_mo": 12749.237500000001,
+   "vacancy_pct": 1.3602,
    "cap": {
-    "cap_income_based": 0.037246,
+    "cap_income_based": 0.036909,
     "quarters_used": [
-     1.0119,
      0.7618,
      0.9692,
-     0.9817
+     0.9817,
+     0.9782
     ],
     "quarters_used_unit": "%(R-ONE 분기 소득수익률 원값 — 소수가 아니다)",
     "caveats": [
@@ -951,24 +951,24 @@
   },
   "서울>여의도마포>당산역": {
    "parent_region": "여의도마포",
-   "latest_quarter": "2026Q1",
-   "rent_level_raw_thousand_won_m2_mo": 13.9606,
-   "nominal_rent_won_m2_mo": 13960.599999999999,
+   "latest_quarter": "2026Q2",
+   "rent_level_raw_thousand_won_m2_mo": 14.0576,
+   "nominal_rent_won_m2_mo": 14057.6,
    "rent_free_mo": 2.5,
    "rent_free_meta": {
     "unit": "개월/년",
     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
    },
-   "effective_rent_won_m2_mo": 11052.141666666665,
-   "vacancy_pct": 12.3861,
+   "effective_rent_won_m2_mo": 11128.933333333334,
+   "vacancy_pct": 15.6391,
    "cap": {
-    "cap_income_based": 0.036024,
+    "cap_income_based": 0.035521000000000004,
     "quarters_used": [
-     0.9841,
      0.7466,
      0.915,
-     0.9567
+     0.9567,
+     0.9338
     ],
     "quarters_used_unit": "%(R-ONE 분기 소득수익률 원값 — 소수가 아니다)",
     "caveats": [
@@ -981,24 +981,24 @@
   },
   "서울>여의도마포>여의도": {
    "parent_region": "여의도마포",
-   "latest_quarter": "2026Q1",
-   "rent_level_raw_thousand_won_m2_mo": 22.4541,
-   "nominal_rent_won_m2_mo": 22454.100000000002,
+   "latest_quarter": "2026Q2",
+   "rent_level_raw_thousand_won_m2_mo": 22.585,
+   "nominal_rent_won_m2_mo": 22585.0,
    "rent_free_mo": 2.5,
    "rent_free_meta": {
     "unit": "개월/년",
     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
    },
-   "effective_rent_won_m2_mo": 17776.162500000002,
-   "vacancy_pct": 4.1616,
+   "effective_rent_won_m2_mo": 17879.791666666668,
+   "vacancy_pct": 3.969,
    "cap": {
-    "cap_income_based": 0.037864,
+    "cap_income_based": 0.037641,
     "quarters_used": [
-     1.0186,
      0.7948,
      0.9715,
-     1.0015
+     1.0015,
+     0.9963
     ],
     "quarters_used_unit": "%(R-ONE 분기 소득수익률 원값 — 소수가 아니다)",
     "caveats": [
@@ -1041,24 +1041,24 @@
   },
   "서울>여의도마포>영등포역": {
    "parent_region": "여의도마포",
-   "latest_quarter": "2026Q1",
-   "rent_level_raw_thousand_won_m2_mo": 12.6664,
-   "nominal_rent_won_m2_mo": 12666.4,
+   "latest_quarter": "2026Q2",
+   "rent_level_raw_thousand_won_m2_mo": 12.706,
+   "nominal_rent_won_m2_mo": 12706.0,
    "rent_free_mo": 2.5,
    "rent_free_meta": {
     "unit": "개월/년",
     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
    },
-   "effective_rent_won_m2_mo": 10027.566666666668,
-   "vacancy_pct": 5.9745,
+   "effective_rent_won_m2_mo": 10058.916666666666,
+   "vacancy_pct": 7.6505,
    "cap": {
-    "cap_income_based": 0.035444,
+    "cap_income_based": 0.035638,
     "quarters_used": [
-     0.9622,
      0.6986,
      0.9259,
-     0.9577
+     0.9577,
+     0.9816
     ],
     "quarters_used_unit": "%(R-ONE 분기 소득수익률 원값 — 소수가 아니다)",
     "caveats": [

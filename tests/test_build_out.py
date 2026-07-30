@@ -36,7 +36,7 @@ from pathlib import Path
 import pytest
 
 from src.analysis import build_out
-from src.analysis.build_out import build_all
+from src.analysis.build_out import _land_verdict_sentence, build_all
 from src.analysis.effective_rent import region_params
 
 
@@ -548,6 +548,20 @@ def test_pf_case_states_parameter_sources_and_land_price_context(built):
     ctx = _read(out_dir, "pf_case.json")["land_price_context"]
     assert ctx["breakeven_land_price_won_m2"] > 0
     assert ctx["seed_land_price_won_m2"]["median"] > 0
+
+
+def test_the_land_note_verdict_follows_the_numbers_not_a_frozen_sentence():
+    """각주의 판정은 그날의 두 수의 대소다 — 갱신 한 번에 뒤집히는 비교이기 때문이다.
+
+    2026Q2 갱신에서 손익분기 토지단가가 시드 최저 필지를 넘어섰다. 문장을 박아 두면 화면의
+    판정(계산에서 나온다)과 각주가 서로 다른 말을 하게 된다.
+    """
+    prices = [16_940_000, 70_590_000, 95_640_000]
+    assert "서지 않는다" in _land_verdict_sentence(prices, 10_000_000)      # 전부 손익분기 위
+    partial = _land_verdict_sentence(prices, 17_029_258)                    # 최저만 아래
+    assert "1곳만" in partial and "중위 필지로는 이 사업이 서지 않는다" in partial
+    assert "중위 필지로도 이 사업이 선다" in _land_verdict_sentence(prices, 80_000_000)
+    assert "견줄 수 없다" in _land_verdict_sentence([], None)
 
 
 # ── 원자적 쓰기·멱등 ─────────────────────────────────────────────────────────

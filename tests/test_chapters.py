@@ -467,11 +467,14 @@ def test_the_rate_that_goes_into_the_prose_is_a_clean_float():
 
 
 def test_the_exit_cap_that_goes_into_the_prose_is_a_clean_float():
+    """cap 은 분기마다 움직이므로 값을 박지 않는다 — 잘라야 할 것은 부동소수 꼬리다."""
     base = base_region("도심")
     knobs = dict(value("chapter2", "defaultKnobs", base), exitCap=0.0003)
     m = evaluate(base, knobs)
-    assert m["exitCap"] == 0.040785
-    assert "0.040785" in " ".join(m["hold"]["notes"])
+    expected = round(base["cap"] + 0.0003, 6)
+    assert m["exitCap"] == expected
+    assert len(str(m["exitCap"]).split(".")[-1]) <= 6, "꼬리가 남았다"
+    assert str(expected) in " ".join(m["hold"]["notes"])
 
 
 # ---- 슬라이더와 낭독 ---- #

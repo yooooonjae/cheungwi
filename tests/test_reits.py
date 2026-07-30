@@ -210,3 +210,47 @@ def test_reits_output_schema():
     assert (meta["fin_rows"], meta["div_rows"], meta["building_links"]) == (
         fin_rows, div_rows, links)
     assert meta["fin_rows_with_revenue"] <= meta["fin_rows"]
+
+
+# ── corpCode ZIP 캐시 ────────────────────────────────────────────────────────
+
+def _corp_map(tmp_path, fetched_at, tickers=("357120",)):
+    (tmp_path / "corp_code_map.json").write_text(json.dumps(
+        {"map": {t: {"corp_code": "0" + t, "dart_name": f"리츠{t}"} for t in tickers},
+         "fetched_at": fetched_at}, ensure_ascii=False), encoding="utf-8")
+
+
+def _forbid_network(monkeypatch):
+    def boom(*a, **k):
+        raise AssertionError("네트워크를 부르면 안 된다")
+    monkeypatch.setattr(reits, "load_config", boom)
+
+
+def test_corp_index_reuses_todays_zip_cache(monkeypatch, tmp_path):
+    """corpCode.xml 은 매 실행 수 MB짜리 zip 전체를 다시 받는다 — 하루 한 번이면 족하다."""
+    import datetime
+    monkeypatch.setattr(reits, "RAW_DIR", tmp_path)
+    _corp_map(tmp_path, datetime.date.today().isoformat())
+    _forbid_network(monkeypatch)
+    assert reits.corp_index(["357120"]) == {"357120": {"corp_code": "0357120",
+                                                       "dart_name": "리츠357120"}}
+
+
+def test_corp_index_refetches_when_the_cache_is_from_another_day(monkeypatch, tmp_path):
+    import datetime
+    monkeypatch.setattr(reits, "RAW_DIR", tmp_path)
+    _corp_map(tmp_path, (datetime.date.today() - datetime.timedelta(days=1)).isoformat())
+    monkeypatch.setattr(reits, "load_config",
+                        lambda: (_ for _ in ()).throw(RuntimeError("네트워크 진입")))
+    with pytest.raises(RuntimeError, match="네트워크 진입"):
+        reits.corp_index(["357120"])
+
+
+def test_corp_index_refetches_when_a_ticker_is_missing_from_the_cache(monkeypatch, tmp_path):
+    import datetime
+    monkeypatch.setattr(reits, "RAW_DIR", tmp_path)
+    _corp_map(tmp_path, datetime.date.today().isoformat())
+    monkeypatch.setattr(reits, "load_config",
+                        lambda: (_ for _ in ()).throw(RuntimeError("네트워크 진입")))
+    with pytest.raises(RuntimeError, match="네트워크 진입"):
+        reits.corp_index(["357120", "448730"])

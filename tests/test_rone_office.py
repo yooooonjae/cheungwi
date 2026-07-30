@@ -65,3 +65,24 @@ def test_fetch_table_refuses_truncated_pagination(tmp_path, monkeypatch):
     with pytest.raises(RuntimeError, match="절단"):
         rone_office._fetch_table("TT_TRUNCATED")
     assert not (tmp_path / "TT_TRUNCATED.json").exists()
+
+
+# ── 캐시 무효화 ──────────────────────────────────────────────────────────────
+
+def test_refresh_latest_drops_only_the_newest_table_of_each_series(tmp_path, monkeypatch):
+    """새 분기는 각 계열의 마지막 기간표에만 붙는다 — 옛 기간표까지 지우면 전량 재수집이다."""
+    monkeypatch.setattr(rone_office, "RAW_DIR", tmp_path)
+    for _, ids, _ in rone_office.TABLES:
+        for statbl_id in ids:
+            (tmp_path / f"{statbl_id}.json").write_text("[]", encoding="utf-8")
+    removed = rone_office.refresh_latest_cache()
+    assert removed == [ids[-1] for _, ids, _ in rone_office.TABLES]
+    for _, ids, _ in rone_office.TABLES:
+        assert not (tmp_path / f"{ids[-1]}.json").exists()
+        for old in ids[:-1]:
+            assert (tmp_path / f"{old}.json").exists()
+
+
+def test_refresh_latest_is_silent_when_there_is_no_cache(tmp_path, monkeypatch):
+    monkeypatch.setattr(rone_office, "RAW_DIR", tmp_path)
+    assert rone_office.refresh_latest_cache() == []

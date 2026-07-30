@@ -232,7 +232,9 @@ def test_the_base_row_carries_both_llcr_values_never_one_alone():
     assert m["base"]["llcr"] == pytest.approx(PF["model"]["llcr"])
     assert m["base"]["llcrNoiOnly"] == pytest.approx(PF["model"]["llcr_noi_only"])
     pair = value("chapter3", "llcrPair", m)
-    assert "1.4002" in pair and "0.0232" in pair
+    # 값을 박지 않는다(금리·임대료가 갱신되면 움직인다) — 두 값이 **함께** 실렸는지를 본다
+    assert "%.4f" % PF["model"]["llcr"] in pair
+    assert "%.4f" % PF["model"]["llcr_noi_only"] in pair
     assert "하나만 인용하지 말 것" in pair
 
 
@@ -243,7 +245,9 @@ def test_the_stress_rows_say_which_llcr_definition_they_are():
     assert m["modelLlcrNote"] == PF["model"]["llcr_note"]
     html = value("chapter3", "stressTableHtml", m)
     assert "매각대금" in html
-    assert "1.4002" in html and "0.0232" in html, "표 안에 두 값이 함께 있어야 한다"
+    assert ("%.4f" % PF["model"]["llcr"] in html
+            and "%.4f" % PF["model"]["llcr_noi_only"] in html), \
+        "표 안에 두 값이 함께 있어야 한다"
 
 
 def test_the_delta_sign_is_not_clipped_because_the_ladder_is_positive():
@@ -252,7 +256,9 @@ def test_the_delta_sign_is_not_clipped_because_the_ladder_is_positive():
     assert len(ladder) == 4
     assert all(r["delta"] > 0 for r in ladder), "자기자본을 줄이면 IRR 은 오른다"
     html = value("chapter3", "stressTableHtml", m)
-    assert "+10.64" in html or "+0.1064" in html
+    # 양수 델타에 부호가 남아 있는지가 요점이다 — 값은 데이터에서 받아 온다
+    top = max(r["delta"] for r in ladder)
+    assert ("+%.2f" % (top * 100)) in html or ("+%.4f" % top) in html
 
 
 def test_a_missing_irr_is_a_dash_not_a_zero():
@@ -332,8 +338,9 @@ def test_the_ladder_says_the_two_faces_of_one_rung():
     assert irrs == sorted(irrs, reverse=True)
     assert llcrs == sorted(llcrs)
     lines = " ".join(value("chapter3", "ladderLines", m))
-    assert "21.08" in lines and "10.98" in lines
-    assert "1.099" in lines or "1.0988" in lines
+    # 사다리의 양 끝이 글줄에 그대로 실려야 한다(값은 데이터에서 받는다 — 금리가 움직인다)
+    assert "%.2f" % (irrs[0] * 100) in lines and "%.2f" % (irrs[-1] * 100) in lines
+    assert "%.4f" % llcrs[0] in lines
 
 
 def test_the_ladder_columns_are_strata_of_the_same_primitive():
@@ -353,11 +360,15 @@ def test_the_land_verdict_is_derived_not_hardcoded():
     ctx = PF["land_price_context"]
     assert m["breakeven"] == pytest.approx(ctx["breakeven_land_price_won_m2"])
     assert m["seedMin"] == pytest.approx(ctx["seed_land_price_won_m2"]["min"])
-    assert m["stands"] is False, "시드 최저조차 손익분기를 넘는다"
+    # 판정은 그날의 두 수의 비교다. 어느 쪽이 나올지를 상수로 박으면, 임대료·금리가 갱신돼
+    # 손익분기 토지단가가 최저 필지를 넘어선 날(2026Q2 에 실제로 그랬다) 옳은 계산이 깨진다.
+    assert m["stands"] is (m["seedMin"] <= m["breakeven"])
     # 시드가 손익분기 밑으로 내려가면 판정이 뒤집혀야 한다 — 문장이 아니라 계산이다
     pf = copy.deepcopy(PF)
     pf["land_price_context"]["seed_land_price_won_m2"]["min"] = 9_000_000
     assert value("chapter3", "landModel", pf)["stands"] is True
+    pf["land_price_context"]["seed_land_price_won_m2"]["min"] = 900_000_000
+    assert value("chapter3", "landModel", pf)["stands"] is False
 
 
 def test_the_assumed_land_price_keeps_its_assumption_label():
