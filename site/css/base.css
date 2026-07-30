@@ -81,9 +81,12 @@ a:hover { text-decoration-color: var(--waterline); }
   border-bottom: 1px solid var(--hairline);
 }
 
+/* 앱바의 손잡이는 전부 44px 이다. 이 하나만 28px 로 남아 있었다(Task 3 이월) —
+   글자 두 덩이의 크기가 같아 baseline 을 center 로 바꿔도 그림은 그대로다. */
 .brand {
   display: inline-flex;
-  align-items: baseline;
+  align-items: center;
+  min-height: 44px;
   gap: var(--sp-1);
   font-family: var(--font-title);
   font-size: var(--t-h3);
@@ -159,17 +162,6 @@ a:hover { text-decoration-color: var(--waterline); }
   margin-top: var(--sp-3);
   font-size: var(--t-h3);
   color: var(--ink-2);
-}
-
-/* 아직 조형이 얹히지 않은 자리 — 채워지면 이 규칙은 사라진다 */
-.chapter-slot {
-  margin-top: var(--sp-4);
-  padding: var(--sp-4);
-  border: 1px dashed var(--hairline-2);
-  border-radius: var(--radius);
-  background: var(--surface);
-  color: var(--ink-3);
-  font-size: var(--t-small);
 }
 
 /* ---------- 판권 ---------- */

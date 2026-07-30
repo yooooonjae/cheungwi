@@ -286,7 +286,7 @@ def test_chapter_scripts_load_after_the_shapes_they_borrow(sandbox):
     """
     assert sandbox.JS_FILES == ["engine.js", "charts.js", "hero.js",
                                 "chapter1.js", "chapter2.js", "chapter3.js",
-                                "lab.js"]
+                                "lab.js", "method.js"]
     html = (sandbox.build_dist() / "index.html").read_text(encoding="utf-8")
     order = [html.index('src="js/%s"' % f) for f in sandbox.JS_FILES]
     assert order == sorted(order)
@@ -402,3 +402,75 @@ def test_build_is_idempotent(sandbox):
     second = {p.relative_to(sandbox.WEB): p.read_bytes()
               for p in sandbox.build_dist().rglob("*") if p.is_file()}
     assert first == second
+
+
+# ------------------------------------------------------------------ #
+# 방법론 — 인용의 자리와 그것을 채울 스크립트
+# ------------------------------------------------------------------ #
+def _rule(css, selector):
+    """압축된 CSS 에서 선택자 하나의 선언 블록을 꺼낸다(정확 일치·첫 규칙)."""
+    hit = re.search(re.escape(selector) + r"\{([^{}]*)\}", css)
+    return hit.group(1) if hit else ""
+
+
+def test_the_method_page_has_the_mounts_its_script_writes_into(sandbox):
+    html = (sandbox.build_dist() / "index.html").read_text(encoding="utf-8")
+    for mount in ('id="method-manifest"', 'id="method-manifest-lines"',
+                  'id="method-estimate"', 'id="method-ladder"',
+                  'id="method-matching-reading"', 'id="method-checks"',
+                  'id="method-ledger"', 'id="method-parked"', 'id="method-spec"'):
+        assert mount in html, "%s 가 없으면 방법론은 조용히 빈다" % mount
+    assert "잘 맞는 척하지 않는다" in html
+    assert 'href="#method"' in html, "방법론은 앱바에서 닿을 수 있어야 한다"
+    assert "chapter-slot" not in html, "채워진 자리에는 임시 상자가 남지 않는다"
+
+
+def test_the_method_script_loads_after_everything_it_quotes(sandbox):
+    """방법론은 Ⅰ장의 배타 사다리를 **같은 함수로** 다시 그린다."""
+    assert sandbox.JS_FILES[-1] == "method.js"
+    html = (sandbox.build_dist() / "index.html").read_text(encoding="utf-8")
+    assert html.index('src="js/method.js"') > html.index('src="js/chapter1.js"')
+
+
+def test_method_css_ships_and_keeps_both_themes(sandbox):
+    css = (sandbox.build_dist() / "css" / "method.css").read_text(encoding="utf-8")
+    assert "prefers-color-scheme" in css
+    assert '[data-theme="dark"]' in css and '[data-theme="light"]' in css
+    assert not re.findall(r"#[0-9a-fA-F]{6}\b", css), \
+        "방법론이 새로 만드는 색은 없다 — 팔레트의 단일 출처는 tokens.css 다"
+
+
+# ------------------------------------------------------------------ #
+# 이월 — 눈금의 겹침과 빈 셀
+# ------------------------------------------------------------------ #
+def test_the_reference_tick_label_sits_on_a_line_of_its_own(sandbox):
+    """「기준」 글자와 최소·최대 라벨이 한 줄에 있으면 좁은 손잡이에서 겹친다.
+
+    강남·여의도마포의 공실 눈금에서 「기준」과 「0.0%」가 4.5~9.2px 겹치는 것이
+    1020px 이상 전 구간에서 실측됐다(Task 4 이월). 삼각 표식은 트랙 바로 아래에
+    남기고 글자만 둘째 줄로 내린다 — 둘 다 같은 `--rest` 를 본다.
+    """
+    css = (sandbox.build_dist() / "css" / "chapters.css").read_text(encoding="utf-8")
+    rest = _rule(css, ".knob-rest")
+    top = re.search(r"top:(\d+(?:\.\d+)?)px", rest)
+    assert top and float(top.group(1)) >= 13, \
+        "「기준」이 첫 줄을 벗어나지 못했다: %s" % rest
+    scale = _rule(css, ".knob-scale")
+    assert "padding-bottom" in scale, "둘째 줄 자리를 미리 비워 두지 않았다"
+    assert ".knob-rest{display:none}" not in css, \
+        "겹침이 해소됐으므로 좁은 화면에서 기준값을 지울 이유가 없다"
+
+
+def test_the_gauge_grid_never_paints_a_cell_that_has_no_card(sandbox):
+    """권역 셋이 2열로 접히면 넷째 칸이 빈다(768px).
+
+    격자에 바탕을 깔아 1px 괘선을 만드는 수법은 그 빈칸을 **hairline 블록**으로
+    남긴다 — 화면에서는 "카드가 하나 더 있는데 비어 있다"로 읽힌다. 괘선은
+    격자가 아니라 카드가 들고 있어야 빈칸이 그냥 종이로 남는다.
+    """
+    css = (sandbox.build_dist() / "css" / "hero.css").read_text(encoding="utf-8")
+    grid = _rule(css, ".g-grid")
+    assert "background" not in grid, "격자가 바탕을 칠하면 빈 셀이 블록으로 남는다"
+    card = _rule(css, ".g-card")
+    assert "outline" in card or "box-shadow" in card, \
+        "괘선을 카드가 들지 않으면 칸막이가 사라진다"

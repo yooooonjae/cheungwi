@@ -1,0 +1,465 @@
+/* ============================================================
+   「층위(層位)」 방법론 — 표제란이 지면 전체가 된다
+
+   앞의 네 장에서 표제란은 도면 오른쪽 아래의 작은 칸이었다. 이 장은 그 칸을
+   지면 크기로 키운 것이다: 한 장의 종이(모눈 + 이중 테두리) 위에 여섯 개의
+   필드가 괘선으로 나뉘고, 필드마다 왼쪽에 번호와 이름이, 오른쪽에 내용이 온다.
+   제도 도면의 표제란이 정확히 그 모양이다.
+
+   색은 tokens.css 가 준다 — 이 파일은 색을 새로 만들지 않는다. 모눈의 농도만
+   `--sheet-grid` 로 따로 두는데, 그것은 색이 아니라 종이의 결이라 서장(.hero)과
+   같은 값을 여기서도 선언한다.
+
+   조형 규약 둘을 그대로 잇는다.
+     · 해칭은 가정이다 — 추정 사다리에서 「가정」 칸만 45° 해칭을 두른다.
+     · 의도된 빈칸에는 사선을 긋는다 — 0건인 점검 항목이 그렇다. 제도 도면이
+       미기입과 구분하려고 쓰는 표기이고, 여기서는 "0건 ≠ 검증됨"이 그 뜻이다.
+   ============================================================ */
+
+.method-sheet {
+  --sheet-grid: rgba(141, 123, 96, .085);
+  position: relative;
+  margin-top: var(--sp-4);
+  background:
+    linear-gradient(var(--sheet-grid) 1px, transparent 1px) 0 0 / 100% 28px,
+    linear-gradient(90deg, var(--sheet-grid) 1px, transparent 1px) 0 0 / 28px 100%,
+    var(--surface);
+  border: 1px solid var(--hairline-2);
+  box-shadow: var(--shadow-1);
+}
+/* 이중 테두리 — 도면 시트의 안쪽 선. 서장과 같은 규약이다. */
+.method-sheet::before {
+  content: "";
+  position: absolute;
+  inset: 5px;
+  border: 1px solid var(--hairline);
+  pointer-events: none;
+}
+
+@media (prefers-color-scheme: dark) {
+  .method-sheet { --sheet-grid: rgba(232, 226, 214, .05); }
+}
+:root[data-theme="dark"] .method-sheet { --sheet-grid: rgba(232, 226, 214, .05); }
+:root[data-theme="light"] .method-sheet { --sheet-grid: rgba(141, 123, 96, .085); }
+
+/* ---------- 필드 ---------- */
+.field {
+  display: grid;
+  grid-template-columns: 132px minmax(0, 1fr);
+  gap: var(--sp-2) var(--sp-4);
+  padding: var(--sp-4);
+}
+.field + .field { border-top: 1px solid var(--hairline); }
+.field-head { min-width: 0; }
+.field-no {
+  display: block;
+  width: max-content;
+  margin-bottom: var(--sp-1);
+  padding-bottom: 3px;
+  border-bottom: 2px solid var(--stratum-3);
+  font-family: var(--font-num);
+  font-size: 11px;
+  letter-spacing: .2em;
+  color: var(--ink-3);
+}
+.field-head h3 {
+  font-size: var(--t-h3);
+  letter-spacing: .01em;
+}
+.field-of {
+  margin: var(--sp-1) 0 0;
+  font-size: var(--t-caption);
+  line-height: 1.55;
+  color: var(--ink-3);
+}
+.field-body { min-width: 0; }
+.field-body > :first-child { margin-top: 0; }
+.field-body .ch-reading { margin-top: var(--sp-3); }
+
+/* ---------- ① 원장 표 ---------- */
+.src-table {
+  width: 100%;
+  min-width: 660px;
+  border-collapse: collapse;
+  font-size: var(--t-small);
+}
+.src-table caption {
+  padding: var(--sp-2) var(--sp-3);
+  border-bottom: 1px solid var(--hairline);
+  text-align: left;
+  font-size: var(--t-caption);
+  line-height: 1.6;
+  color: var(--ink-3);
+}
+.src-table caption b { color: var(--ink-2); font-family: var(--font-num); }
+.src-table th,
+.src-table td {
+  padding: 7px var(--sp-2);
+  text-align: left;
+  vertical-align: top;
+}
+.src-table thead th {
+  border-bottom: 2px solid var(--ink);
+  font-size: var(--t-caption);
+  font-weight: 600;
+  letter-spacing: .06em;
+  color: var(--ink-2);
+  white-space: nowrap;
+}
+.src-table tbody th {
+  font-weight: 600;
+  color: var(--ink);
+  min-width: 170px;
+}
+.src-key {
+  display: block;
+  font-family: var(--font-num);
+  font-size: 11px;
+  font-weight: 400;
+  letter-spacing: .02em;
+  color: var(--ink-3);
+}
+.src-row td.num {
+  font-family: var(--font-num);
+  font-variant-numeric: tabular-nums;
+  color: var(--ink);
+  white-space: nowrap;
+}
+.src-row .unit-cell {
+  font-family: var(--font-num);
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--ink-2);
+  min-width: 150px;
+}
+/* 캐시 정책은 각주가 아니라 행의 일부다 — 접히면 그 원천의 한계가 사라진다 */
+.src-note td {
+  padding-top: 0;
+  padding-bottom: var(--sp-2);
+  border-bottom: 1px solid var(--hairline);
+  font-size: var(--t-caption);
+  line-height: 1.6;
+  color: var(--ink-3);
+}
+.src-note b {
+  font-family: var(--font-num);
+  font-size: 10.5px;
+  font-weight: 600;
+  letter-spacing: .1em;
+  color: var(--stratum-3);
+  padding-right: 4px;
+}
+.src-note span { display: block; margin-top: 3px; }
+
+/* ---------- ② 추정 사다리 ---------- */
+.rungs {
+  list-style: none;
+  display: grid;
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+  background: var(--hairline);
+  border: 1px solid var(--hairline);
+}
+.rung {
+  display: grid;
+  grid-template-columns: 62px minmax(0, 1fr);
+  gap: var(--sp-3);
+  padding: var(--sp-3);
+  background: var(--surface);
+}
+.rung-kind {
+  align-self: start;
+  padding: 3px 0;
+  border-top: 2px solid var(--ink-3);
+  font-size: var(--t-caption);
+  letter-spacing: .08em;
+  color: var(--ink-2);
+  text-align: center;
+}
+/* 실선은 계산, 해칭은 가정 — 서장에서 정한 규칙을 글자 칸으로 옮긴 것이다 */
+.rung.is-assume .rung-kind {
+  border-top-color: var(--stratum-2);
+  background: repeating-linear-gradient(45deg,
+    var(--hairline) 0 1px, transparent 1px 5px);
+}
+.rung.is-est .rung-kind { border-top-color: var(--stratum-3); }
+.rung.is-obs .rung-kind { border-top-color: var(--ink); }
+.rung-body h4 {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  flex-wrap: wrap;
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: var(--t-h3);
+  font-weight: 600;
+}
+.rung-val {
+  font-family: var(--font-num);
+  font-size: var(--t-small);
+  color: var(--ink-2);
+}
+.rung-body p {
+  margin: var(--sp-1) 0 0;
+  font-size: var(--t-small);
+  line-height: 1.7;
+  color: var(--ink-2);
+}
+.rung-src {
+  border-left: 2px solid var(--stratum-2);
+  padding-left: var(--sp-2);
+  color: var(--ink-2);
+}
+.rung-src b {
+  font-size: var(--t-caption);
+  letter-spacing: .06em;
+  color: var(--ink-3);
+  padding-right: 4px;
+}
+.rung-caveat {
+  font-size: var(--t-caption) !important;
+  line-height: 1.65 !important;
+  color: var(--ink-3) !important;
+}
+
+/* ---------- ③ 매칭 사다리 재게시 ---------- */
+.method-ladder {
+  display: grid;
+  grid-template-columns: 300px minmax(0, 1fr);
+  gap: var(--sp-4);
+  align-items: start;
+}
+/* 사다리는 세로로 긴 판이라 폭을 주면 세로로도 자란다 — 한 열로 접히는 폭에서
+   판을 그대로 늘리면 기둥 하나가 화면 두 개를 먹는다. 열 폭을 못박아 둔다. */
+.method-ladder .ladder-host { max-width: 320px; }
+.method-ladder .ladder-host .ch-fig { display: block; width: 100%; height: auto; }
+
+/* ---------- ④ 점검표 ---------- */
+/* 넷을 세 열에 넣으면 넷째 칸이 빈다. 격자에 바탕을 깔아 괘선을 만들면 그 빈칸이
+   블록으로 남아 "다섯째 항목이 비어 있다"로 읽히는데, 이 페이지에서 빈칸은
+   그것대로 뜻을 가진 표기라 더 나쁘다. 괘선은 칸이 든다(계기판과 같은 규약). */
+.checks {
+  list-style: none;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1px;
+  margin: 0;
+  padding: 0;
+}
+.check {
+  padding: var(--sp-3);
+  background: var(--surface);
+  outline: 1px solid var(--hairline);
+  outline-offset: 0;
+}
+.check h4 {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--sp-2);
+  margin: 0;
+  font-family: var(--font-title);
+  font-size: var(--t-h3);
+}
+.check-n {
+  font-family: var(--font-num);
+  font-size: var(--t-small);
+  color: var(--ink-2);
+}
+.check.is-blank .check-n { color: var(--ink-3); }
+.check:not(.is-blank) .check-n { color: var(--alert); font-weight: 600; }
+.check-of {
+  margin: var(--sp-1) 0 var(--sp-2);
+  font-size: var(--t-caption);
+  line-height: 1.6;
+  color: var(--ink-3);
+}
+.check-where {
+  display: block;
+  margin-top: 2px;
+  font-family: var(--font-num);
+  font-size: 11px;
+  color: var(--stratum-3);
+}
+/* 의도된 빈칸에는 사선을 긋는다. 미기입이 아니라 "여기는 비워 두기로 했다"는
+   표기이고, 이 페이지에서는 "0건은 검증의 결과가 아니다"라는 뜻이다. */
+.check-blank {
+  position: relative;
+  margin: 0;
+  padding: var(--sp-3);
+  border: 1px dashed var(--hairline-2);
+  background: linear-gradient(to top right,
+    transparent calc(50% - .5px), var(--hairline-2) calc(50% - .5px),
+    var(--hairline-2) calc(50% + .5px), transparent calc(50% + .5px));
+  font-size: var(--t-caption);
+  line-height: 1.7;
+  color: var(--ink-2);
+}
+/* 사선 위에서도 글자는 읽혀야 한다 — 글줄만 종이색으로 들어 올린다 */
+.check-blank span {
+  background: var(--surface);
+  box-shadow: 0 0 0 3px var(--surface);
+}
+.check-rows {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: var(--sp-2);
+}
+.check-rows li {
+  padding: var(--sp-2);
+  border-left: 3px solid var(--alert);
+  background: var(--alert-wash);
+  font-size: var(--t-caption);
+  line-height: 1.6;
+}
+.check-rows b {
+  font-family: var(--font-num);
+  font-size: var(--t-small);
+  color: var(--ink);
+}
+.check-kind {
+  font-family: var(--font-num);
+  font-size: 10.5px;
+  letter-spacing: .06em;
+  color: var(--ink-3);
+  padding-left: 6px;
+}
+.check-rows span { display: block; margin-top: 3px; color: var(--ink-2); }
+.check-note {
+  margin: var(--sp-2) 0 0;
+  font-size: var(--t-caption);
+  line-height: 1.7;
+  color: var(--ink-3);
+}
+
+/* ---------- ⑤ 대장 ---------- */
+.ledger-state {
+  padding: var(--sp-3);
+  border: 1px solid var(--hairline-2);
+  background: var(--surface);
+}
+.ledger-count-big {
+  margin: 0;
+  font-size: var(--t-h3);
+  color: var(--ink-2);
+}
+.ledger-count-big b {
+  font-family: var(--font-num);
+  font-size: 32px;
+  font-weight: 600;
+  color: var(--ink);
+}
+.ledger-count-big .num { font-family: var(--font-num); }
+.ledger-blocked,
+.ledger-http {
+  margin: var(--sp-2) 0 0;
+  font-size: var(--t-caption);
+  line-height: 1.7;
+  color: var(--ink-3);
+}
+.ledger-blocked b { color: var(--ink-2); }
+.ledger-http {
+  border-left: 3px solid var(--stratum-3);
+  padding-left: var(--sp-2);
+  font-family: var(--font-num);
+  font-size: 11.5px;
+}
+.ledger-http b {
+  font-family: var(--font-body);
+  letter-spacing: .06em;
+  color: var(--ink-2);
+  padding-right: 4px;
+}
+.path-h {
+  margin: var(--sp-3) 0 0;
+  font-family: var(--font-title);
+  font-size: var(--t-h3);
+}
+.path {
+  list-style: none;
+  margin: var(--sp-2) 0 0;
+  padding: 0;
+  display: grid;
+  gap: var(--sp-2);
+  counter-reset: step;
+}
+.path li {
+  display: grid;
+  grid-template-columns: 30px minmax(0, 1fr);
+  gap: var(--sp-2);
+  padding-bottom: var(--sp-2);
+  border-bottom: 1px solid var(--hairline);
+  font-size: var(--t-small);
+  line-height: 1.7;
+  color: var(--ink-2);
+}
+.path li:last-child { border-bottom: 0; padding-bottom: 0; }
+.step-no {
+  font-family: var(--font-num);
+  font-size: var(--t-caption);
+  color: var(--ink-3);
+  border-right: 1px solid var(--hairline);
+  padding-right: var(--sp-2);
+  text-align: right;
+}
+
+/* ---------- ⑥ 파킹 ---------- */
+.parked {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  gap: 0;
+  border-top: 1px solid var(--hairline);
+}
+.parked li {
+  display: grid;
+  grid-template-columns: 240px minmax(0, 1fr);
+  gap: var(--sp-3);
+  padding: var(--sp-2) 0;
+  border-bottom: 1px solid var(--hairline);
+  font-size: var(--t-small);
+  line-height: 1.65;
+}
+.parked b {
+  font-family: var(--font-num);
+  font-size: var(--t-caption);
+  font-weight: 400;
+  color: var(--stratum-3);
+  word-break: break-all;
+}
+.parked span { color: var(--ink-2); }
+.parked-src {
+  margin: var(--sp-3) 0 0;
+  font-size: var(--t-caption);
+  line-height: 1.7;
+  color: var(--ink-3);
+}
+
+/* ---------- 좁은 화면 ---------- */
+@media (max-width: 1099px) {
+  .method-ladder { grid-template-columns: 260px minmax(0, 1fr); }
+}
+@media (max-width: 899px) {
+  .field { grid-template-columns: 1fr; padding: var(--sp-3); }
+  .field-head {
+    display: flex;
+    align-items: baseline;
+    gap: var(--sp-2);
+    flex-wrap: wrap;
+    border-bottom: 1px solid var(--hairline);
+    padding-bottom: var(--sp-2);
+  }
+  .field-no { margin-bottom: 0; border-bottom: 0; }
+  .field-of { flex-basis: 100%; margin-top: 0; }
+  .method-ladder { grid-template-columns: 1fr; }
+  .parked li { grid-template-columns: 1fr; gap: 2px; }
+}
+@media (max-width: 599px) {
+  .rung { grid-template-columns: 1fr; gap: var(--sp-2); }
+  .rung-kind { width: max-content; padding: 3px 10px; }
+}

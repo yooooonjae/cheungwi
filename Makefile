@@ -4,7 +4,7 @@
 
 PY := $(shell if [ -x venv/bin/python ]; then echo venv/bin/python; else echo python3; fi)
 .DEFAULT_GOAL := help
-.PHONY: help setup collect manifest analyze build serve test
+.PHONY: help setup collect manifest analyze build serve test responsive
 
 help: ## 타깃 목록
 	@grep -E '^[a-zA-Z_-]+:.*?## .*$$' $(MAKEFILE_LIST) | awk 'BEGIN {FS = ":.*?## "}; {printf "  %-12s %s\n", $$1, $$2}'
@@ -22,3 +22,5 @@ serve: ## web/ 을 로컬에서 서빙한다 (기본 8768, 봇 차단·noindex)
 	$(PY) serve.py
 test: ## pytest
 	$(PY) -m pytest tests/ -q
+responsive: ## web/ 을 다섯 뷰포트에서 실제로 재고 다크 스크린샷을 남긴다 (make build 뒤)
+	node tests/responsive_check.js

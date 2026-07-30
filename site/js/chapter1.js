@@ -231,6 +231,28 @@
   }
 
   // ── 원장 전체 ───────────────────────────────────────────────────────────
+  /**
+   * 막힌 계산의 **합집합**을 파이프라인 순서로 늘어놓는다.
+   *
+   * 대장이 일부만 열리면 어떤 동은 NOI 부터, 어떤 동은 보유 모델부터 막힌다 —
+   * 가장 긴 한 행을 골라 그것만 말하면 다른 행에서만 막힌 계산이 화면에서
+   * 조용히 사라진다. 원장 카드와 방법론이 같은 목록을 보게 하려고 한 곳에 둔다.
+   */
+  function blockedUnion(rows) {
+    var out = [];
+    (rows || []).forEach(function (row) {
+      ((row && row.blocked) || []).forEach(function (key) {
+        var label = BLOCKED_LABEL[key] || key;
+        if (out.indexOf(label) < 0) out.push(label);
+      });
+    });
+    return out.sort(function (a, b) {
+      var ia = BLOCKED_ORDER.indexOf(a), ib = BLOCKED_ORDER.indexOf(b);
+      return (ia < 0 ? BLOCKED_ORDER.length : ia) -
+             (ib < 0 ? BLOCKED_ORDER.length : ib);
+    });
+  }
+
   function ledgerModel(underwriting) {
     var rows = (underwriting && underwriting.buildings) || [];
     if (!rows.length) {
@@ -253,20 +275,8 @@
     // 카드에는 막힌 계산의 **수**만 적는다(일곱 이름을 55장에 되풀이하면 도장이
     // 묻힌다). 그러니 이름은 판독 글줄이 본문 크기로 한 번 받아야 한다 — 손끝에
     // 닿아야만 보이는 정보로 남겨 두지 않는다.
-    // 목록은 행마다 다를 수 있다. 대장이 일부만 열리면 어떤 동은 NOI 부터,
-    // 어떤 동은 보유 모델부터 막힌다 — **가장 긴 한 행**을 골라 그것만 말하면
-    // 다른 행에서만 막힌 계산이 화면에서 조용히 사라진다. 합집합이어야 한다.
-    var blocked = [];
-    cards.forEach(function (c) {
-      (c.blocked || []).forEach(function (name) {
-        if (blocked.indexOf(name) < 0) blocked.push(name);
-      });
-    });
-    blocked.sort(function (a, b) {
-      var ia = BLOCKED_ORDER.indexOf(a), ib = BLOCKED_ORDER.indexOf(b);
-      return (ia < 0 ? BLOCKED_ORDER.length : ia) -
-             (ib < 0 ? BLOCKED_ORDER.length : ib);
-    });
+    // 목록은 행마다 다를 수 있다 — 합집합을 내는 자리는 `blockedUnion` 하나다.
+    var blocked = blockedUnion(rows);
     return {
       n: rows.length,
       pending: counts.pending,
@@ -821,6 +831,7 @@
     STAMP: STAMP,
     ambiguousCaveat: ambiguousCaveat,
     variantOf: variantOf,
+    blockedUnion: blockedUnion,
     cardModel: cardModel,
     card: card,
     ledgerModel: ledgerModel,

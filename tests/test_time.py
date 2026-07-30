@@ -556,3 +556,72 @@ def test_the_field_row_binds_its_label_and_silences_the_output():
         assert 'for="lab-f-%s"' % spec["key"] in html
         assert 'id="lab-f-%s"' % spec["key"] in html
         assert 'aria-live="off"' in html
+
+
+# ================================================================== #
+# ⑥ Task 6 이월 — 도면 각주의 과장, 사라지는 행, 기본값의 사연
+# ================================================================== #
+def test_the_axis_footnote_does_not_call_the_whole_dry_band_equity():
+    """수면 위 두께는 자기자본이 아니다.
+
+    28개월째 마른 두께는 324억이고 자기자본은 256억이다 — 차이는 아직 원금으로
+    얹히지 않은 발생이자이고, 준공 뒤에는 임대기간의 누적 순유출이다. 각주가
+    "위가 자기자본이다"라고 말하면 그림 안의 지시선(준공 달 하나뿐)과 정면으로
+    부딪힌다. 같은 판에서 두 문장이 다른 말을 하면 하나는 반드시 틀린다.
+    """
+    svg = value("chapter3", "renderDeposit", PF, WIDE)
+    assert "위가 자기자본이다" not in svg
+    labels = re.findall(r"<text[^>]*>([^<]*)</text>", svg)
+    joined = " ".join(labels)
+    assert "대출잔액" in joined
+    assert "자본화되지 않은 이자" in joined, "부푼 두께의 정체가 각주에 없다"
+    assert "운영 순유출" in joined or "순현금" in joined, \
+        "준공 뒤의 두께가 무엇인지도 같은 각주가 말해야 한다"
+
+
+@pytest.mark.parametrize("hurt,kind", [
+    ({"dscr": 130}, "gate"),      # 물리 게이트 — 배수 칸에 퍼센트를 적은 사고
+    ({"ltv": 200}, "input"),      # 입력 오류 — 한도가 정의역 밖이다
+])
+def test_the_readings_keep_every_row_even_when_the_loan_stage_is_refused(hurt, kind):
+    """대출이 거절되면 자기자본·DSCR 행이 통째로 사라지고 있었다.
+
+    행이 사라지면 판독표의 줄 수가 상태마다 달라지고, 읽는 사람은 그 값을
+    **묻지 않은 것**으로 읽는다. 없는 값은 0 도 아니고 침묵도 아니다 — 줄표다.
+    """
+    base = value("lab", "readings", value("lab", "run", lab_defaults()))
+    res = value("lab", "run", dict(lab_defaults(), **hurt))
+    assert res["loan"]["ok"] is False and res["loan"]["kind"] == kind
+    rows = value("lab", "readings", res)
+    assert [r["k"] for r in rows] == [r["k"] for r in base], \
+        "거절 상태의 판독표가 기준 상태와 다른 줄을 낸다"
+    got = {r["k"]: r["v"] for r in rows}
+    assert got["자기자본"] == "―" and got["DSCR"] == "―"
+    for key in ("자기자본", "DSCR"):
+        note = [r["note"] for r in rows if r["k"] == key][0]
+        assert note.strip(), "%s 가 왜 비었는지 사유가 없다" % key
+
+
+def test_the_readings_survive_a_field_that_is_not_a_number_at_all():
+    """빈 칸은 0 이 아니다 — 엔진 인자가 아예 만들어지지 않는 갈래다."""
+    base = value("lab", "readings", value("lab", "run", lab_defaults()))
+    res = value("lab", "run", dict(lab_defaults(), price=None))
+    assert res["engine"] is None
+    rows = value("lab", "readings", res)
+    assert [r["k"] for r in rows] == [r["k"] for r in base]
+    assert all(r["v"] == "―" for r in rows)
+
+
+def test_the_lab_says_its_defaults_are_the_downtown_numbers_rounded_down():
+    """Ⅱ장은 1,540.1·5.61%, 실험실은 1,540.0·5.58% 다 — 그 차이의 사연을 적는다.
+
+    같은 데이터에서 나온 두 화면이 다른 수를 보이면, 사연이 없는 쪽은 오류로
+    읽힌다. 사연은 하나다: 실험실의 칸은 **보이는 수가 곧 엔진의 수**여야 해서
+    기본값을 칸의 자릿수로 내렸고, 파생 판독은 그 내린 수로 다시 계산된다.
+    """
+    fixed = value("lab", "fixedHtml", value("lab", "defaultFixed", UNDERWRITING))
+    assert "도심 대표치" in fixed
+    assert "자릿수" in fixed and ("내린" in fixed or "내림" in fixed)
+    said = " ".join(value("lab", "lines", value("lab", "run", lab_defaults())))
+    assert "Ⅱ장" in said, "글줄이 어느 장과 견주는지 밝히지 않는다"
+    assert "자릿수" in said

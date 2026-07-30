@@ -81,7 +81,11 @@
     ["취득부대비용률", "취득세·중개·실사·자문 — 전액 자기자본으로 본다"],
     ["차환 LTV 한도", "만기에 다시 빌릴 때의 관문"],
     ["차환 시장금리", "위의 금리 칸을 그대로 쓴다"],
-    ["차환 시점 가치", "위의 가격 칸을 그대로 쓴다"]
+    ["차환 시점 가치", "위의 가격 칸을 그대로 쓴다"],
+    // Ⅱ장과 실험실이 같은 데이터에서 다른 수를 보이는 이유는 하나뿐이다.
+    // 사연 없이 두면 둘 중 하나가 오류로 읽힌다.
+    ["기본값 출처", "Ⅱ장 도심 대표치를 이 칸의 자릿수로 내린 값 — " +
+      "그래서 Ⅱ장의 판독값과 뒷자리가 다르다"]
   ];
 
   function defaultFixed(underwriting) {
@@ -309,6 +313,10 @@
 
   function readings(res) {
     var rows = [];
+    // 대출이 거절되면 그 뒤의 지분·DSCR 도 정해지지 않는다. 그렇다고 행을 빼면
+    // 판독표의 줄 수가 상태마다 달라지고, 읽는 사람은 자기자본을 **묻지 않은
+    // 것**으로 읽는다. 줄표로 남기고 사유를 그 자리에 적는다.
+    var loanWhy = (KIND_HEAD[res.loan.kind] || "") + " · " + res.loan.message;
     if (res.loan.ok) {
       rows.push({
         k: "대출가능액", v: eok(res.loan.won), u: "억원",
@@ -323,8 +331,10 @@
           F.fx(res.fixed.costRate * 100, 0) + "%)"
       });
     } else {
-      rows.push({ k: "대출가능액", v: "―", u: "", alert: true,
-                  note: (KIND_HEAD[res.loan.kind] || "") + " · " + res.loan.message });
+      rows.push({ k: "대출가능액", v: "―", u: "", alert: true, note: loanWhy });
+      rows.push({ k: "자기자본", v: "―", u: "", alert: true,
+                  note: "대출이 정해지지 않아 가격을 지분과 부채로 가를 수 없다 · " +
+                    loanWhy });
     }
     if (res.hold.ok) {
       rows.push({
@@ -371,6 +381,10 @@
         alert: dscrNow !== null && dscrNow < res.engine.dscr - EPS,
         note: "NOI ÷ 이자 · 요구 " + F.fx(res.engine.dscr, 2) + "배(IO 가정)"
       });
+    } else {
+      rows.push({ k: "DSCR", v: "―", u: "", alert: true,
+                  note: "대출이 없으면 이자도 없다 — 나눌 수 없는 값이다 · " +
+                    loanWhy });
     }
     return rows;
   }
@@ -397,6 +411,11 @@
         "최대금리 " + F.pct(res.refi.maxRate) + " 대 시장금리 " +
         F.pct(res.engine.rate) + ", 여유 " + F.bp(res.refi.headroomBp) + ".");
     }
+    // 여섯 칸의 기본값이 어디서 왔는지. 같은 데이터에서 나온 Ⅱ장과 이 실험실이
+    // 서로 다른 수를 보이는데 사연이 없으면, 둘 중 하나가 오류로 읽힌다.
+    out.push("여섯 칸의 기본값은 Ⅱ장 도심 대표치를 칸의 자릿수로 내린 값이다 — " +
+      "이 실험실은 보이는 수가 곧 엔진의 수여야 해서 뒷자리를 먼저 잘랐고, " +
+      "판독값은 그 잘린 수로 다시 계산된다. Ⅱ장과 뒷자리가 다른 이유가 그것뿐이다.");
     res.banners.forEach(function (b) { out.push(b.head + " — " + b.text); });
     return out;
   }
@@ -572,7 +591,8 @@
       "취득부대비용률": F.pct(fixed.costRate, 0),
       "차환 LTV 한도": F.pct(fixed.refiLtvMax, 0),
       "차환 시장금리": "= 금리 칸",
-      "차환 시점 가치": "= 가격 칸"
+      "차환 시점 가치": "= 가격 칸",
+      "기본값 출처": "= 도심 대표치(내림)"
     };
     return FIXED_NOTES.map(function (pair) {
       return "<div><dt>" + esc(pair[0]) + "</dt><dd>" + esc(v[pair[0]]) +

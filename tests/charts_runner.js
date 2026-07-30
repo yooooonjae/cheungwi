@@ -30,6 +30,7 @@ const MODULES = {
   chapter2: require(path.join(__dirname, "..", "site", "js", "chapter2.js")),
   chapter3: require(path.join(__dirname, "..", "site", "js", "chapter3.js")),
   lab: require(path.join(__dirname, "..", "site", "js", "lab.js")),
+  method: require(path.join(__dirname, "..", "site", "js", "method.js")),
 };
 
 function kindOf(err) {

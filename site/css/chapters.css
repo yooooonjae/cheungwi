@@ -486,13 +486,20 @@
    삼각과 「기준」 글자는 **같은 자리**(--rest)를 가리켜야 한다. 글자를 흐름에
    두고 space-between 으로 가운데 세우면 글자는 늘 50% 에 서고 삼각만 --rest 로
    가, 공실처럼 기준이 가운데가 아닌 손잡이에서 둘이 어긋난다. 그래서 글자도
-   흐름에서 빼 --rest 에 절대 배치한다. 남은 두 라벨(최소·최대)이 양 끝을 맡는다. */
+   흐름에서 빼 --rest 에 절대 배치한다. 남은 두 라벨(최소·최대)이 양 끝을 맡는다.
+
+   다만 절대 배치한 글자를 첫 줄에 두면 이번에는 최소·최대 라벨과 **겹친다** —
+   공실 손잡이의 기준은 눈금의 왼쪽 끝(14~21%)에 앉아 「0.0%」 위로 4.5~9.2px
+   올라탄다(1020px 이상, 손잡이 열이 좁아지는 전 구간에서 실측). 그래서 삼각은
+   트랙 바로 아래에 남기고 글자만 **둘째 줄**로 내린다. 둘은 여전히 같은 --rest
+   하나를 본다. 아래 padding 은 그 둘째 줄의 자리다. */
 .knob-scale {
   grid-column: 1 / -1;
   position: relative;
   display: flex;
   justify-content: space-between;
   margin: -6px 0 0;
+  padding-bottom: 15px;
   font-family: var(--font-num);
   font-size: 11px;
   color: var(--ink-3);
@@ -518,7 +525,7 @@
 }
 .knob-rest {
   position: absolute;
-  top: 0;
+  top: 13px;
   left: var(--rest, 50%);
   transform: translateX(-50%);
   white-space: nowrap;
@@ -611,5 +618,4 @@
   .ladder { grid-template-columns: 1fr; gap: var(--sp-3); }
   .ch-reading.is-two { columns: 1; }
   .card-grid { grid-template-columns: repeat(auto-fill, minmax(190px, 1fr)); }
-  .knob-rest { display: none; }   /* 세 칸이 겹친다 — 삼각 표식만 남긴다 */
 }
