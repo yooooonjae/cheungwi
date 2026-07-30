@@ -121,6 +121,17 @@ def test_benchmark_rejects_negative_quarter():
         caprate.benchmark([0.94, -0.95, 0.96, 0.96])
 
 
+def test_benchmark_checks_the_whole_series_not_just_the_last_four():
+    # 계열 오입력(자본수익률) 판별은 뒤 4분기만 봐서는 새어 나간다 — 최근
+    # 넷이 우연히 양수이고 합이 게이트 안(0.5+0.6+0.5+0.6 = 2.2%)이면
+    # cap 0.022 가 조용히 나간다. 소득수익률은 정의상 음수가 없으므로 계열
+    # 전체를 봐도 오탐 비용이 0 이다.
+    with pytest.raises(ValueError):
+        caprate.benchmark([-1.4, 0.8, 0.5, 0.6, 0.5, 0.6])
+    with pytest.raises(ValueError):
+        caprate.benchmark([float("nan"), 0.8, 0.94, 0.95, 0.96, 0.96])
+
+
 def test_benchmark_does_not_mutate_or_share_input():
     src = [0.94, 0.95, 0.96, 0.96]
     r = caprate.benchmark(src)

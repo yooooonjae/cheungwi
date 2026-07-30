@@ -102,6 +102,11 @@ def benchmark(income_yield_quarterly_pct: list[float]) -> dict:
     짧으면 `ValueError` 다 — 세 분기만으로 연환산하면 4분의 3 짜리 cap 이
     나오는데 그 값도 게이트 안(2~12%)이라 조용히 통과하기 때문이다.
 
+    **검사 범위: 합에는 뒤 4분기만 쓰지만 검사는 넘어온 계열 전체에 건다.**
+    음수·NaN·inf 한 개는 그 분기 하나가 아니라 계열을 잘못 넣었다는 신호라
+    앞쪽 분기에 있어도 `ValueError` 다. 뒤 넷만 보면 자본수익률 계열이라도
+    최근 4분기가 우연히 양수이고 합이 게이트 안이면 새어 나간다.
+
     반환: `{"cap_income_based": 소수 cap, "quarters_used": [쓴 4개 %],
     "caveats": [...]}`. `caveats` 는 계약(두 키)에 더한 것이다 — 시장
     벤치마크를 개별 건물 cap 으로 인용하지 못하게 라벨을 붙여 보낸다.
@@ -113,16 +118,24 @@ def benchmark(income_yield_quarterly_pct: list[float]) -> dict:
             f"연환산에는 최근 {QUARTERS_PER_YEAR}분기가 필요하다: "
             f"{len(income_yield_quarterly_pct)}개만 들어왔다"
         )
+    # 검사는 넘어온 **계열 전체**에 건다. 합에 쓰는 것은 뒤 4분기뿐이지만,
+    # 음수 한 개는 그 분기 하나가 아니라 계열을 잘못 넣었다는 신호이기
+    # 때문이다. 뒤 넷만 보면 자본수익률 계열이라도 최근 4분기가 우연히
+    # 양수이고 합이 게이트 안(예: 0.5+0.6+0.5+0.6 = 2.2%)이면 cap 0.022 로
+    # 조용히 통과한다. 소득수익률은 정의상 음수가 없어 오탐 비용이 0 이다.
+    for i, q in enumerate(income_yield_quarterly_pct):
+        _require_finite(q, f"{i}번째 분기 소득수익률")
+        if q < 0:
+            raise ValueError(
+                f"{i}번째 분기 소득수익률이 음수다: {q} — 소득수익률은 정의상 "
+                "음수가 될 수 없다. 음수가 나올 수 있는 것은 자본수익률"
+                "(capital)이므로 계열을 잘못 넣었는지 보라. 합에 쓰는 것은 뒤 "
+                f"{QUARTERS_PER_YEAR}분기뿐이지만 검사는 계열 전체에 건다"
+            )
+
     # 슬라이스가 새 리스트를 만든다 — 입력을 건드리지 않고, 반환한 리스트를
     # 부르는 쪽이 고쳐도 다음 호출이 오염되지 않는다.
     recent = income_yield_quarterly_pct[-QUARTERS_PER_YEAR:]
-    for q in recent:
-        _require_finite(q, "분기 소득수익률")
-        if q < 0:
-            raise ValueError(
-                f"분기 소득수익률은 음수일 수 없다: {q} — 음수가 나올 수 있는 "
-                "것은 자본수익률(capital)이다. 계열을 잘못 넣었는지 보라"
-            )
 
     cap = _gate_cap(math.fsum(recent) / _PERCENT, "소득수익률 벤치마크 cap")
 
