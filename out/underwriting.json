@@ -1,0 +1,2662 @@
+{
+ "schema": "cheungwi/underwriting/1",
+ "as_of": {
+  "buildings_collected_at": "2026-07-30",
+  "seed_as_of": "2026-07-30",
+  "rone_latest_quarter": "2026Q1",
+  "age_reference_date": "2026-03-31",
+  "rates_latest_month": "2026-06"
+ },
+ "assumptions": {
+  "efficiency": 0.5,
+  "opex_ratio": 0.15,
+  "ltv_max": 0.55,
+  "dscr_min": 1.3,
+  "debt_yield_min": 0.08,
+  "refi_ltv_max": 0.6,
+  "loan_rate": 0.042699999999999995,
+  "market_rate": 0.042699999999999995,
+  "noi_growth_y": 0.02,
+  "hold_years": 5,
+  "cost_rate": 0.05,
+  "dist_subway_m": null,
+  "notes": [
+   "대출금리·차환 시장금리는 ECOS 예금은행 기업대출(신규취급액) 2026-06 값 0.0427 을 그대로 썼다. 실제 부동산 담보대출 금리는 주선·약정 수수료와 스프레드가 붙어 이보다 높다.",
+   "LTV 한도·요구 DSCR·DY 하한은 시장 관행 수준의 가정이며 대주 심사 결과가 아니다. 넷 중 하나만 흔들려도 대출가능액이 두 자릿수 퍼센트로 움직인다.",
+   "역까지 거리를 담은 데이터층이 없어 dist_subway_m 은 None 이다 — 역세권 계수 1.0 은 '역세권 아님'이 아니라 **판단 유보**다.",
+   "진입 cap 과 매각 cap 을 같은 권역 벤치마크로 두었다. 벌리면(cap expansion) 지분 IRR 이 급격히 나빠지므로 단일 IRR 을 인용하지 말 것."
+  ]
+ },
+ "summary": {
+  "n": 55,
+  "pending_ledger": 55,
+  "underwritten": 0,
+  "by_region": {
+   "도심": {
+    "n": 20,
+    "pending_ledger": 20,
+    "effective_rent_won_m2_mo": 26114.083333333332,
+    "vacancy": 0.063692,
+    "cap_income_based": 0.040485
+   },
+   "강남": {
+    "n": 21,
+    "pending_ledger": 21,
+    "effective_rent_won_m2_mo": 23780.662500000002,
+    "vacancy": 0.049196,
+    "cap_income_based": 0.030452
+   },
+   "여의도마포": {
+    "n": 14,
+    "pending_ledger": 14,
+    "effective_rent_won_m2_mo": 16056.662499999999,
+    "vacancy": 0.044482999999999995,
+    "cap_income_based": 0.037492
+   }
+  },
+  "ledger_status": "건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+ },
+ "buildings": [
+  {
+   "id": "sfc",
+   "name": "서울파이낸스센터",
+   "region_code": "CBD",
+   "region": "도심",
+   "sgg_cd": "11140",
+   "umd": "태평로1가",
+   "jibun": "84",
+   "address_road": "서울 중구 세종대로 136",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 31336.9,
+    "effective_rent_won_m2_mo": 26114.083333333332,
+    "rent_free_mo": 2.0,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.063692,
+    "cap_income_based": 0.040485
+   },
+   "land": {
+    "land_price_won_m2": 61960000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1114010300100840000",
+    "lat": 37.568415,
+    "lon": 126.978284
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1",
+    "도로명 점 필지 불일치(시드 태평로1가 84 vs 점 97대) — 여러 필지에 걸친 건물이면 정상이다. 공시지가·PNU는 시드 지번으로 조회했다. 사람 확인 권장."
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "grand-seoul",
+   "name": "그랑서울",
+   "region_code": "CBD",
+   "region": "도심",
+   "sgg_cd": "11110",
+   "umd": "청진동",
+   "jibun": "70",
+   "address_road": "서울 종로구 종로 33",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 31336.9,
+    "effective_rent_won_m2_mo": 26114.083333333332,
+    "rent_free_mo": 2.0,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.063692,
+    "cap_income_based": 0.040485
+   },
+   "land": {
+    "land_price_won_m2": 61200000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1111012200100700000",
+    "lat": 37.5710142,
+    "lon": 126.9814357
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "dtower-gwanghwamun",
+   "name": "광화문 D타워",
+   "region_code": "CBD",
+   "region": "도심",
+   "sgg_cd": "11110",
+   "umd": "청진동",
+   "jibun": "246",
+   "address_road": "서울 종로구 종로3길 17",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 31336.9,
+    "effective_rent_won_m2_mo": 26114.083333333332,
+    "rent_free_mo": 2.0,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.063692,
+    "cap_income_based": 0.040485
+   },
+   "land": {
+    "land_price_won_m2": 56390000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1111012200102460000",
+    "lat": 37.5710682,
+    "lon": 126.9788968
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "centropolis",
+   "name": "센트로폴리스",
+   "region_code": "CBD",
+   "region": "도심",
+   "sgg_cd": "11110",
+   "umd": "공평동",
+   "jibun": "17",
+   "address_road": "서울 종로구 우정국로 26",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 31336.9,
+    "effective_rent_won_m2_mo": 26114.083333333332,
+    "rent_free_mo": 2.0,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.063692,
+    "cap_income_based": 0.040485
+   },
+   "land": {
+    "land_price_won_m2": 37800000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1111012700100170000",
+    "lat": 37.5716808,
+    "lon": 126.9835302
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "jongno-tower",
+   "name": "종로타워",
+   "region_code": "CBD",
+   "region": "도심",
+   "sgg_cd": "11110",
+   "umd": "종로2가",
+   "jibun": "6",
+   "address_road": "서울 종로구 종로 51",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 31336.9,
+    "effective_rent_won_m2_mo": 26114.083333333332,
+    "rent_free_mo": 2.0,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.063692,
+    "cap_income_based": 0.040485
+   },
+   "land": {
+    "land_price_won_m2": 68890000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1111013800100060000",
+    "lat": 37.5707427,
+    "lon": 126.9836089
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1",
+    "도로명 점 필지 불일치(시드 종로2가 6 vs 점 70대) — 여러 필지에 걸친 건물이면 정상이다. 공시지가·PNU는 시드 지번으로 조회했다. 사람 확인 권장."
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "sk-seorin",
+   "name": "SK서린빌딩",
+   "region_code": "CBD",
+   "region": "도심",
+   "sgg_cd": "11110",
+   "umd": "서린동",
+   "jibun": "99",
+   "address_road": "서울 종로구 종로 26",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 31336.9,
+    "effective_rent_won_m2_mo": 26114.083333333332,
+    "rent_free_mo": 2.0,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.063692,
+    "cap_income_based": 0.040485
+   },
+   "land": {
+    "land_price_won_m2": 60860000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1111012300100990000",
+    "lat": 37.5696909,
+    "lon": 126.9803035
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "twin-tree-tower",
+   "name": "트윈트리타워",
+   "region_code": "CBD",
+   "region": "도심",
+   "sgg_cd": "11110",
+   "umd": "중학동",
+   "jibun": "14",
+   "address_road": "서울 종로구 율곡로 6",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 31336.9,
+    "effective_rent_won_m2_mo": 26114.083333333332,
+    "rent_free_mo": 2.0,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.063692,
+    "cap_income_based": 0.040485
+   },
+   "land": {
+    "land_price_won_m2": 30690000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1111012500100140000",
+    "lat": 37.5754722,
+    "lon": 126.9797725
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "concordian",
+   "name": "콘코디언빌딩",
+   "region_code": "CBD",
+   "region": "도심",
+   "sgg_cd": "11110",
+   "umd": "신문로1가",
+   "jibun": "115",
+   "address_road": "서울 종로구 새문안로 76",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 31336.9,
+    "effective_rent_won_m2_mo": 26114.083333333332,
+    "rent_free_mo": 2.0,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.063692,
+    "cap_income_based": 0.040485
+   },
+   "land": {
+    "land_price_won_m2": 42660000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1111012000101150000",
+    "lat": 37.569802,
+    "lon": 126.973193
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "susong-square",
+   "name": "수송스퀘어",
+   "region_code": "CBD",
+   "region": "도심",
+   "sgg_cd": "11110",
+   "umd": "수송동",
+   "jibun": "83-1",
+   "address_road": "서울 종로구 율곡로2길 19",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 31336.9,
+    "effective_rent_won_m2_mo": 26114.083333333332,
+    "rent_free_mo": 2.0,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.063692,
+    "cap_income_based": 0.040485
+   },
+   "land": {
+    "land_price_won_m2": 19970000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1111012400100830001",
+    "lat": 37.5745373,
+    "lon": 126.9810189
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1",
+    "도로명 점 필지 불일치(시드 수송동 83-1 vs 점 85-7대) — 여러 필지에 걸친 건물이면 정상이다. 공시지가·PNU는 시드 지번으로 조회했다. 사람 확인 권장."
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "center-one",
+   "name": "미래에셋 센터원",
+   "region_code": "CBD",
+   "region": "도심",
+   "sgg_cd": "11140",
+   "umd": "수하동",
+   "jibun": "67",
+   "address_road": "서울 중구 을지로5길 26",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 31336.9,
+    "effective_rent_won_m2_mo": 26114.083333333332,
+    "rent_free_mo": 2.0,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.063692,
+    "cap_income_based": 0.040485
+   },
+   "land": {
+    "land_price_won_m2": 50510000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1114010800100670000",
+    "lat": 37.5673428,
+    "lon": 126.9851447
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "ferrum-tower",
+   "name": "페럼타워",
+   "region_code": "CBD",
+   "region": "도심",
+   "sgg_cd": "11140",
+   "umd": "수하동",
+   "jibun": "66",
+   "address_road": "서울 중구 을지로5길 19",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 31336.9,
+    "effective_rent_won_m2_mo": 26114.083333333332,
+    "rent_free_mo": 2.0,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.063692,
+    "cap_income_based": 0.040485
+   },
+   "land": {
+    "land_price_won_m2": 50510000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1114010800100660000",
+    "lat": 37.566979,
+    "lon": 126.9842095
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "eulji-twin-tower",
+   "name": "을지트윈타워",
+   "region_code": "CBD",
+   "region": "도심",
+   "sgg_cd": "11140",
+   "umd": "을지로4가",
+   "jibun": "323",
+   "address_road": "서울 중구 을지로 170",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 31336.9,
+    "effective_rent_won_m2_mo": 26114.083333333332,
+    "rent_free_mo": 2.0,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.063692,
+    "cap_income_based": 0.040485
+   },
+   "land": {
+    "land_price_won_m2": 33160000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1114015000103230000",
+    "lat": 37.5661469,
+    "lon": 126.9973184
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "signature-tower",
+   "name": "시그니처타워",
+   "region_code": "CBD",
+   "region": "도심",
+   "sgg_cd": "11140",
+   "umd": "수표동",
+   "jibun": "99",
+   "address_road": "서울 중구 청계천로 100",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 31336.9,
+    "effective_rent_won_m2_mo": 26114.083333333332,
+    "rent_free_mo": 2.0,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.063692,
+    "cap_income_based": 0.040485
+   },
+   "land": {
+    "land_price_won_m2": 53630000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1114011000100990000",
+    "lat": 37.5674728,
+    "lon": 126.9881132
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "state-tower-namsan",
+   "name": "스테이트타워 남산",
+   "region_code": "CBD",
+   "region": "도심",
+   "sgg_cd": "11140",
+   "umd": "회현동2가",
+   "jibun": "88",
+   "address_road": "서울 중구 퇴계로 100",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 31336.9,
+    "effective_rent_won_m2_mo": 26114.083333333332,
+    "rent_free_mo": 2.0,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.063692,
+    "cap_income_based": 0.040485
+   },
+   "land": {
+    "land_price_won_m2": 41660000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1114012200100880000",
+    "lat": 37.5601421,
+    "lon": 126.9829442
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "booyoung-eulji",
+   "name": "더존을지타워",
+   "region_code": "CBD",
+   "region": "도심",
+   "sgg_cd": "11140",
+   "umd": "을지로1가",
+   "jibun": "87",
+   "address_road": "서울 중구 을지로 29",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 31336.9,
+    "effective_rent_won_m2_mo": 26114.083333333332,
+    "rent_free_mo": 2.0,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.063692,
+    "cap_income_based": 0.040485
+   },
+   "land": {
+    "land_price_won_m2": 67120000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1114010400100870000",
+    "lat": 37.5664965,
+    "lon": 126.9810349
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "fine-avenue",
+   "name": "파인애비뉴",
+   "region_code": "CBD",
+   "region": "도심",
+   "sgg_cd": "11140",
+   "umd": "을지로2가",
+   "jibun": "203",
+   "address_road": "서울 중구 을지로 100",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 31336.9,
+    "effective_rent_won_m2_mo": 26114.083333333332,
+    "rent_free_mo": 2.0,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.063692,
+    "cap_income_based": 0.040485
+   },
+   "land": {
+    "land_price_won_m2": 60890000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1114010500102030000",
+    "lat": 37.5656487,
+    "lon": 126.9881425
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "seoul-square",
+   "name": "서울스퀘어",
+   "region_code": "CBD",
+   "region": "도심",
+   "sgg_cd": "11140",
+   "umd": "남대문로5가",
+   "jibun": "541",
+   "address_road": "서울 중구 한강대로 416",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 31336.9,
+    "effective_rent_won_m2_mo": 26114.083333333332,
+    "rent_free_mo": 2.0,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.063692,
+    "cap_income_based": 0.040485
+   },
+   "land": {
+    "land_price_won_m2": 52980000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1114011800105410000",
+    "lat": 37.5555219,
+    "lon": 126.9737628
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "hanwha-building",
+   "name": "한화빌딩",
+   "region_code": "CBD",
+   "region": "도심",
+   "sgg_cd": "11140",
+   "umd": "장교동",
+   "jibun": "1",
+   "address_road": "서울 중구 청계천로 86",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 31336.9,
+    "effective_rent_won_m2_mo": 26114.083333333332,
+    "rent_free_mo": 2.0,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.063692,
+    "cap_income_based": 0.040485
+   },
+   "land": {
+    "land_price_won_m2": 53090000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1114010900100010000",
+    "lat": 37.5675188,
+    "lon": 126.9865251
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "samsung-main-building",
+   "name": "삼성본관빌딩",
+   "region_code": "CBD",
+   "region": "도심",
+   "sgg_cd": "11140",
+   "umd": "태평로2가",
+   "jibun": "250",
+   "address_road": "서울 중구 세종대로 67",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 31336.9,
+    "effective_rent_won_m2_mo": 26114.083333333332,
+    "rent_free_mo": 2.0,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.063692,
+    "cap_income_based": 0.040485
+   },
+   "land": {
+    "land_price_won_m2": 48380000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1114011400102500000",
+    "lat": 37.5623145,
+    "lon": 126.975531
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "daishin-finance-center",
+   "name": "대신파이낸스센터",
+   "region_code": "CBD",
+   "region": "도심",
+   "sgg_cd": "11140",
+   "umd": "저동1가",
+   "jibun": "114",
+   "address_road": "서울 중구 삼일대로 343",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 31336.9,
+    "effective_rent_won_m2_mo": 26114.083333333332,
+    "rent_free_mo": 2.0,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.063692,
+    "cap_income_based": 0.040485
+   },
+   "land": {
+    "land_price_won_m2": 49730000,
+    "land_price_year": "2025",
+    "zones": [
+     "중심상업지역"
+    ],
+    "pnu": "1114013100101140000",
+    "lat": 37.5651179,
+    "lon": 126.9869606
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "gfc",
+   "name": "강남파이낸스센터",
+   "region_code": "GBD",
+   "region": "강남",
+   "sgg_cd": "11680",
+   "umd": "역삼동",
+   "jibun": "737",
+   "address_road": "서울 강남구 테헤란로 152",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 27177.9,
+    "effective_rent_won_m2_mo": 23780.662500000002,
+    "rent_free_mo": 1.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.049196,
+    "cap_income_based": 0.030452
+   },
+   "land": {
+    "land_price_won_m2": 67300000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1168010100107370000",
+    "lat": 37.5000286,
+    "lon": 127.0365145
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "parnas-tower",
+   "name": "파르나스타워",
+   "region_code": "GBD",
+   "region": "강남",
+   "sgg_cd": "11680",
+   "umd": "삼성동",
+   "jibun": "159-8",
+   "address_road": "서울 강남구 테헤란로 521",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 27177.9,
+    "effective_rent_won_m2_mo": 23780.662500000002,
+    "rent_free_mo": 1.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.049196,
+    "cap_income_based": 0.030452
+   },
+   "land": {
+    "land_price_won_m2": 70590000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1168010500101590008",
+    "lat": 37.5091745,
+    "lon": 127.0606252
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "trade-tower",
+   "name": "트레이드타워",
+   "region_code": "GBD",
+   "region": "강남",
+   "sgg_cd": "11680",
+   "umd": "삼성동",
+   "jibun": "159-1",
+   "address_road": "서울 강남구 영동대로 511",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 27177.9,
+    "effective_rent_won_m2_mo": 23780.662500000002,
+    "rent_free_mo": 1.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.049196,
+    "cap_income_based": 0.030452
+   },
+   "land": {
+    "land_price_won_m2": 45660000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1168010500101590001",
+    "lat": 37.5103226,
+    "lon": 127.0609991
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "asem-tower",
+   "name": "아셈타워",
+   "region_code": "GBD",
+   "region": "강남",
+   "sgg_cd": "11680",
+   "umd": "삼성동",
+   "jibun": "159",
+   "address_road": "서울 강남구 영동대로 517",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 27177.9,
+    "effective_rent_won_m2_mo": 23780.662500000002,
+    "rent_free_mo": 1.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.049196,
+    "cap_income_based": 0.030452
+   },
+   "land": {
+    "land_price_won_m2": 45660000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1168010500101590000",
+    "lat": 37.5130928,
+    "lon": 127.0597756
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "centerfield",
+   "name": "센터필드",
+   "region_code": "GBD",
+   "region": "강남",
+   "sgg_cd": "11680",
+   "umd": "역삼동",
+   "jibun": "676",
+   "address_road": "서울 강남구 테헤란로 231",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 27177.9,
+    "effective_rent_won_m2_mo": 23780.662500000002,
+    "rent_free_mo": 1.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.049196,
+    "cap_income_based": 0.030452
+   },
+   "land": {
+    "land_price_won_m2": 58620000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1168010100106760000",
+    "lat": 37.5036246,
+    "lon": 127.0416283
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "gangnam-n-tower",
+   "name": "강남N타워",
+   "region_code": "GBD",
+   "region": "강남",
+   "sgg_cd": "11680",
+   "umd": "역삼동",
+   "jibun": "648-9",
+   "address_road": "서울 강남구 테헤란로 129",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 27177.9,
+    "effective_rent_won_m2_mo": 23780.662500000002,
+    "rent_free_mo": 1.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.049196,
+    "cap_income_based": 0.030452
+   },
+   "land": {
+    "land_price_won_m2": 66390000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1168010100106480009",
+    "lat": 37.4999398,
+    "lon": 127.0323664
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "arc-place",
+   "name": "아크플레이스",
+   "region_code": "GBD",
+   "region": "강남",
+   "sgg_cd": "11680",
+   "umd": "역삼동",
+   "jibun": "736-1",
+   "address_road": "서울 강남구 테헤란로 142",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 27177.9,
+    "effective_rent_won_m2_mo": 23780.662500000002,
+    "rent_free_mo": 1.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.049196,
+    "cap_income_based": 0.030452
+   },
+   "land": {
+    "land_price_won_m2": 64440000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1168010100107360001",
+    "lat": 37.499744,
+    "lon": 127.0349543
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "posco-center",
+   "name": "포스코센터",
+   "region_code": "GBD",
+   "region": "강남",
+   "sgg_cd": "11680",
+   "umd": "대치동",
+   "jibun": "892",
+   "address_road": "서울 강남구 테헤란로 440",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 27177.9,
+    "effective_rent_won_m2_mo": 23780.662500000002,
+    "rent_free_mo": 1.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.049196,
+    "cap_income_based": 0.030452
+   },
+   "land": {
+    "land_price_won_m2": 70790000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1168010600108920000",
+    "lat": 37.5058305,
+    "lon": 127.0561399
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "gs-tower",
+   "name": "GS타워",
+   "region_code": "GBD",
+   "region": "강남",
+   "sgg_cd": "11680",
+   "umd": "역삼동",
+   "jibun": "679",
+   "address_road": "서울 강남구 논현로 508",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 27177.9,
+    "effective_rent_won_m2_mo": 23780.662500000002,
+    "rent_free_mo": 1.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.049196,
+    "cap_income_based": 0.030452
+   },
+   "land": {
+    "land_price_won_m2": 63830000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1168010100106790000",
+    "lat": 37.5020018,
+    "lon": 127.037476
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1",
+    "도로명 점 필지 불일치(시드 역삼동 679 vs 점 679-1 대) — 여러 필지에 걸친 건물이면 정상이다. 공시지가·PNU는 시드 지번으로 조회했다. 사람 확인 권장."
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "glass-tower",
+   "name": "글라스타워",
+   "region_code": "GBD",
+   "region": "강남",
+   "sgg_cd": "11680",
+   "umd": "대치동",
+   "jibun": "946-1",
+   "address_road": "서울 강남구 테헤란로 534",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 27177.9,
+    "effective_rent_won_m2_mo": 23780.662500000002,
+    "rent_free_mo": 1.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.049196,
+    "cap_income_based": 0.030452
+   },
+   "land": {
+    "land_price_won_m2": 75020000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1168010600109460001",
+    "lat": 37.5080429,
+    "lon": 127.0628076
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1",
+    "도로명 점 필지 불일치(시드 대치동 946-1 vs 점 946-8 대) — 여러 필지에 걸친 건물이면 정상이다. 공시지가·PNU는 시드 지번으로 조회했다. 사람 확인 권장."
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "dongbu-finance-center",
+   "name": "동부금융센터",
+   "region_code": "GBD",
+   "region": "강남",
+   "sgg_cd": "11680",
+   "umd": "대치동",
+   "jibun": "891-10",
+   "address_road": "서울 강남구 테헤란로 432",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 27177.9,
+    "effective_rent_won_m2_mo": 23780.662500000002,
+    "rent_free_mo": 1.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.049196,
+    "cap_income_based": 0.030452
+   },
+   "land": {
+    "land_price_won_m2": 72240000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1168010600108910010",
+    "lat": 37.5057221,
+    "lon": 127.0547507
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1",
+    "도로명 점 필지 불일치(시드 대치동 891-10 vs 점 891-58 대) — 여러 필지에 걸친 건물이면 정상이다. 공시지가·PNU는 시드 지번으로 조회했다. 사람 확인 권장."
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "textile-center",
+   "name": "섬유센터",
+   "region_code": "GBD",
+   "region": "강남",
+   "sgg_cd": "11680",
+   "umd": "대치동",
+   "jibun": "944-31",
+   "address_road": "서울 강남구 테헤란로 518",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 27177.9,
+    "effective_rent_won_m2_mo": 23780.662500000002,
+    "rent_free_mo": 1.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.049196,
+    "cap_income_based": 0.030452
+   },
+   "land": {
+    "land_price_won_m2": 73880000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1168010600109440031",
+    "lat": 37.5075409,
+    "lon": 127.0605977
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "yeoksam-i-tower",
+   "name": "역삼 아이타워",
+   "region_code": "GBD",
+   "region": "강남",
+   "sgg_cd": "11680",
+   "umd": "역삼동",
+   "jibun": "707-27",
+   "address_road": "서울 강남구 테헤란로 326",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 27177.9,
+    "effective_rent_won_m2_mo": 23780.662500000002,
+    "rent_free_mo": 1.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.049196,
+    "cap_income_based": 0.030452
+   },
+   "land": {
+    "land_price_won_m2": 70410000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1168010100107070027",
+    "lat": 37.5035472,
+    "lon": 127.0470337
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "samsung-electronics-seocho",
+   "name": "삼성전자 서초사옥",
+   "region_code": "GBD",
+   "region": "강남",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1320-10",
+   "address_road": "서울 서초구 서초대로74길 11",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 27177.9,
+    "effective_rent_won_m2_mo": 23780.662500000002,
+    "rent_free_mo": 1.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.049196,
+    "cap_income_based": 0.030452
+   },
+   "land": {
+    "land_price_won_m2": 95640000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1165010800113200010",
+    "lat": 37.4965744,
+    "lon": 127.0269412
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "samsung-life-seocho-tower",
+   "name": "삼성생명 서초타워",
+   "region_code": "GBD",
+   "region": "강남",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1321-15",
+   "address_road": "서울 서초구 서초대로74길 4",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 27177.9,
+    "effective_rent_won_m2_mo": 23780.662500000002,
+    "rent_free_mo": 1.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.049196,
+    "cap_income_based": 0.030452
+   },
+   "land": {
+    "land_price_won_m2": 92860000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1165010800113210015",
+    "lat": 37.4968037,
+    "lon": 127.0256541
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "the-asset",
+   "name": "더에셋",
+   "region_code": "GBD",
+   "region": "강남",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1321-20",
+   "address_road": "서울 서초구 서초대로74길 14",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 27177.9,
+    "effective_rent_won_m2_mo": 23780.662500000002,
+    "rent_free_mo": 1.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.049196,
+    "cap_income_based": 0.030452
+   },
+   "land": {
+    "land_price_won_m2": 79850000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1165010800113210020",
+    "lat": 37.4959646,
+    "lon": 127.0261244
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "platinum-tower",
+   "name": "그레이츠강남",
+   "region_code": "GBD",
+   "region": "강남",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1321-11",
+   "address_road": "서울 서초구 서초대로 398",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 27177.9,
+    "effective_rent_won_m2_mo": 23780.662500000002,
+    "rent_free_mo": 1.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.049196,
+    "cap_income_based": 0.030452
+   },
+   "land": {
+    "land_price_won_m2": 71250000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1165010800113210011",
+    "lat": 37.4966361,
+    "lon": 127.0251045
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "kyobo-tower",
+   "name": "교보타워",
+   "region_code": "GBD",
+   "region": "강남",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1303-22",
+   "address_road": "서울 서초구 강남대로 465",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 27177.9,
+    "effective_rent_won_m2_mo": 23780.662500000002,
+    "rent_free_mo": 1.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.049196,
+    "cap_income_based": 0.030452
+   },
+   "land": {
+    "land_price_won_m2": 90500000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1165010800113030022",
+    "lat": 37.5037586,
+    "lon": 127.0241121
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "majesta-city-tower1",
+   "name": "마제스타시티 타워1",
+   "region_code": "GBD",
+   "region": "강남",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1498-5",
+   "address_road": "서울 서초구 서초대로38길 12",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 27177.9,
+    "effective_rent_won_m2_mo": 23780.662500000002,
+    "rent_free_mo": 1.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.049196,
+    "cap_income_based": 0.030452
+   },
+   "land": {
+    "land_price_won_m2": 16940000,
+    "land_price_year": "2025",
+    "zones": [
+     "준주거지역"
+    ],
+    "pnu": "1165010800114980005",
+    "lat": 37.4904696,
+    "lon": 127.0053566
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "majesta-city-tower2",
+   "name": "마제스타시티 타워2",
+   "region_code": "GBD",
+   "region": "강남",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1498-5",
+   "address_road": "서울 서초구 서초대로38길 12",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 27177.9,
+    "effective_rent_won_m2_mo": 23780.662500000002,
+    "rent_free_mo": 1.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.049196,
+    "cap_income_based": 0.030452
+   },
+   "land": {
+    "land_price_won_m2": 16940000,
+    "land_price_year": "2025",
+    "zones": [
+     "준주거지역"
+    ],
+    "pnu": "1165010800114980005",
+    "lat": 37.4904696,
+    "lon": 127.0053566
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "gt-tower-east",
+   "name": "GT타워 EAST",
+   "region_code": "GBD",
+   "region": "강남",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1317-23",
+   "address_road": "서울 서초구 서초대로 411",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 27177.9,
+    "effective_rent_won_m2_mo": 23780.662500000002,
+    "rent_free_mo": 1.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.049196,
+    "cap_income_based": 0.030452
+   },
+   "land": {
+    "land_price_won_m2": 74110000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1165010800113170023",
+    "lat": 37.4981096,
+    "lon": 127.0259223
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1",
+    "도로명 점 필지 불일치(시드 서초동 1317-23 vs 점 1317-28대) — 여러 필지에 걸친 건물이면 정상이다. 공시지가·PNU는 시드 지번으로 조회했다. 사람 확인 권장."
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "parc1-tower1",
+   "name": "파크원 타워1",
+   "region_code": "YBD",
+   "region": "여의도마포",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "22",
+   "address_road": "서울 영등포구 여의대로 108",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 20282.1,
+    "effective_rent_won_m2_mo": 16056.662499999999,
+    "rent_free_mo": 2.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.044482999999999995,
+    "cap_income_based": 0.037492
+   },
+   "land": {
+    "land_price_won_m2": 32090000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1156011000100220000",
+    "lat": 37.527054,
+    "lon": 126.9278476
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "parc1-tower2",
+   "name": "파크원 타워2",
+   "region_code": "YBD",
+   "region": "여의도마포",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "22",
+   "address_road": "서울 영등포구 여의대로 108",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 20282.1,
+    "effective_rent_won_m2_mo": 16056.662499999999,
+    "rent_free_mo": 2.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.044482999999999995,
+    "cap_income_based": 0.037492
+   },
+   "land": {
+    "land_price_won_m2": 32090000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1156011000100220000",
+    "lat": 37.527054,
+    "lon": 126.9278476
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "ifc-one",
+   "name": "서울국제금융센터 ONE",
+   "region_code": "YBD",
+   "region": "여의도마포",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "23",
+   "address_road": "서울 영등포구 국제금융로 10",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 20282.1,
+    "effective_rent_won_m2_mo": 16056.662499999999,
+    "rent_free_mo": 2.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.044482999999999995,
+    "cap_income_based": 0.037492
+   },
+   "land": {
+    "land_price_won_m2": 32090000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1156011000100230000",
+    "lat": 37.5250584,
+    "lon": 126.9259369
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "ifc-two",
+   "name": "서울국제금융센터 TWO",
+   "region_code": "YBD",
+   "region": "여의도마포",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "23",
+   "address_road": "서울 영등포구 국제금융로 10",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 20282.1,
+    "effective_rent_won_m2_mo": 16056.662499999999,
+    "rent_free_mo": 2.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.044482999999999995,
+    "cap_income_based": 0.037492
+   },
+   "land": {
+    "land_price_won_m2": 32090000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1156011000100230000",
+    "lat": 37.5250584,
+    "lon": 126.9259369
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "ifc-three",
+   "name": "서울국제금융센터 THREE",
+   "region_code": "YBD",
+   "region": "여의도마포",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "23",
+   "address_road": "서울 영등포구 국제금융로 10",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 20282.1,
+    "effective_rent_won_m2_mo": 16056.662499999999,
+    "rent_free_mo": 2.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.044482999999999995,
+    "cap_income_based": 0.037492
+   },
+   "land": {
+    "land_price_won_m2": 32090000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1156011000100230000",
+    "lat": 37.5250584,
+    "lon": 126.9259369
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "fki-tower",
+   "name": "FKI타워",
+   "region_code": "YBD",
+   "region": "여의도마포",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "28-1",
+   "address_road": "서울 영등포구 여의대로 24",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 20282.1,
+    "effective_rent_won_m2_mo": 16056.662499999999,
+    "rent_free_mo": 2.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.044482999999999995,
+    "cap_income_based": 0.037492
+   },
+   "land": {
+    "land_price_won_m2": 29793000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1156011000100280001",
+    "lat": 37.5216933,
+    "lon": 126.9200453
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "sixty-three-square",
+   "name": "63스퀘어",
+   "region_code": "YBD",
+   "region": "여의도마포",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "60",
+   "address_road": "서울 영등포구 63로 50",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 20282.1,
+    "effective_rent_won_m2_mo": 16056.662499999999,
+    "rent_free_mo": 2.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.044482999999999995,
+    "cap_income_based": 0.037492
+   },
+   "land": {
+    "land_price_won_m2": 21960000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1156011000100600000",
+    "lat": 37.5195762,
+    "lon": 126.9398376
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "lg-twin-towers",
+   "name": "LG트윈타워",
+   "region_code": "YBD",
+   "region": "여의도마포",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "20",
+   "address_road": "서울 영등포구 여의대로 128",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 20282.1,
+    "effective_rent_won_m2_mo": 16056.662499999999,
+    "rent_free_mo": 2.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.044482999999999995,
+    "cap_income_based": 0.037492
+   },
+   "land": {
+    "land_price_won_m2": 32090000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1156011000100200000",
+    "lat": 37.5278855,
+    "lon": 126.9291392
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "tp-tower",
+   "name": "TP타워",
+   "region_code": "YBD",
+   "region": "여의도마포",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "27-2",
+   "address_road": "서울 영등포구 의사당대로 96",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 20282.1,
+    "effective_rent_won_m2_mo": 16056.662499999999,
+    "rent_free_mo": 2.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.044482999999999995,
+    "cap_income_based": 0.037492
+   },
+   "land": {
+    "land_price_won_m2": 32403000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1156011000100270002",
+    "lat": 37.5215485,
+    "lon": 126.9229429
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "krx-seoul",
+   "name": "한국거래소 서울사옥",
+   "region_code": "YBD",
+   "region": "여의도마포",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "33",
+   "address_road": "서울 영등포구 여의나루로 76",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 20282.1,
+    "effective_rent_won_m2_mo": 16056.662499999999,
+    "rent_free_mo": 2.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.044482999999999995,
+    "cap_income_based": 0.037492
+   },
+   "land": {
+    "land_price_won_m2": 27950000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1156011000100330000",
+    "lat": 37.5230469,
+    "lon": 126.9281785
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "yeouido-finance-tower",
+   "name": "여의도 파이낸스타워",
+   "region_code": "YBD",
+   "region": "여의도마포",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "23-8",
+   "address_road": "서울 영등포구 국제금융로2길 32",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 20282.1,
+    "effective_rent_won_m2_mo": 16056.662499999999,
+    "rent_free_mo": 2.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.044482999999999995,
+    "cap_income_based": 0.037492
+   },
+   "land": {
+    "land_price_won_m2": 25980000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1156011000100230008",
+    "lat": 37.5238803,
+    "lon": 126.9241264
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "hana-securities-yeouido",
+   "name": "하나증권 여의도 사옥",
+   "region_code": "YBD",
+   "region": "여의도마포",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "27-3",
+   "address_road": "서울 영등포구 의사당대로 82",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 20282.1,
+    "effective_rent_won_m2_mo": 16056.662499999999,
+    "rent_free_mo": 2.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.044482999999999995,
+    "cap_income_based": 0.037492
+   },
+   "land": {
+    "land_price_won_m2": 28649000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1156011000100270003",
+    "lat": 37.5226829,
+    "lon": 126.9218534
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "korea-investment-hq",
+   "name": "한국투자증권 본사",
+   "region_code": "YBD",
+   "region": "여의도마포",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "27-1",
+   "address_road": "서울 영등포구 의사당대로 88",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 20282.1,
+    "effective_rent_won_m2_mo": 16056.662499999999,
+    "rent_free_mo": 2.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.044482999999999995,
+    "cap_income_based": 0.037492
+   },
+   "land": {
+    "land_price_won_m2": 28650000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1156011000100270001",
+    "lat": 37.5221118,
+    "lon": 126.9222785
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  },
+  {
+   "id": "anchor-one",
+   "name": "앵커원",
+   "region_code": "YBD",
+   "region": "여의도마포",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "525",
+   "address_road": "서울 영등포구 국제금융로 39",
+   "region_figures": {
+    "latest_quarter": "2026Q1",
+    "nominal_rent_won_m2_mo": 20282.1,
+    "effective_rent_won_m2_mo": 16056.662499999999,
+    "rent_free_mo": 2.5,
+    "rent_free_meta": {
+     "unit": "개월/년",
+     "source": "공개 시장 보고서들의 관행 수준을 반영한 가정값, 리츠 앵커 캘리브레이션으로 조정 예정",
+     "caveat": "권역 대표값 한 숫자로 개별 계약의 렌트프리를 대신한 것이다. 실제 렌트프리는 같은 권역 안에서도 공실률·신축 공급·임차인 신용도에 따라 갈리고 경기 국면에 따라 움직인다. 값을 확정된 관측치로 인용하지 말고, 리츠 실적 임대수익 앵커에 맞추는 캘리브레이션의 초기값으로만 쓰라. 권역 명칭은 R-ONE 기준이며 seed_buildings.meta.rone_region 매핑은 근사다."
+    },
+    "vacancy": 0.044482999999999995,
+    "cap_income_based": 0.037492
+   },
+   "land": {
+    "land_price_won_m2": 27950000,
+    "land_price_year": "2025",
+    "zones": [
+     "일반상업지역"
+    ],
+    "pnu": "1156011000105250000",
+    "lat": 37.5242916,
+    "lon": 126.9293386
+   },
+   "ledger_flags": [
+    "대장 미조회: 건축물대장 표제부 HTTP 403 — 이 service_key에 BldRgstHubService 접근 권한이 없다(응답: 'Forbidden'). data.go.kr 활용신청 미승인이 가장 유력하나, 평문 403은 게이트웨이 단 차단에서도 같게 나온다. 11140/10300/0084-0000 p1"
+   ],
+   "pending_ledger": true,
+   "pending_reason": "건축물대장(ledger)이 없어 연면적·사용승인일을 모른다 — 건물 특성 보정과 NOI 이하를 계산하지 않는다. 대장 부재를 권역 평균이나 0 으로 메우면 추정이 아니라 지어낸 값이 되므로, 권역 수치만 싣고 자리를 비워 둔다. data.go.kr 건축물대장 활용신청이 승인된 뒤 재수집·재실행하면 승격된다.",
+   "blocked": [
+    "building_adjust",
+    "noi",
+    "value",
+    "max_loan",
+    "hold_model",
+    "refi_test",
+    "breakeven_vacancy"
+   ]
+  }
+ ],
+ "errors": [],
+ "implausible_refi": [],
+ "caveats": [
+  "**건축물대장이 열리기 전이라 대부분(또는 전부)의 동이 pending_ledger 다.** 빈 자리를 권역 평균으로 메우지 않았다 — 추정과 부재를 같은 색으로 칠하면 대장이 없다는 사실이 산출물에서 사라진다.",
+  "임대료는 건물 실측이 아니라 권역 지표에 연식·규모·역세권 세 계수를 곱으로 겹친 추정이다. 특성 간 상관을 무시했으므로 셋이 함께 좋은 건물은 프리미엄이 과대평가된다.",
+  "가치는 직접환원법(NOI ÷ cap) 한 줄이다. 임대차 만기 구조·리스업·CapEx 의 시점이 들어 있지 않고, 추정가치와 실거래의 오차 분포는 대장 승격 뒤에야 낼 수 있다(trades_analysis.value_error_dist 참조).",
+  "대출은 선순위 한 트랜치·IO(이자만 상환) 가정이다. 원리금균등이면 대출가능액이 이보다 작아지고, 메자닌·후순위를 얹는 구조는 이 삼중 제약으로 설명되지 않는다.",
+  "차환 판정의 `pass` 는 금리와 LTV **두 관문의 AND** 다. 등호는 금리 쪽이 실패(여유 0), LTV 쪽이 통과(한도 준수)로 갈려, 취득 시점에 DSCR 결속으로 승인된 대출이 같은 금리의 차환에서는 부결될 수 있다."
+ ]
+}

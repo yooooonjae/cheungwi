@@ -12,6 +12,7 @@ make setup && make test     # venv 생성·의존성 설치 후 테스트
 cp config.example.json config.json   # 그리고 각 키 값을 채운다
 make collect                # 수집기 5종 실행 (재개형)
 make manifest               # 수집 산출을 훑어 데이터 원장 갱신
+make analyze                # 엔진을 실데이터에 적용해 out/*.json 4종 생성
 ```
 
 수집기는 파이썬 표준 라이브러리만 쓴다(pytest는 테스트 전용). 저장 형식은 JSON 단일이고,
@@ -29,6 +30,28 @@ API 원본 응답은 `data/raw/{source}/`에 전량 캐시해 재실행을 증�
 | 금융감독원 DART | 오피스 보유 상장리츠 재무·배당 | `data/reits.json` |
 | 한국은행 ECOS | 국고채 10년·CD 91일·기업대출 금리 | `data/rates.json` |
 | 국토교통부 VWorld | 좌표·용도지역·공시지가 | (buildings에 병합) |
+
+## 분석 산출
+
+`src/analysis/`의 일곱 모듈(유효임대료·NOI·cap rate·가치·인수금융·차환·개발 PF)은 파일도
+네트워크도 건드리지 않는 순수 함수이고, 그것을 실데이터에 붙이는 자리는 `build_out.py`
+하나뿐이다. `make analyze`가 네 산출을 만든다.
+
+| 산출 | 담는 것 |
+|---|---|
+| `out/market.json` | 권역 3종의 유효임대료·공실률·cap 벤치마크·금리 3계열·스프레드(cap − 국고채10년) |
+| `out/underwriting.json` | 시드 55동의 언더라이팅. 건축물대장이 없는 동은 `pending_ledger` |
+| `out/trades_analysis.json` | 해제 거래를 뺀 실거래의 권역별·연도별 중위 평당가와 매칭 사다리 |
+| `out/pf_case.json` | 대표 가상 사업지의 월별 인출·이자 스케줄과 스트레스 15행 |
+
+같은 입력이면 같은 바이트가 나온다(벽시계 시각을 싣지 않는다). 조립을 모두 끝낸 뒤에
+쓰고 쓰기는 임시 파일 → rename이라, 도중에 실패하면 기존 `out/`이 그대로 남는다.
+
+**대장이 없다는 사실을 메우지 않는다.** 건축물대장 활용신청이 승인되기 전이라 지금은
+55동 전부가 `pending_ledger`이고, 그 동들은 연면적을 몰라 NOI 이하를 계산하지 않는다 —
+빈 자리를 권역 평균으로 칠하면 추정과 부재가 같은 색이 된다. 승인 뒤 재수집·재실행하면
+그대로 승격된다. 물리 게이트(cap 0.02~0.12 · 유효임대료 10,000~60,000원/㎡·월 · DSCR 0~5)에
+걸린 값은 조용히 빠지지 않고 `gate_violations`·`errors`에 사유와 함께 남는다.
 
 ## 데이터 원장
 

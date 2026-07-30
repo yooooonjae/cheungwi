@@ -1,0 +1,1494 @@
+{
+ "schema": "cheungwi/trades_analysis/1",
+ "as_of": {
+  "trades_collected_at": "2026-07-30",
+  "months": "200601~202607",
+  "seed_as_of": "2026-07-30"
+ },
+ "units": {
+  "per_m2_won": "원/㎡(거래면적 기준)",
+  "per_pyeong_won": "원/평 — 1평 = 400/121 ㎡ = 3.3057851239669422",
+  "amount_won": "원"
+ },
+ "filters": {
+  "rows_total": 14521,
+  "rows_used": 14117,
+  "canceled_excluded": 404,
+  "use": "업무(수집 단계에서 이미 업무용만 담겨 있다)",
+  "note": "해제(canceled=true) 거래는 데이터층이 지우지 않고 플래그로 보존한다 — 취소된 계약도 그 시점의 호가 정보이기 때문이다. 가격 집계에서 빼는 판단은 분석 단계의 몫이고, 여기서 뺐다."
+ },
+ "region_mapping": {
+  "map": {
+   "11110": "도심",
+   "11140": "도심",
+   "11560": "여의도마포",
+   "11650": "강남",
+   "11680": "강남"
+  },
+  "source": "seed_buildings.meta.region_def × seed_buildings.meta.rone_region",
+  "unmapped_sgg_cd": [],
+  "caveat": "시군구 → R-ONE 권역 매핑은 근사다. 여의도마포는 마포(11440)를 포함한 합성 권역인데 실거래 표본에는 영등포구(11560)만 있어 마포 쪽이 통째로 빠져 있다. 권역 안의 상권 편차도 이 한 칸으로 뭉개진다."
+ },
+ "by_region": {
+  "도심": {
+   "sgg_cd": [
+    "11110",
+    "11140"
+   ],
+   "n": 4702,
+   "by_year": [
+    {
+     "year": 2006,
+     "n": 513,
+     "median_won_per_m2": 9918605,
+     "median_won_per_pyeong": 32788776.859504133,
+     "p25_won_per_pyeong": 28419500.826446284,
+     "p75_won_per_pyeong": 39349094.21487603
+    },
+    {
+     "year": 2007,
+     "n": 443,
+     "median_won_per_m2": 18901869,
+     "median_won_per_pyeong": 62485517.3553719,
+     "p25_won_per_pyeong": 62242000.0,
+     "p75_won_per_pyeong": 64584122.31404959
+    },
+    {
+     "year": 2008,
+     "n": 202,
+     "median_won_per_m2": 7805569.0,
+     "median_won_per_pyeong": 25803533.88429752,
+     "p25_won_per_pyeong": 14356771.074380165,
+     "p75_won_per_pyeong": 25804747.107438017
+    },
+    {
+     "year": 2009,
+     "n": 149,
+     "median_won_per_m2": 4328084,
+     "median_won_per_pyeong": 14307715.70247934,
+     "p25_won_per_pyeong": 9657163.636363637,
+     "p75_won_per_pyeong": 21254512.396694217
+    },
+    {
+     "year": 2010,
+     "n": 146,
+     "median_won_per_m2": 5338989.5,
+     "median_won_per_pyeong": 17649552.066115703,
+     "p25_won_per_pyeong": 11105557.85123967,
+     "p75_won_per_pyeong": 21360787.603305787
+    },
+    {
+     "year": 2011,
+     "n": 150,
+     "median_won_per_m2": 5388749.5,
+     "median_won_per_pyeong": 17814047.933884297,
+     "p25_won_per_pyeong": 12585390.082644628,
+     "p75_won_per_pyeong": 25412800.0
+    },
+    {
+     "year": 2012,
+     "n": 454,
+     "median_won_per_m2": 15300699.0,
+     "median_won_per_pyeong": 50580823.14049587,
+     "p25_won_per_pyeong": 19671747.933884297,
+     "p75_won_per_pyeong": 50582440.49586777
+    },
+    {
+     "year": 2013,
+     "n": 214,
+     "median_won_per_m2": 8609844.5,
+     "median_won_per_pyeong": 28462295.867768597,
+     "p25_won_per_pyeong": 14987638.842975207,
+     "p75_won_per_pyeong": 41974671.07438017
+    },
+    {
+     "year": 2014,
+     "n": 265,
+     "median_won_per_m2": 7630719,
+     "median_won_per_pyeong": 25225517.3553719,
+     "p25_won_per_pyeong": 17505550.41322314,
+     "p75_won_per_pyeong": 25261342.14876033
+    },
+    {
+     "year": 2015,
+     "n": 161,
+     "median_won_per_m2": 6797283,
+     "median_won_per_pyeong": 22470357.02479339,
+     "p25_won_per_pyeong": 17030376.859504133,
+     "p75_won_per_pyeong": 28158307.43801653
+    },
+    {
+     "year": 2016,
+     "n": 228,
+     "median_won_per_m2": 6435062.0,
+     "median_won_per_pyeong": 21272932.23140496,
+     "p25_won_per_pyeong": 15974628.099173553,
+     "p75_won_per_pyeong": 28482628.099173553
+    },
+    {
+     "year": 2017,
+     "n": 106,
+     "median_won_per_m2": 6005838.0,
+     "median_won_per_pyeong": 19854009.917355374,
+     "p25_won_per_pyeong": 13525560.330578513,
+     "p75_won_per_pyeong": 25356497.520661157
+    },
+    {
+     "year": 2018,
+     "n": 267,
+     "median_won_per_m2": 9664059,
+     "median_won_per_pyeong": 31947302.479338843,
+     "p25_won_per_pyeong": 19767087.603305787,
+     "p75_won_per_pyeong": 56603613.2231405
+    },
+    {
+     "year": 2019,
+     "n": 254,
+     "median_won_per_m2": 8457039.0,
+     "median_won_per_pyeong": 27957153.719008267,
+     "p25_won_per_pyeong": 20749775.20661157,
+     "p75_won_per_pyeong": 40511627.27272727
+    },
+    {
+     "year": 2020,
+     "n": 314,
+     "median_won_per_m2": 8614617.0,
+     "median_won_per_pyeong": 28478072.727272727,
+     "p25_won_per_pyeong": 23058254.545454547,
+     "p75_won_per_pyeong": 40713623.96694215
+    },
+    {
+     "year": 2021,
+     "n": 191,
+     "median_won_per_m2": 8370134,
+     "median_won_per_pyeong": 27669864.462809917,
+     "p25_won_per_pyeong": 20671968.595041323,
+     "p75_won_per_pyeong": 40201117.3553719
+    },
+    {
+     "year": 2022,
+     "n": 100,
+     "median_won_per_m2": 7964201.0,
+     "median_won_per_pyeong": 26327937.190082647,
+     "p25_won_per_pyeong": 21420809.917355374,
+     "p75_won_per_pyeong": 32883292.561983474
+    },
+    {
+     "year": 2023,
+     "n": 128,
+     "median_won_per_m2": 12213190.0,
+     "median_won_per_pyeong": 40374181.81818182,
+     "p25_won_per_pyeong": 23305550.41322314,
+     "p75_won_per_pyeong": 64145287.60330579
+    },
+    {
+     "year": 2024,
+     "n": 113,
+     "median_won_per_m2": 11044639,
+     "median_won_per_pyeong": 36511203.30578513,
+     "p25_won_per_pyeong": 21327646.280991737,
+     "p75_won_per_pyeong": 46656426.44628099
+    },
+    {
+     "year": 2025,
+     "n": 180,
+     "median_won_per_m2": 7724316.5,
+     "median_won_per_pyeong": 25534930.578512397,
+     "p25_won_per_pyeong": 21139071.074380167,
+     "p75_won_per_pyeong": 40702755.37190083
+    },
+    {
+     "year": 2026,
+     "n": 124,
+     "median_won_per_m2": 10521576.0,
+     "median_won_per_pyeong": 34782069.42148761,
+     "p25_won_per_pyeong": 27628961.157024793,
+     "p75_won_per_pyeong": 63965504.13223141
+    }
+   ]
+  },
+  "강남": {
+   "sgg_cd": [
+    "11650",
+    "11680"
+   ],
+   "n": 6995,
+   "by_year": [
+    {
+     "year": 2006,
+     "n": 430,
+     "median_won_per_m2": 3752195.5,
+     "median_won_per_pyeong": 12403952.066115703,
+     "p25_won_per_pyeong": 10023602.479338843,
+     "p75_won_per_pyeong": 17678548.76033058
+    },
+    {
+     "year": 2007,
+     "n": 115,
+     "median_won_per_m2": 4203540,
+     "median_won_per_pyeong": 13896000.0,
+     "p25_won_per_pyeong": 9283990.082644628,
+     "p75_won_per_pyeong": 22871639.669421487
+    },
+    {
+     "year": 2008,
+     "n": 476,
+     "median_won_per_m2": 5259979.0,
+     "median_won_per_pyeong": 17388360.330578513,
+     "p25_won_per_pyeong": 13520446.280991737,
+     "p75_won_per_pyeong": 21281877.685950413
+    },
+    {
+     "year": 2009,
+     "n": 507,
+     "median_won_per_m2": 4770607,
+     "median_won_per_pyeong": 15770601.652892562,
+     "p25_won_per_pyeong": 12652348.760330578,
+     "p75_won_per_pyeong": 22398571.900826447
+    },
+    {
+     "year": 2010,
+     "n": 392,
+     "median_won_per_m2": 5676582.5,
+     "median_won_per_pyeong": 18765561.983471073,
+     "p25_won_per_pyeong": 13858318.181818182,
+     "p75_won_per_pyeong": 26092843.801652893
+    },
+    {
+     "year": 2011,
+     "n": 309,
+     "median_won_per_m2": 5626588,
+     "median_won_per_pyeong": 18600290.90909091,
+     "p25_won_per_pyeong": 13560803.305785125,
+     "p75_won_per_pyeong": 29679011.570247933
+    },
+    {
+     "year": 2012,
+     "n": 241,
+     "median_won_per_m2": 6917064,
+     "median_won_per_pyeong": 22866327.272727273,
+     "p25_won_per_pyeong": 14757970.247933885,
+     "p75_won_per_pyeong": 27562300.826446284
+    },
+    {
+     "year": 2013,
+     "n": 279,
+     "median_won_per_m2": 5974629,
+     "median_won_per_pyeong": 19750839.669421487,
+     "p25_won_per_pyeong": 14364561.983471075,
+     "p75_won_per_pyeong": 27795879.338842977
+    },
+    {
+     "year": 2014,
+     "n": 198,
+     "median_won_per_m2": 5464180.5,
+     "median_won_per_pyeong": 18063406.61157025,
+     "p25_won_per_pyeong": 13105712.396694215,
+     "p75_won_per_pyeong": 24081905.785123967
+    },
+    {
+     "year": 2015,
+     "n": 283,
+     "median_won_per_m2": 6861245,
+     "median_won_per_pyeong": 22681801.652892563,
+     "p25_won_per_pyeong": 15777692.561983472,
+     "p75_won_per_pyeong": 29917274.38016529
+    },
+    {
+     "year": 2016,
+     "n": 265,
+     "median_won_per_m2": 6510584,
+     "median_won_per_pyeong": 21522591.73553719,
+     "p25_won_per_pyeong": 16557411.570247935,
+     "p75_won_per_pyeong": 27293656.198347107
+    },
+    {
+     "year": 2017,
+     "n": 394,
+     "median_won_per_m2": 5744838.5,
+     "median_won_per_pyeong": 18991201.652892563,
+     "p25_won_per_pyeong": 15273289.256198347,
+     "p75_won_per_pyeong": 27105005.785123967
+    },
+    {
+     "year": 2018,
+     "n": 354,
+     "median_won_per_m2": 6428118.0,
+     "median_won_per_pyeong": 21249976.859504133,
+     "p25_won_per_pyeong": 16924522.314049587,
+     "p75_won_per_pyeong": 27252472.727272727
+    },
+    {
+     "year": 2019,
+     "n": 397,
+     "median_won_per_m2": 6120277,
+     "median_won_per_pyeong": 20232320.661157027,
+     "p25_won_per_pyeong": 16791289.256198347,
+     "p75_won_per_pyeong": 29210928.925619837
+    },
+    {
+     "year": 2020,
+     "n": 401,
+     "median_won_per_m2": 6437768,
+     "median_won_per_pyeong": 21281877.685950413,
+     "p25_won_per_pyeong": 16884161.983471073,
+     "p75_won_per_pyeong": 35455428.09917355
+    },
+    {
+     "year": 2021,
+     "n": 384,
+     "median_won_per_m2": 7942839.0,
+     "median_won_per_pyeong": 26257319.008264463,
+     "p25_won_per_pyeong": 18422594.214876033,
+     "p75_won_per_pyeong": 44172597.52066116
+    },
+    {
+     "year": 2022,
+     "n": 238,
+     "median_won_per_m2": 6813589.0,
+     "median_won_per_pyeong": 22524261.157024793,
+     "p25_won_per_pyeong": 19005275.20661157,
+     "p75_won_per_pyeong": 37476160.33057851
+    },
+    {
+     "year": 2023,
+     "n": 223,
+     "median_won_per_m2": 7294564,
+     "median_won_per_pyeong": 24114261.157024793,
+     "p25_won_per_pyeong": 17870004.958677687,
+     "p75_won_per_pyeong": 45641067.76859504
+    },
+    {
+     "year": 2024,
+     "n": 623,
+     "median_won_per_m2": 9613405,
+     "median_won_per_pyeong": 31779851.239669424,
+     "p25_won_per_pyeong": 27358636.363636363,
+     "p75_won_per_pyeong": 32156274.38016529
+    },
+    {
+     "year": 2025,
+     "n": 332,
+     "median_won_per_m2": 9671296.5,
+     "median_won_per_pyeong": 31971228.099173553,
+     "p25_won_per_pyeong": 20857132.23140496,
+     "p75_won_per_pyeong": 55771464.46280992
+    },
+    {
+     "year": 2026,
+     "n": 154,
+     "median_won_per_m2": 8454953.0,
+     "median_won_per_pyeong": 27950257.85123967,
+     "p25_won_per_pyeong": 19918154.545454547,
+     "p75_won_per_pyeong": 51295142.97520661
+    }
+   ]
+  },
+  "여의도마포": {
+   "sgg_cd": [
+    "11560"
+   ],
+   "n": 2420,
+   "by_year": [
+    {
+     "year": 2006,
+     "n": 37,
+     "median_won_per_m2": 2700878,
+     "median_won_per_pyeong": 8928522.314049587,
+     "p25_won_per_pyeong": 7967880.991735538,
+     "p75_won_per_pyeong": 10454727.272727273
+    },
+    {
+     "year": 2007,
+     "n": 9,
+     "median_won_per_m2": 2735978,
+     "median_won_per_pyeong": 9044555.371900827,
+     "p25_won_per_pyeong": 6810436.363636364,
+     "p75_won_per_pyeong": 9438066.11570248
+    },
+    {
+     "year": 2008,
+     "n": 63,
+     "median_won_per_m2": 6785463,
+     "median_won_per_pyeong": 22431282.6446281,
+     "p25_won_per_pyeong": 10380147.107438017,
+     "p75_won_per_pyeong": 37076056.19834711
+    },
+    {
+     "year": 2009,
+     "n": 176,
+     "median_won_per_m2": 3262510.0,
+     "median_won_per_pyeong": 10785157.024793388,
+     "p25_won_per_pyeong": 8790306.611570248,
+     "p75_won_per_pyeong": 13899216.52892562
+    },
+    {
+     "year": 2010,
+     "n": 96,
+     "median_won_per_m2": 3103559.0,
+     "median_won_per_pyeong": 10259699.17355372,
+     "p25_won_per_pyeong": 9012907.438016528,
+     "p75_won_per_pyeong": 12007241.32231405
+    },
+    {
+     "year": 2011,
+     "n": 164,
+     "median_won_per_m2": 3963221.0,
+     "median_won_per_pyeong": 13101557.024793388,
+     "p25_won_per_pyeong": 10387976.033057852,
+     "p75_won_per_pyeong": 14858796.694214877
+    },
+    {
+     "year": 2012,
+     "n": 121,
+     "median_won_per_m2": 3576642,
+     "median_won_per_pyeong": 11823609.917355372,
+     "p25_won_per_pyeong": 8539943.801652893,
+     "p75_won_per_pyeong": 13502185.123966942
+    },
+    {
+     "year": 2013,
+     "n": 92,
+     "median_won_per_m2": 3060469.5,
+     "median_won_per_pyeong": 10117254.545454545,
+     "p25_won_per_pyeong": 8236519.834710744,
+     "p75_won_per_pyeong": 13230201.652892562
+    },
+    {
+     "year": 2014,
+     "n": 103,
+     "median_won_per_m2": 3965548,
+     "median_won_per_pyeong": 13109249.58677686,
+     "p25_won_per_pyeong": 11056138.842975207,
+     "p75_won_per_pyeong": 15020373.553719008
+    },
+    {
+     "year": 2015,
+     "n": 183,
+     "median_won_per_m2": 3421634,
+     "median_won_per_pyeong": 11311186.776859505,
+     "p25_won_per_pyeong": 10070839.669421488,
+     "p75_won_per_pyeong": 14627368.595041323
+    },
+    {
+     "year": 2016,
+     "n": 117,
+     "median_won_per_m2": 3942875,
+     "median_won_per_pyeong": 13034297.520661157,
+     "p25_won_per_pyeong": 10987497.520661157,
+     "p75_won_per_pyeong": 19757844.628099173
+    },
+    {
+     "year": 2017,
+     "n": 115,
+     "median_won_per_m2": 4366050,
+     "median_won_per_pyeong": 14433223.140495868,
+     "p25_won_per_pyeong": 11143717.355371902,
+     "p75_won_per_pyeong": 16241502.479338843
+    },
+    {
+     "year": 2018,
+     "n": 101,
+     "median_won_per_m2": 4116408,
+     "median_won_per_pyeong": 13607960.330578513,
+     "p25_won_per_pyeong": 11480697.520661157,
+     "p75_won_per_pyeong": 16455434.710743802
+    },
+    {
+     "year": 2019,
+     "n": 125,
+     "median_won_per_m2": 3915950,
+     "median_won_per_pyeong": 12945289.256198347,
+     "p25_won_per_pyeong": 11361120.661157025,
+     "p75_won_per_pyeong": 16643355.371900827
+    },
+    {
+     "year": 2020,
+     "n": 99,
+     "median_won_per_m2": 5013580,
+     "median_won_per_pyeong": 16573818.181818182,
+     "p25_won_per_pyeong": 14163642.975206612,
+     "p75_won_per_pyeong": 19622229.752066117
+    },
+    {
+     "year": 2021,
+     "n": 193,
+     "median_won_per_m2": 6263817,
+     "median_won_per_pyeong": 20706833.05785124,
+     "p25_won_per_pyeong": 15696290.90909091,
+     "p75_won_per_pyeong": 36470720.66115703
+    },
+    {
+     "year": 2022,
+     "n": 217,
+     "median_won_per_m2": 4935330,
+     "median_won_per_pyeong": 16315140.495867768,
+     "p25_won_per_pyeong": 13822575.20661157,
+     "p75_won_per_pyeong": 25362783.47107438
+    },
+    {
+     "year": 2023,
+     "n": 103,
+     "median_won_per_m2": 6399069,
+     "median_won_per_pyeong": 21153947.107438017,
+     "p25_won_per_pyeong": 14824851.239669422,
+     "p75_won_per_pyeong": 28082624.79338843
+    },
+    {
+     "year": 2024,
+     "n": 154,
+     "median_won_per_m2": 8606625.5,
+     "median_won_per_pyeong": 28451654.545454547,
+     "p25_won_per_pyeong": 20616183.47107438,
+     "p75_won_per_pyeong": 36962308.264462814
+    },
+    {
+     "year": 2025,
+     "n": 93,
+     "median_won_per_m2": 8507765,
+     "median_won_per_pyeong": 28124842.975206614,
+     "p25_won_per_pyeong": 21594340.49586777,
+     "p75_won_per_pyeong": 34506975.20661157
+    },
+    {
+     "year": 2026,
+     "n": 59,
+     "median_won_per_m2": 8455882,
+     "median_won_per_pyeong": 27953328.925619837,
+     "p25_won_per_pyeong": 20716489.256198347,
+     "p75_won_per_pyeong": 32215685.950413223
+    }
+   ]
+  }
+ },
+ "by_building_exact": [
+  {
+   "building_id": "anchor-one",
+   "n": 7,
+   "median_won_per_m2": 12592379,
+   "median_won_per_pyeong": 41627699.17355372
+  },
+  {
+   "building_id": "eulji-twin-tower",
+   "n": 18,
+   "median_won_per_m2": 14070894.0,
+   "median_won_per_pyeong": 46515352.06611571
+  },
+  {
+   "building_id": "hanwha-building",
+   "n": 11,
+   "median_won_per_m2": 6595947,
+   "median_won_per_pyeong": 21804783.47107438
+  },
+  {
+   "building_id": "platinum-tower",
+   "n": 19,
+   "median_won_per_m2": 26705006,
+   "median_won_per_pyeong": 88281011.57024793
+  }
+ ],
+ "exact_cases": [
+  {
+   "building_id": "hanwha-building",
+   "deal_ymd": "2024-04-30",
+   "sgg_cd": "11140",
+   "umd": "장교동",
+   "jibun": "1",
+   "amount_won": 160000000,
+   "building_ar_m2": 35.97,
+   "per_m2_won": 4448151,
+   "per_pyeong_won": 14704631.404958678,
+   "floor": null,
+   "build_year": 1987,
+   "share_deal": false,
+   "dealing_gbn": "중개거래"
+  },
+  {
+   "building_id": "hanwha-building",
+   "deal_ymd": "2024-07-18",
+   "sgg_cd": "11140",
+   "umd": "장교동",
+   "jibun": "1",
+   "amount_won": 485000000,
+   "building_ar_m2": 73.53,
+   "per_m2_won": 6595947,
+   "per_pyeong_won": 21804783.47107438,
+   "floor": null,
+   "build_year": 1987,
+   "share_deal": false,
+   "dealing_gbn": "중개거래"
+  },
+  {
+   "building_id": "hanwha-building",
+   "deal_ymd": "2024-08-12",
+   "sgg_cd": "11140",
+   "umd": "장교동",
+   "jibun": "1",
+   "amount_won": 808000000000,
+   "building_ar_m2": 44490.2,
+   "per_m2_won": 18161303,
+   "per_pyeong_won": 60037365.2892562,
+   "floor": null,
+   "build_year": 1987,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "hanwha-building",
+   "deal_ymd": "2024-09-05",
+   "sgg_cd": "11140",
+   "umd": "장교동",
+   "jibun": "1",
+   "amount_won": 502500000,
+   "building_ar_m2": 74.55,
+   "per_m2_won": 6740443,
+   "per_pyeong_won": 22282456.198347107,
+   "floor": null,
+   "build_year": 1987,
+   "share_deal": false,
+   "dealing_gbn": "중개거래"
+  },
+  {
+   "building_id": "hanwha-building",
+   "deal_ymd": "2024-09-05",
+   "sgg_cd": "11140",
+   "umd": "장교동",
+   "jibun": "1",
+   "amount_won": 502500000,
+   "building_ar_m2": 74.55,
+   "per_m2_won": 6740443,
+   "per_pyeong_won": 22282456.198347107,
+   "floor": null,
+   "build_year": 1987,
+   "share_deal": false,
+   "dealing_gbn": "중개거래"
+  },
+  {
+   "building_id": "anchor-one",
+   "deal_ymd": "2024-09-10",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "525",
+   "amount_won": 1811200000,
+   "building_ar_m2": 151.76,
+   "per_m2_won": 11934634,
+   "per_pyeong_won": 39453335.53719009,
+   "floor": null,
+   "build_year": 2023,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "anchor-one",
+   "deal_ymd": "2024-09-10",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "525",
+   "amount_won": 862320000,
+   "building_ar_m2": 69.91,
+   "per_m2_won": 12334716,
+   "per_pyeong_won": 40775920.66115703,
+   "floor": null,
+   "build_year": 2023,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "anchor-one",
+   "deal_ymd": "2024-09-10",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "525",
+   "amount_won": 1039980000,
+   "building_ar_m2": 82.59,
+   "per_m2_won": 12592081,
+   "per_pyeong_won": 41626714.04958678,
+   "floor": null,
+   "build_year": 2023,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "anchor-one",
+   "deal_ymd": "2024-09-10",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "525",
+   "amount_won": 1047560000,
+   "building_ar_m2": 83.19,
+   "per_m2_won": 12592379,
+   "per_pyeong_won": 41627699.17355372,
+   "floor": null,
+   "build_year": 2023,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "anchor-one",
+   "deal_ymd": "2024-09-10",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "525",
+   "amount_won": 1211520000,
+   "building_ar_m2": 96.21,
+   "per_m2_won": 12592454,
+   "per_pyeong_won": 41627947.10743802,
+   "floor": null,
+   "build_year": 2023,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "anchor-one",
+   "deal_ymd": "2024-09-10",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "525",
+   "amount_won": 585260000,
+   "building_ar_m2": 46.47,
+   "per_m2_won": 12594362,
+   "per_pyeong_won": 41634254.54545455,
+   "floor": null,
+   "build_year": 2023,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "anchor-one",
+   "deal_ymd": "2024-09-10",
+   "sgg_cd": "11560",
+   "umd": "여의도동",
+   "jibun": "525",
+   "amount_won": 844880000,
+   "building_ar_m2": 67.08,
+   "per_m2_won": 12595110,
+   "per_pyeong_won": 41636727.27272727,
+   "floor": null,
+   "build_year": 2023,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "hanwha-building",
+   "deal_ymd": "2024-11-27",
+   "sgg_cd": "11140",
+   "umd": "장교동",
+   "jibun": "1",
+   "amount_won": 330000000,
+   "building_ar_m2": 72.38,
+   "per_m2_won": 4559271,
+   "per_pyeong_won": 15071970.247933885,
+   "floor": null,
+   "build_year": 1987,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "hanwha-building",
+   "deal_ymd": "2025-02-14",
+   "sgg_cd": "11140",
+   "umd": "장교동",
+   "jibun": "1",
+   "amount_won": 460000000,
+   "building_ar_m2": 71.39,
+   "per_m2_won": 6443479,
+   "per_pyeong_won": 21300757.02479339,
+   "floor": 21,
+   "build_year": null,
+   "share_deal": false,
+   "dealing_gbn": "중개거래"
+  },
+  {
+   "building_id": "hanwha-building",
+   "deal_ymd": "2025-03-14",
+   "sgg_cd": "11140",
+   "umd": "장교동",
+   "jibun": "1",
+   "amount_won": 550000000,
+   "building_ar_m2": 74.06,
+   "per_m2_won": 7426411,
+   "per_pyeong_won": 24550119.008264463,
+   "floor": null,
+   "build_year": 1987,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "platinum-tower",
+   "deal_ymd": "2025-06-20",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1321-11",
+   "amount_won": 24181910000,
+   "building_ar_m2": 932.23,
+   "per_m2_won": 25939854,
+   "per_pyeong_won": 85751583.47107439,
+   "floor": 10,
+   "build_year": null,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "platinum-tower",
+   "deal_ymd": "2025-06-20",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1321-11",
+   "amount_won": 24810010000,
+   "building_ar_m2": 956.22,
+   "per_m2_won": 25945922,
+   "per_pyeong_won": 85771642.97520661,
+   "floor": 6,
+   "build_year": null,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "platinum-tower",
+   "deal_ymd": "2025-06-20",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1321-11",
+   "amount_won": 24810010000,
+   "building_ar_m2": 956.22,
+   "per_m2_won": 25945922,
+   "per_pyeong_won": 85771642.97520661,
+   "floor": 7,
+   "build_year": null,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "platinum-tower",
+   "deal_ymd": "2025-06-20",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1321-11",
+   "amount_won": 26514860000,
+   "building_ar_m2": 1021.85,
+   "per_m2_won": 25947898,
+   "per_pyeong_won": 85778175.20661157,
+   "floor": 5,
+   "build_year": null,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "platinum-tower",
+   "deal_ymd": "2025-06-20",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1321-11",
+   "amount_won": 23239760000,
+   "building_ar_m2": 895.13,
+   "per_m2_won": 25962441,
+   "per_pyeong_won": 85826251.23966943,
+   "floor": 8,
+   "build_year": null,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "platinum-tower",
+   "deal_ymd": "2025-06-20",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1321-11",
+   "amount_won": 23239760000,
+   "building_ar_m2": 895.13,
+   "per_m2_won": 25962441,
+   "per_pyeong_won": 85826251.23966943,
+   "floor": 9,
+   "build_year": null,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "platinum-tower",
+   "deal_ymd": "2025-06-20",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1321-11",
+   "amount_won": 26649450000,
+   "building_ar_m2": 1026.42,
+   "per_m2_won": 25963494,
+   "per_pyeong_won": 85829732.23140496,
+   "floor": 3,
+   "build_year": null,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "platinum-tower",
+   "deal_ymd": "2025-06-20",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1321-11",
+   "amount_won": 26649450000,
+   "building_ar_m2": 1026.42,
+   "per_m2_won": 25963494,
+   "per_pyeong_won": 85829732.23140496,
+   "floor": 4,
+   "build_year": null,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "platinum-tower",
+   "deal_ymd": "2025-06-20",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1321-11",
+   "amount_won": 11350690000,
+   "building_ar_m2": 425.33,
+   "per_m2_won": 26686784,
+   "per_pyeong_won": 88220773.55371901,
+   "floor": 12,
+   "build_year": null,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "platinum-tower",
+   "deal_ymd": "2025-06-20",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1321-11",
+   "amount_won": 11395560000,
+   "building_ar_m2": 426.72,
+   "per_m2_won": 26705006,
+   "per_pyeong_won": 88281011.57024793,
+   "floor": 12,
+   "build_year": null,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "platinum-tower",
+   "deal_ymd": "2025-06-20",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1321-11",
+   "amount_won": 25348390000,
+   "building_ar_m2": 948.36,
+   "per_m2_won": 26728658,
+   "per_pyeong_won": 88359200.0,
+   "floor": 18,
+   "build_year": null,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "platinum-tower",
+   "deal_ymd": "2025-06-20",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1321-11",
+   "amount_won": 25348390000,
+   "building_ar_m2": 948.36,
+   "per_m2_won": 26728658,
+   "per_pyeong_won": 88359200.0,
+   "floor": 19,
+   "build_year": null,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "platinum-tower",
+   "deal_ymd": "2025-06-20",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1321-11",
+   "amount_won": 25438110000,
+   "building_ar_m2": 951.42,
+   "per_m2_won": 26736993,
+   "per_pyeong_won": 88386753.71900827,
+   "floor": 20,
+   "build_year": null,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "platinum-tower",
+   "deal_ymd": "2025-06-20",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1321-11",
+   "amount_won": 24944610000,
+   "building_ar_m2": 932.23,
+   "per_m2_won": 26758000,
+   "per_pyeong_won": 88456198.34710744,
+   "floor": 11,
+   "build_year": null,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "platinum-tower",
+   "deal_ymd": "2025-06-20",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1321-11",
+   "amount_won": 24944610000,
+   "building_ar_m2": 932.23,
+   "per_m2_won": 26758000,
+   "per_pyeong_won": 88456198.34710744,
+   "floor": 13,
+   "build_year": null,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "platinum-tower",
+   "deal_ymd": "2025-06-20",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1321-11",
+   "amount_won": 24944610000,
+   "building_ar_m2": 932.23,
+   "per_m2_won": 26758000,
+   "per_pyeong_won": 88456198.34710744,
+   "floor": 14,
+   "build_year": null,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "platinum-tower",
+   "deal_ymd": "2025-06-20",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1321-11",
+   "amount_won": 24944610000,
+   "building_ar_m2": 932.23,
+   "per_m2_won": 26758000,
+   "per_pyeong_won": 88456198.34710744,
+   "floor": 15,
+   "build_year": null,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "platinum-tower",
+   "deal_ymd": "2025-06-20",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1321-11",
+   "amount_won": 24944610000,
+   "building_ar_m2": 932.23,
+   "per_m2_won": 26758000,
+   "per_pyeong_won": 88456198.34710744,
+   "floor": 16,
+   "build_year": null,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "platinum-tower",
+   "deal_ymd": "2025-06-20",
+   "sgg_cd": "11650",
+   "umd": "서초동",
+   "jibun": "1321-11",
+   "amount_won": 24944610000,
+   "building_ar_m2": 932.23,
+   "per_m2_won": 26758000,
+   "per_pyeong_won": 88456198.34710744,
+   "floor": 17,
+   "build_year": null,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "hanwha-building",
+   "deal_ymd": "2025-11-04",
+   "sgg_cd": "11140",
+   "umd": "장교동",
+   "jibun": "1",
+   "amount_won": 245000000,
+   "building_ar_m2": 46.5,
+   "per_m2_won": 5268817,
+   "per_pyeong_won": 17417576.859504133,
+   "floor": null,
+   "build_year": 1987,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "eulji-twin-tower",
+   "deal_ymd": "2026-04-15",
+   "sgg_cd": "11140",
+   "umd": "을지로4가",
+   "jibun": "323",
+   "amount_won": 4394030000,
+   "building_ar_m2": 462.35,
+   "per_m2_won": 9503688,
+   "per_pyeong_won": 31417150.41322314,
+   "floor": null,
+   "build_year": 2019,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "eulji-twin-tower",
+   "deal_ymd": "2026-04-15",
+   "sgg_cd": "11140",
+   "umd": "을지로4가",
+   "jibun": "323",
+   "amount_won": 27895050000,
+   "building_ar_m2": 1982.47,
+   "per_m2_won": 14070856,
+   "per_pyeong_won": 46515226.44628099,
+   "floor": null,
+   "build_year": 2019,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "eulji-twin-tower",
+   "deal_ymd": "2026-04-15",
+   "sgg_cd": "11140",
+   "umd": "을지로4가",
+   "jibun": "323",
+   "amount_won": 27895050000,
+   "building_ar_m2": 1982.47,
+   "per_m2_won": 14070856,
+   "per_pyeong_won": 46515226.44628099,
+   "floor": null,
+   "build_year": 2019,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "eulji-twin-tower",
+   "deal_ymd": "2026-04-15",
+   "sgg_cd": "11140",
+   "umd": "을지로4가",
+   "jibun": "323",
+   "amount_won": 27895050000,
+   "building_ar_m2": 1982.47,
+   "per_m2_won": 14070856,
+   "per_pyeong_won": 46515226.44628099,
+   "floor": null,
+   "build_year": 2019,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "eulji-twin-tower",
+   "deal_ymd": "2026-04-15",
+   "sgg_cd": "11140",
+   "umd": "을지로4가",
+   "jibun": "323",
+   "amount_won": 27895050000,
+   "building_ar_m2": 1982.47,
+   "per_m2_won": 14070856,
+   "per_pyeong_won": 46515226.44628099,
+   "floor": null,
+   "build_year": 2019,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "eulji-twin-tower",
+   "deal_ymd": "2026-04-15",
+   "sgg_cd": "11140",
+   "umd": "을지로4가",
+   "jibun": "323",
+   "amount_won": 27895050000,
+   "building_ar_m2": 1982.47,
+   "per_m2_won": 14070856,
+   "per_pyeong_won": 46515226.44628099,
+   "floor": null,
+   "build_year": 2019,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "eulji-twin-tower",
+   "deal_ymd": "2026-04-15",
+   "sgg_cd": "11140",
+   "umd": "을지로4가",
+   "jibun": "323",
+   "amount_won": 28238440000,
+   "building_ar_m2": 2006.87,
+   "per_m2_won": 14070887,
+   "per_pyeong_won": 46515328.92561983,
+   "floor": null,
+   "build_year": 2019,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "eulji-twin-tower",
+   "deal_ymd": "2026-04-15",
+   "sgg_cd": "11140",
+   "umd": "을지로4가",
+   "jibun": "323",
+   "amount_won": 28238440000,
+   "building_ar_m2": 2006.87,
+   "per_m2_won": 14070887,
+   "per_pyeong_won": 46515328.92561983,
+   "floor": null,
+   "build_year": 2019,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "eulji-twin-tower",
+   "deal_ymd": "2026-04-15",
+   "sgg_cd": "11140",
+   "umd": "을지로4가",
+   "jibun": "323",
+   "amount_won": 28238440000,
+   "building_ar_m2": 2006.87,
+   "per_m2_won": 14070887,
+   "per_pyeong_won": 46515328.92561983,
+   "floor": null,
+   "build_year": 2019,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "eulji-twin-tower",
+   "deal_ymd": "2026-04-15",
+   "sgg_cd": "11140",
+   "umd": "을지로4가",
+   "jibun": "323",
+   "amount_won": 27895420000,
+   "building_ar_m2": 1982.49,
+   "per_m2_won": 14070901,
+   "per_pyeong_won": 46515375.20661157,
+   "floor": null,
+   "build_year": 2019,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "eulji-twin-tower",
+   "deal_ymd": "2026-04-15",
+   "sgg_cd": "11140",
+   "umd": "을지로4가",
+   "jibun": "323",
+   "amount_won": 27895420000,
+   "building_ar_m2": 1982.49,
+   "per_m2_won": 14070901,
+   "per_pyeong_won": 46515375.20661157,
+   "floor": null,
+   "build_year": 2019,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "eulji-twin-tower",
+   "deal_ymd": "2026-04-15",
+   "sgg_cd": "11140",
+   "umd": "을지로4가",
+   "jibun": "323",
+   "amount_won": 27895420000,
+   "building_ar_m2": 1982.49,
+   "per_m2_won": 14070901,
+   "per_pyeong_won": 46515375.20661157,
+   "floor": null,
+   "build_year": 2019,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "eulji-twin-tower",
+   "deal_ymd": "2026-04-15",
+   "sgg_cd": "11140",
+   "umd": "을지로4가",
+   "jibun": "323",
+   "amount_won": 27895420000,
+   "building_ar_m2": 1982.49,
+   "per_m2_won": 14070901,
+   "per_pyeong_won": 46515375.20661157,
+   "floor": null,
+   "build_year": 2019,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "eulji-twin-tower",
+   "deal_ymd": "2026-04-15",
+   "sgg_cd": "11140",
+   "umd": "을지로4가",
+   "jibun": "323",
+   "amount_won": 26984960000,
+   "building_ar_m2": 1917.78,
+   "per_m2_won": 14070936,
+   "per_pyeong_won": 46515490.909090914,
+   "floor": null,
+   "build_year": 2019,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "eulji-twin-tower",
+   "deal_ymd": "2026-04-15",
+   "sgg_cd": "11140",
+   "umd": "을지로4가",
+   "jibun": "323",
+   "amount_won": 26984960000,
+   "building_ar_m2": 1917.78,
+   "per_m2_won": 14070936,
+   "per_pyeong_won": 46515490.909090914,
+   "floor": null,
+   "build_year": 2019,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "eulji-twin-tower",
+   "deal_ymd": "2026-04-15",
+   "sgg_cd": "11140",
+   "umd": "을지로4가",
+   "jibun": "323",
+   "amount_won": 26984960000,
+   "building_ar_m2": 1917.78,
+   "per_m2_won": 14070936,
+   "per_pyeong_won": 46515490.909090914,
+   "floor": null,
+   "build_year": 2019,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "eulji-twin-tower",
+   "deal_ymd": "2026-04-15",
+   "sgg_cd": "11140",
+   "umd": "을지로4가",
+   "jibun": "323",
+   "amount_won": 16322510000,
+   "building_ar_m2": 1135.94,
+   "per_m2_won": 14369166,
+   "per_pyeong_won": 47501375.20661157,
+   "floor": null,
+   "build_year": 2019,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "eulji-twin-tower",
+   "deal_ymd": "2026-04-15",
+   "sgg_cd": "11140",
+   "umd": "을지로4가",
+   "jibun": "323",
+   "amount_won": 4960230000,
+   "building_ar_m2": 323.27,
+   "per_m2_won": 15343923,
+   "per_pyeong_won": 50723712.39669421,
+   "floor": null,
+   "build_year": 2019,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "hanwha-building",
+   "deal_ymd": "2026-05-15",
+   "sgg_cd": "11140",
+   "umd": "장교동",
+   "jibun": "1",
+   "amount_won": 380000000,
+   "building_ar_m2": 54.73,
+   "per_m2_won": 6943176,
+   "per_pyeong_won": 22952647.933884297,
+   "floor": null,
+   "build_year": 1987,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  },
+  {
+   "building_id": "hanwha-building",
+   "deal_ymd": "2026-06-01",
+   "sgg_cd": "11140",
+   "umd": "장교동",
+   "jibun": "1",
+   "amount_won": 180000000,
+   "building_ar_m2": 36.17,
+   "per_m2_won": 4976500,
+   "per_pyeong_won": 16451239.669421488,
+   "floor": null,
+   "build_year": 1987,
+   "share_deal": false,
+   "dealing_gbn": "직거래"
+  }
+ ],
+ "matching": {
+  "exact": {
+   "n": 57,
+   "n_live": 55,
+   "n_canceled_excluded": 2,
+   "parcel_confirmed": true,
+   "label": "마스킹 없는 지번이 시드 한 동에만 걸린 행 — 필지까지 확정됐다."
+  },
+  "resolved": {
+   "n": 734,
+   "parcel_confirmed": false,
+   "label": "**시드 55동 목록 안에서 후보가 유일**하다는 뜻일 뿐이다. 마스킹된 지번이라 같은 법정동의 비-시드 건물과 구분되지 않는다 — '확정'으로 읽으면 안 된다.",
+   "excluded_from_aggregation": false,
+   "reason": "권역·연도 집계는 시군구로만 가르므로 매칭 상태와 무관하게 전 행을 쓴다. 건물 단위 집계(by_building_exact)에는 exact 만 넣는다."
+  },
+  "ambiguous": {
+   "n": 3789,
+   "parcel_confirmed": false,
+   "label": "마스킹된 지번이 여러 시드에 동시에 걸려 동을 특정하지 못한 행.",
+   "excluded_from_aggregation": true,
+   "reason": "후보 중 첫 동을 고르면 수천 행이 엉뚱한 한 동에 몰린다. 건물 단위 집계에서 통째로 뺀다 — 권역·연도 집계에는 시군구만 쓰므로 그대로 남는다."
+  },
+  "build_year_conflicts": {
+   "anchor-one": [
+    1977,
+    1983,
+    2002,
+    2023
+   ],
+   "concordian": [
+    2005,
+    2008
+   ],
+   "eulji-twin-tower": [
+    1968,
+    2019
+   ],
+   "fine-avenue": [
+    2011,
+    2016
+   ],
+   "krx-seoul": [
+    1981,
+    1983,
+    1984,
+    1985,
+    1988,
+    1990,
+    1991
+   ],
+   "seoul-square": [
+    1970,
+    1977,
+    1985,
+    2002
+   ],
+   "sixty-three-square": [
+    1991,
+    1994,
+    2000,
+    2003
+   ],
+   "twin-tree-tower": [
+    2010,
+    2012
+   ]
+  },
+  "build_year_conflicts_note": "붙은 거래의 건축년도가 갈리는 시드다 — 마스킹 지번이 같은 법정동의 다른 건물을 끌어왔거나 그 자리를 헐고 다시 지은 것이다. 어느 쪽이든 build_year 로 갈라 보기 전에는 그 시드 매칭을 쓸 수 없다."
+ },
+ "value_error_dist": null,
+ "value_error_dist_reason": "추정가치 대비 오차 분포는 건물별 추정가치가 있어야 낼 수 있는데, 건축물대장이 열리지 않아 연면적을 몰라 55동 전부 pending_ledger 다(underwriting.json 참조). 대장 승격 뒤 exact 57행(해제 제외)과 짝을 지어 value.error_dist 로 낸다. 지금 값을 지어내지 않는다.",
+ "caveats": [
+  "거래면적(building_ar_m2)은 집합건물 거래의 계약·분양면적이라 건물 연면적이 아니다. 평당가는 그 면적 기준이므로 연면적 기준 단가와 직접 비교하면 안 된다.",
+  "공유지분 거래(share_deal)와 층·향·전용률 차이를 나누지 않고 한 칸에 넣었다 — 중위값이 그 편차를 뭉갠다.",
+  "표본은 시군구 다섯 곳(종로·중구·영등포·서초·강남)의 업무용 매매다. 대형 통매각은 건수가 적어 연도별 중위값이 소형 구분소유 거래에 끌린다.",
+  "수집 단계의 평당 단가 게이트(30만~2억원/㎡)를 벗어난 43행은 데이터층에서 이미 빠졌다. 그 행들은 여기 없다."
+ ]
+}
