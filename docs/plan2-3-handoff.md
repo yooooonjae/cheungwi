@@ -74,3 +74,9 @@ IRR 은 `fin_core.irr_annual` 의 이분법(구간 [−0.5, 1.0], 200회 고정 
 - `docs/ledger-unlock-checklist.md`·`buildings.py` 독스트링의 "필지 공유 8동" → 실제 7동(IFC 3·파크원 2·마제스타 2).
 - 스펙 §4 "50동" → 55동. `reits.py` 독스트링 div 예시 날짜 형식.
 - tests/의 `open()` 인코딩 미명시 7곳.
+
+## 엔진 최종 리뷰 파킹 목록 (계획 3 터치 시 정정)
+
+- `build_out`: 빈 yield 계열 입력 시 진단이 TypeError로 강등(빌드는 정지 — 오답 출고는 없음). `_require_same_quarter` 앞에서 None 검사로 복원.
+- `market.sub_regions.*`·`seoul_reference`: 권역 3종에 넣은 분기 정렬 단언(F1)과 동류의 구멍 잔존 — 같은 패턴 확장 적용.
+- `pf.py:54`: D4 대안 3.3495억의 설명이 "마지막 달 인출 23.33억"으로 오귀속(실제는 마지막 달 잔액 669.9억의 한 달 이자). 상수는 정확.
