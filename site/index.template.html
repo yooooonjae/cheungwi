@@ -33,10 +33,43 @@
 
 <!-- ============ 서장: 타워의 단면 ============ -->
 <section class="chapter" id="prologue" aria-labelledby="prologue-h">
-  <span class="chapter-mark">서장</span>
-  <h1 class="chapter-title" id="prologue-h">층위</h1>
-  <p class="chapter-lede">임대의 층이 쌓이고, 부채의 물이 차오른다.</p>
-  <div class="chapter-slot">타워 단면 히어로와 세 권역 계기판이 이 자리에 온다.</div>
+
+  <div class="hero">
+    <div class="hero-head">
+      <span class="chapter-mark">서장</span>
+      <h1 class="chapter-title" id="prologue-h">층위</h1>
+      <span class="hero-seal" aria-hidden="true">層位</span>
+      <p class="chapter-lede">임대의 층이 쌓이고, 부채의 물이 차오른다.</p>
+      <p class="hero-lineage">수지 收支 → 순환 循環 → 시차 視差·時差 → <b>층위 層位</b> · 네 번째 작품</p>
+    </div>
+
+    <div class="r-tabs" id="hero-tabs" role="tablist" aria-label="권역을 고른다"></div>
+
+    <figure class="hero-panel" id="hero-panel" role="tabpanel" tabindex="0">
+      <div class="plate" id="hero-plate">
+        <p class="plate-wait">단면은 브라우저에서 그린다. 자바스크립트가 꺼져 있으면 이 자리는 비고, 수치는 아래 계기판에만 남는다.</p>
+      </div>
+      <figcaption>
+        <ul class="hero-reading" id="hero-reading"></ul>
+      </figcaption>
+    </figure>
+
+    <dl class="titleblock">
+      <div><dt>도면</dt><dd>서울 3대 권역 대표 단면 · 모식도</dd></div>
+      <div><dt>축척</dt><dd>가치 100 = 20층 · 창 1칸 = 0.83%p</dd></div>
+      <div><dt>기준</dt><dd>{{DATA_CUTOFF}}</dd></div>
+      <div><dt>계보</dt><dd>수지 → 순환 → 시차 → 층위</dd></div>
+    </dl>
+  </div>
+
+  <div class="gauge-wrap">
+    <div class="gauge-h">
+      <h2 id="gauge-h">세 권역의 현재</h2>
+      <p class="stamp">데이터 기준월 {{DATA_CUTOFF}}</p>
+    </div>
+    <div class="gauge" id="gauge" aria-labelledby="gauge-h"></div>
+  </div>
+
 </section>
 
 <!-- ============ Ⅰ장: 공간의 층위 ============ -->

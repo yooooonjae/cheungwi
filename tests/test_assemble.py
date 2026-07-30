@@ -32,13 +32,19 @@ def sandbox(tmp_path, monkeypatch):
 
 
 def _fake_site(tmp_path, body, js=None):
-    """고의로 망가뜨릴 수 있는 최소 사이트 소스. CSS 는 실물을 복사한다."""
+    """고의로 망가뜨릴 수 있는 최소 사이트 소스. CSS·JS 는 실물을 복사한다.
+
+    선언(CSS_FILES·JS_FILES)에 적힌 파일이 없으면 빌드가 게이트에 닿기도 전에
+    멈춘다. 여기서 검사하려는 것은 템플릿 게이트라, 자산은 실물을 그대로 둔다.
+    """
     site = tmp_path / "site"
     (site / "css").mkdir(parents=True)
     (site / "static").mkdir()
     (site / "js").mkdir()
     for name in assemble.CSS_FILES:
         shutil.copy(ROOT / "site" / "css" / name, site / "css" / name)
+    for name in assemble.JS_FILES:
+        shutil.copy(ROOT / "site" / "js" / name, site / "js" / name)
     for name, src in (js or {}).items():
         (site / "js" / name).write_text(src, encoding="utf-8")
     (site / "index.template.html").write_text(
@@ -211,6 +217,35 @@ def test_minified_css_keeps_theme_switches(sandbox):
     assert "prefers-color-scheme" in css
     assert '[data-theme="dark"]' in css and '[data-theme="light"]' in css
     assert "/*" not in css, "주석은 압축에서 빠진다"
+
+
+# ------------------------------------------------------------------ #
+# 서장 — 조형이 붙을 자리와 그것을 채울 스크립트가 함께 나가야 한다
+# ------------------------------------------------------------------ #
+def test_prologue_has_the_mounts_the_hero_writes_into(sandbox):
+    html = (sandbox.build_dist() / "index.html").read_text(encoding="utf-8")
+    for mount in ('id="hero-tabs"', 'id="hero-plate"', 'id="hero-reading"', 'id="gauge"'):
+        assert mount in html, "%s 가 없으면 hero.js 는 조용히 아무것도 그리지 않는다" % mount
+    assert 'role="tablist"' in html and 'role="tabpanel"' in html
+    assert "임대의 층이 쌓이고, 부채의 물이 차오른다." in html
+    assert "수지" in html and "순환" in html and "시차" in html, "시리즈 계보"
+
+
+def test_scripts_load_in_dependency_order(sandbox):
+    """hero 는 로드 시점에 엔진과 조형을 이미 있는 것으로 읽는다."""
+    assert sandbox.JS_FILES == ["engine.js", "charts.js", "hero.js"]
+    html = (sandbox.build_dist() / "index.html").read_text(encoding="utf-8")
+    order = [html.index('src="js/%s"' % f) for f in sandbox.JS_FILES]
+    assert order == sorted(order)
+    assert all(html.index('src="data/%s.js"' % n) < order[0]
+               for n, _ in sandbox.DATA_MAP.values()), "데이터가 스크립트보다 앞선다"
+
+
+def test_hero_css_ships_and_keeps_both_themes(sandbox):
+    css = (sandbox.build_dist() / "css" / "hero.css").read_text(encoding="utf-8")
+    assert "--win-lit" in css and "--win-off" in css
+    assert css.count("--win-lit:") >= 4, "창의 불빛도 네 벌(기본·미디어·수동 2종)이다"
+    assert "prefers-color-scheme" in css and '[data-theme="dark"]' in css
 
 
 # ------------------------------------------------------------------ #

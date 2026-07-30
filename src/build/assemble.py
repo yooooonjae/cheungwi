@@ -48,8 +48,11 @@ DATA_MAP = {
     "DATA_MANIFEST": ("manifest", DATA / "DATA_MANIFEST.json"),
 }
 # 적힌 순서가 곧 로드 순서다. 뒤 파일이 앞 파일을 덮어쓴다.
-CSS_FILES = ["tokens.css", "base.css"]
-JS_FILES = []
+CSS_FILES = ["tokens.css", "base.css", "hero.css"]
+# JS 도 순서가 계약이다. hero 는 로드 시점에 window.CheungwiCharts·CheungwiEngine
+# 을 이미 있는 것으로 읽으므로, 엔진과 조형이 앞서야 한다. defer 스크립트는 문서
+# 순서대로 실행되니 이 배열의 순서가 곧 실행 순서다.
+JS_FILES = ["engine.js", "charts.js", "hero.js"]
 
 # 조사 분리 의심 패턴 — 강조 태그 닫힘과 조사 사이의 줄바꿈
 _JOSA = re.compile(
