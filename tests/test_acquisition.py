@@ -308,6 +308,42 @@ def test_max_loan_amortizing_is_not_supported_silently():
         max_loan(12_112_500_000, 270_000_000_000, 0.55, 1.3, 0.08, 0.045, io=False)
 
 
+def test_not_implemented_is_a_runtime_error_subclass_so_order_the_handlers():
+    # 세 오류 유형은 **서로소가 아니다**: NotImplementedError 는 RuntimeError 의
+    # 하위형이다. 이 리포 관례상 RuntimeError 는 "단위·자릿수 게이트 위반"이라,
+    # 하류가 except RuntimeError 로만 감싸면 io=False(계산 불가)가 단위 오류로
+    # 조용히 오분류된다. 관계를 여기 못박고 처리 순서를 못박는다.
+    assert issubclass(NotImplementedError, RuntimeError)
+
+    # (1) 위험을 드러낸다 — except RuntimeError 가 io=False 를 **잡는다**.
+    try:
+        max_loan(12_112_500_000, 270_000_000_000, 0.55, 1.3, 0.08, 0.045, io=False)
+    except RuntimeError as e:
+        caught = e
+    assert isinstance(caught, NotImplementedError)   # 게이트 위반이 아닌데 잡혔다
+
+    # (2) 올바른 처리 순서 — NotImplementedError 를 RuntimeError보다 먼저 잡으면
+    #     "계산 불가"와 "단위 의심"이 갈린다.
+    def classify(call):
+        try:
+            call()
+        except NotImplementedError:
+            return "계산 불가"
+        except RuntimeError:
+            return "단위 의심"
+        except ValueError:
+            return "입력 오류"
+        return "정상"
+
+    base = (12_112_500_000, 270_000_000_000, 0.55, 1.3, 0.08, 0.045)
+    assert classify(lambda: max_loan(*base, io=False)) == "계산 불가"
+    assert classify(lambda: max_loan(12_112_500_000, 270_000_000_000, 0.55,
+                                     130.0, 0.08, 0.045)) == "단위 의심"
+    assert classify(lambda: max_loan(12_112_500_000, 270_000_000_000, 55.0,
+                                     1.3, 0.08, 0.045)) == "입력 오류"
+    assert classify(lambda: max_loan(*base)) == "정상"
+
+
 def test_max_loan_reports_the_resulting_dscr():
     r = max_loan(12_112_500_000, 270_000_000_000, 0.55, 1.3, 0.08, 0.045)
     # 결속이 ltv 라 실제 DSCR 은 요구치보다 높다: 121.125/(1,485×4.5%) = 1.8126

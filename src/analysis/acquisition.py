@@ -32,7 +32,7 @@
    보유 마지막 해가 아니라 **그 다음 해**(t=hold_years)다 — 사는 쪽은 앞으로
    벌 돈을 보고 값을 매기기 때문이다.
 
-오류 유형은 셋을 구분한다.
+오류 유형은 셋을 쓰지만 **서로소가 아니다**(아래 경고 참조).
 
 - `ValueError` — 값이 물리적으로 말이 안 된다(음수 NOI, 가격 0, LTV 1.01,
   NaN·inf 등). NaN 은 크기 비교가 전부 False 라 도메인 검사와 게이트를 조용히
@@ -41,6 +41,23 @@
   게이트 둘이다: DSCR 0~5(전역 제약), exit cap 0.02~0.12(`caprate` 상수를
   임포트해 쓴다 — 여기 다시 적으면 두 모듈이 따로 움직인다).
 - `NotImplementedError` — `io=False`. 위 규약 3 참조.
+
+**`NotImplementedError` 는 `RuntimeError` 의 하위형이다**(MRO:
+NotImplementedError → RuntimeError → Exception). 이 저장소에서 `RuntimeError`
+는 "단위·자릿수를 의심하라"는 뜻으로만 쓰이는데, `except RuntimeError` 로만
+감싸면 `io=False`(애초에 계산할 수 없다는 신호)가 **거기 걸려 단위 오류로
+조용히 오분류된다**. 그러니 부르는 쪽은 반드시
+
+    except NotImplementedError:   # 계산 불가 — 입력을 고쳐도 안 된다
+        ...
+    except RuntimeError:          # 물리 게이트 위반 — 단위를 의심하라
+        ...
+
+순서로, **`NotImplementedError` 를 `RuntimeError` 보다 먼저** 잡아야 한다.
+반대로 쓰면 두 상황이 한 갈래로 뭉개진다. 이 관계와 순서는
+`tests/test_acquisition.py` 의
+`test_not_implemented_is_a_runtime_error_subclass_so_order_the_handlers` 가
+고정한다.
 
 검사 순서는 인자 순서가 아니라 **유형 순서**다. ① 모든 인자의 유한성 →
 ② 도메인 → ③ 게이트. 그래서 인자 둘이 동시에 틀리면 먼저 나오는 오류는
@@ -138,7 +155,8 @@ def max_loan(
     이자뿐(= 대출 × 금리)이므로 DSCR = NOI ÷ (대출 × 금리) ≥ 하한을 대출에
     대해 풀면 대출 ≤ (NOI ÷ 하한) ÷ 금리가 된다. 원리금균등이면 상환액이
     커져 이 값이 작아진다(그래서 `io=False` 는 `NotImplementedError` —
-    규약 3).
+    규약 3). 그 예외는 `RuntimeError` 의 **하위형**이라 `except RuntimeError`
+    에도 걸린다 — 잡는 순서는 모듈 docstring 을 볼 것.
 
     **binding 은 최솟값의 이름 하나다.** 동률이면 `ltv > dscr > debt_yield`
     순서로 앞선 하나만 고른다(`BINDING_PRIORITY`). 예컨대 NOI 0 이면
