@@ -14,7 +14,9 @@ make collect                # 수집기 5종 실행 (재개형)
 ```
 
 수집기는 파이썬 표준 라이브러리만 쓴다(pytest는 테스트 전용). 저장 형식은 JSON 단일이고,
-API 원본 응답은 `data/raw/{source}/`에 전량 캐시해 재실행을 증분화한다.
+API 원본 응답은 `data/raw/{source}/`에 전량 캐시해 재실행을 증분화한다. 실거래 캐시
+(`data/raw/trades/`)만은 서울 5개 구 × 2006년 이후 1,200여 개 파일이라 저장소에 담지 않는다 —
+`python3 src/collect/trades.py`를 다시 돌리면 중단 지점부터 이어서 받는다.
 
 ## 데이터 출처
 

@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8" standalone="yes"?>
+<response>
+  <header><resultCode>000</resultCode><resultMsg>OK</resultMsg></header>
+  <body>
+    <items>
+      <!-- 실제 응답(강남구 202308)에서 3건만 추린 축약본. 값은 한 글자도 고치지 않았다.
+           지번은 마스킹('7*')되어 오고, cdealType의 미해제 표시는 빈 문자열이 아니라 공백 1칸이다. -->
+      <item><buildYear>1992</buildYear><buildingAr>1807.24</buildingAr><buildingType>일반</buildingType><buildingUse>업무</buildingUse><buyerGbn> </buyerGbn><cdealDay> </cdealDay><cdealType> </cdealType><dealAmount>3,320,000</dealAmount><dealDay>21</dealDay><dealMonth>8</dealMonth><dealYear>2023</dealYear><dealingGbn>중개거래</dealingGbn><estateAgentSggNm>서울 성동구</estateAgentSggNm><floor> </floor><jibun>7*</jibun><landUse>제3종일반주거</landUse><plottageAr>580.5</plottageAr><sggCd>11680</sggCd><sggNm>강남구</sggNm><shareDealingType> </shareDealingType><slerGbn> </slerGbn><umdNm>논현동</umdNm></item>
+      <item><buildYear>2020</buildYear><buildingAr>671.45</buildingAr><buildingType>일반</buildingType><buildingUse>제2종근린생활</buildingUse><buyerGbn> </buyerGbn><cdealDay> </cdealDay><cdealType> </cdealType><dealAmount>900,000</dealAmount><dealDay>4</dealDay><dealMonth>8</dealMonth><dealYear>2023</dealYear><dealingGbn>중개거래</dealingGbn><estateAgentSggNm>서울 강남구</estateAgentSggNm><floor> </floor><jibun>6**</jibun><landUse>제1종일반주거</landUse><plottageAr>248.6</plottageAr><sggCd>11680</sggCd><sggNm>강남구</sggNm><shareDealingType> </shareDealingType><slerGbn> </slerGbn><umdNm>역삼동</umdNm></item>
+      <item><buildYear>1992</buildYear><buildingAr>1807.24</buildingAr><buildingType>일반</buildingType><buildingUse>업무</buildingUse><buyerGbn> </buyerGbn><cdealDay>24.06.25</cdealDay><cdealType>O</cdealType><dealAmount>3,500,000</dealAmount><dealDay>21</dealDay><dealMonth>8</dealMonth><dealYear>2023</dealYear><dealingGbn>중개거래</dealingGbn><estateAgentSggNm>서울 성동구</estateAgentSggNm><floor> </floor><jibun>7*</jibun><landUse>제3종일반주거</landUse><plottageAr>580.5</plottageAr><sggCd>11680</sggCd><sggNm>강남구</sggNm><shareDealingType> </shareDealingType><slerGbn> </slerGbn><umdNm>논현동</umdNm></item>
+    </items>
+    <numOfRows>1000</numOfRows>
+    <pageNo>1</pageNo>
+    <totalCount>3</totalCount>
+  </body>
+</response>
