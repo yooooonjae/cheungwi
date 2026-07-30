@@ -88,23 +88,37 @@ D7 의 분기 집계(임대 m24~m35 → q9~q12)로 접으면 흐름은 13개다.
 엑셀 대조 형태이기도 하다 — 위 13개 값을 A1:A13 에 세로로 넣고
 `=(1+IRR(A1:A13))^4-1`.
 
-## LLCR
+## LLCR 두 값(D8 — 하나만 인용하면 의미가 바뀐다)
 
-준공 시점 기준, 월이율 0.5% 로 할인한다(1.005^12 = 1.061677811864499568789707…).
+둘 다 준공 시점 기준, 월이율 0.5% 로 할인한다(1.005^12 =
+1.061677811864499568789707…).
 
     PV(NOI)  = Σ_{k=1..12} (5억 × k/12) / 1.005^k = 3,118,022,092.9956394915…원
     PV(매각) = 1,200억 / 1.005^12               = 113,028,640,759.910153949…원
-    llcr = (PV(NOI) + PV(매각)) ÷ 718.088억
-         = 631,348,914,549,948,301,940,532,527,093,750
-           / 390,337,585,441,871,240,372,768,544,556,161
-         = **1.61744330573558941858626432704654083447…**
+
+    llcr          = (PV(NOI) + PV(매각)) ÷ 718.088억
+                  = 631,348,914,549,948,301,940,532,527,093,750
+                    / 390,337,585,441,871,240,372,768,544,556,161
+                  = **1.61744330573558941858626432704654083447…**
+    llcr_noi_only = PV(NOI) ÷ 718.088억
+                  = **0.04342116973122569227598033503299230925…**
+
+앞의 값은 분자의 **97.3%** 가 매각가라(113,028.6/116,146.7) 커버리지 배수가
+아니라 exit-LTV 의 역수처럼 움직인다 — 매각가가 10% 빠지면 정확히 0.903배가
+된다. 뒤의 값이 계획 문면(잔여 NOI 현재가치 ÷ 대출) 그대로이고 대주 관행
+(잔존가치 제외)에 가깝지만, lease-up 12개월이라는 유한 horizon 에서는 1 을
+한참 밑돈다. 그래서 **둘을 함께** 고정한다.
 
 ## 부동소수점 허용오차에 대하여
 
-위 값은 전부 **정확한 유리수**다. 엔진은 float 로 월별 이자를 누적하므로
-interest_won 이 4,818,799,999.999999 로, ltc 가 마지막 2 ulp 만큼 어긋난다.
-그래서 금액은 1원, 비율·IRR 은 1e−12 를 허용오차로 둔다(브리프 초안의 `==` 를
-그대로 쓰면 골든이 아니라 부동소수점 누적 순서를 시험하게 된다).
+위 값은 전부 **정확한 유리수**다. 엔진의 float 경로는 이 케이스에서
+interest_won·total_cost·loan_won·profit·ltc·margin 을 **마지막 자리까지 정확히**
+(0 ulp) 맞히고, 실제로 어긋나는 것은 12개 항을 거듭제곱으로 할인해 더하는
+llcr(8 ulp ≈ 1.8e−15)과 이분법을 200회로 끊는 equity_irr(7.8e−16)뿐이다.
+그래도 금액 1원 · 비율/IRR 1e−12 를 허용오차로 둔다 — 지금 0 ulp 인 값들도
+누적 순서(같은 산식을 다른 순서로 접기)나 플랫폼이 바뀌면 마지막 자리가
+흔들리고, 그때 실패해야 하는 것은 골든이 아니라 산식이기 때문이다. 브리프
+초안의 `==` 를 그대로 쓰면 골든이 아니라 부동소수점 누적 순서를 시험하게 된다.
 """
 
 import json
@@ -139,7 +153,8 @@ G_LTC = 0.7821559589059000880089926020163644443670   # 89,761/114,761
 G_PROFIT = 28_191_200_000.0
 G_MARGIN = 0.3070642465645994719460443879018133337981  # 35,239/114,761
 G_IRR = 0.328198968342281365611986267680842715159
-G_LLCR = 1.61744330573558941858626432704654083447
+G_LLCR = 1.61744330573558941858626432704654083447          # 매각대금 포함(D8)
+G_LLCR_NOI_ONLY = 0.04342116973122569227598033503299230925  # 잔여 NOI 만(계획 문면)
 
 
 # ── 브리프 확정 골든 2건(축자 — `...` 를 손계산으로 채웠다) ──────────────
@@ -177,6 +192,7 @@ def test_golden_pf_small_full_row():
     assert abs(r["margin"] - G_MARGIN) < 1e-12
     assert abs(r["equity_irr"] - G_IRR) < 1e-12
     assert abs(r["llcr"] - G_LLCR) < 1e-12
+    assert abs(r["assumptions"]["llcr_noi_only"] - G_LLCR_NOI_ONLY) < 1e-12
 
 
 def test_golden_quarterly_cashflows_match_the_hand_table():
@@ -189,6 +205,33 @@ def test_golden_quarterly_cashflows_match_the_hand_table():
     assert abs(cf[10] - (-452_132_000.0)) < 1.0
     assert abs(cf[11] - (-77_132_000.0)) < 1.0
     assert abs(cf[12] - 48_489_068_000.0) < 1.0
+
+
+def test_llcr_is_two_values_that_answer_different_questions():
+    """D8 — 매각 포함(llcr)과 잔여 NOI 만(llcr_noi_only)을 함께 낸다."""
+    r = pf_model(G_PF_001)
+    a = r["assumptions"]
+    assert abs(a["llcr_noi_only"] - G_LLCR_NOI_ONLY) < 1e-12
+    assert a["llcr_noi_only"] < 1 < r["llcr"]        # 같은 사업, 반대 판정
+    # 두 값의 차이가 곧 매각대금의 현재가치다.
+    assert abs((r["llcr"] - a["llcr_noi_only"]) * r["loan_won"]
+               - a["pv_exit_won"]) < 1.0
+    assert abs(a["pv_exit_won"] / (a["pv_lease_up_noi_won"] + a["pv_exit_won"])
+               - 0.9731544409765396) < 1e-12        # 분자의 97.3% 가 매각가다
+
+
+def test_llcr_tracks_the_sale_price_while_noi_only_ignores_it():
+    """매각가 −10% 에 llcr 은 정확히 0.903배로 붙고(exit-LTV 의 역수처럼),
+
+    llcr_noi_only 는 꿈쩍하지 않는다 — 두 지표가 다른 것을 재고 있다는 증거다.
+    """
+    base = pf_model(G_PF_001)
+    cut = pf_model({**G_PF_001, "exit_cap": 0.05 / 0.9})
+    assert abs(cut["exit_value"] - 0.9 * base["exit_value"]) < 1.0
+    # 1 − 0.1 × 0.97315444097653958688… = 0.90268455590234604131…(손계산)
+    assert abs(cut["llcr"] / base["llcr"] - 0.9026845559023460413113) < 1e-12
+    assert abs(cut["assumptions"]["llcr_noi_only"]
+               - base["assumptions"]["llcr_noi_only"]) < 1e-15
 
 
 # ── 월별 스케줄 ─────────────────────────────────────────────────────────
@@ -379,8 +422,12 @@ def test_exit_cap_gate_edges_are_inclusive(cap):
 
 
 def test_exit_cap_gate_uses_the_caprate_constants():
-    """게이트 상수는 caprate 것을 임포트해 쓴다 — 여기 다시 적으면 따로 움직인다."""
-    assert (pf.CAP_MIN, pf.CAP_MAX) == (CAP_MIN, CAP_MAX)
+    """게이트 상수는 caprate 것을 **임포트**해 쓴다 — 여기 다시 적으면 따로 움직인다.
+
+    값 비교(`==`)로는 `CAP_MIN = 0.02` 를 이 모듈에 다시 적은 복제본이 그대로
+    통과한다(같은 값, 다른 객체). 임포트를 확인하려면 **동일성**이어야 한다.
+    """
+    assert pf.CAP_MIN is CAP_MIN and pf.CAP_MAX is CAP_MAX
 
 
 def test_equity_above_total_cost_trips_the_ltc_gate():
@@ -415,7 +462,8 @@ def test_result_carries_assumptions_notes_caveats_and_decisions():
                 "equity_won", "loan_rate", "fee_rate", "stabilized_noi_won_y",
                 "lease_up_months", "exit_cap", "notes", "caveats", "decisions"):
         assert key in a
-    assert len(a["decisions"]) == 8      # D1~D8
+    assert "llcr_noi_only" in a          # D8 — LLCR 은 두 값이 함께 나간다
+    assert len(a["decisions"]) == 9      # D1~D9
     assert a["notes"] and a["caveats"]
 
 
