@@ -22,6 +22,19 @@ def test_seed_schema_and_counts():
     assert by_region["CBD"] >= 15 and by_region["GBD"] >= 15 and by_region["YBD"] >= 10
 
 
+def test_seed_maps_regions_to_rone_names():
+    """권역 조인 키다. 시드 권역(CBD·GBD·YBD)과 R-ONE 권역명은 글자가 겹치지 않아, 매핑을
+    데이터에 적어 두지 않으면 소비자가 코드에 문자열을 다시 박는다."""
+    meta = _load()["meta"]
+    assert meta["rone_region"] == {"CBD": "도심", "GBD": "강남", "YBD": "여의도마포"}
+    assert set(meta["rone_region"]) == set(meta["region_def"])
+    rone = json.load(open(ROOT / "data" / "rone_office.json"))["regions"]
+    for region, name in meta["rone_region"].items():
+        assert name in rone, f"{region}: R-ONE 권역 {name} 이 산출에 없다"
+    # 근사 매핑이라는 사실은 값 옆에 붙어 있어야 한다 — 여의도마포는 마포를 포함한 합성 권역이다
+    assert "여의도마포" in meta["rone_region_caveat"] and "근사" in meta["rone_region_caveat"]
+
+
 def test_seed_ids_unique():
     rows = _load()["buildings"]
     ids = [b["id"] for b in rows]
