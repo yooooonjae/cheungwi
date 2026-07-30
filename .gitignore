@@ -12,3 +12,4 @@ data/raw/trades/
 
 # 부분 수집이 완성본을 덮어쓰지 않으려고 비켜 쓴 산출. 로컬에서 보라고 남기는 것이지 커밋 대상이 아니다.
 data/trades.partial.json
+data/reits.partial.json
